@@ -49,12 +49,6 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     }).then((mediaStream: MediaStream) => {
       this.localMediaStream = mediaStream;
       console.log('ngAfterViewInit getUserMedia', mediaStream)
-      //this.localVideoRef.nativeElement.autoplay = true;
-      // Seems this has to be set by code to work :
-      //this.localVideoRef.nativeElement.muted = true;
-      // Attach stream
-      //this.localVideoRef.nativeElement.srcObject = stream;
-
       this.doGetConversationAndPublish(mediaStream);
     }).catch((error) => {
       console.error("CAUGHT" + error);
@@ -73,33 +67,31 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         //this.channelsByPeer.delete(peer);
       };
 
-      conversation.onRemoteStreamPublished = (user: User, streamId: string, topic: any) => {
-        console.log('onRemoteStreamPublished', user, streamId, topic);
+      conversation.onRemoteStreamPublished = (topic: { user: User, metadata: any }, streamId: string) => {
+        console.log('onRemoteStreamPublished', topic, streamId);
 
         // TODO : decide to subscribe OR NOT to this streamId
-        conversation.subscribe(user, streamId).then(mediaStream => {
-          if (!this.streamsByUserAndId.has(user)) {
-            this.streamsByUserAndId.set(user, new Map());
-          }
-          this.streamsByUserAndId.get(user)?.set(streamId, mediaStream);
-          // TODO store mediaStream per user for display (instead of using conversation.channelsByPeerId attribute from html)
-          // AND then we can hide Channel from the public API
-
+        conversation.subscribe(topic, streamId).then(mediaStream => {
+          this.doStoreStream(topic.user, streamId, mediaStream);
         }).catch(error => {
           console.error('subscribe', error);
         });
       }
 
-      conversation.onRemoteStreamUnpublished = (user: User, streamId: string, topic: any) => {
-        console.log('onRemoteStreamUnpublished', user, streamId, topic);
-        this.streamsByUserAndId.get(user)?.delete(streamId);
+      conversation.onRemoteStreamUnpublished = (topic: { user: User, metadata: any }, streamId: string) => {
+        console.log('onRemoteStreamUnpublished', topic, streamId);
+        this.streamsByUserAndId.get(topic.user)?.delete(streamId);
       }
+
+      // conversation.onStreamReady = (user: User, topic: any) => {
+      //   this.doStoreStream(user, streamId, mediaStream);
+      // }
 
       // Join the Conversation
       this.user = conversation.createParticipant();
 
       // Publish
-      this.conversation.publish(this.user, mediaStream, 'webcam');
+      this.conversation.publish(mediaStream, { user: this.user, metadata: 'webcam' });
 
     }).catch((error: Error) => {
       console.log('getOrCreateConversation error', error);
@@ -108,6 +100,14 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.doCleanUp();
+  }
+
+  // TODO store by topic ? there can be a list of streams under same topic
+  private doStoreStream(user: User, streamId: string, mediaStream: MediaStream) {
+    if (!this.streamsByUserAndId.has(user)) {
+      this.streamsByUserAndId.set(user, new Map());
+    }
+    this.streamsByUserAndId.get(user)?.set(streamId, mediaStream);
   }
 
   private doCleanUp() {
@@ -122,7 +122,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       this.localDisplayMediaStream = mediaStream;
       console.log('ngAfterViewInit getDisplayMedia', mediaStream)
       if (this.conversation && this.user) {
-        this.conversation.publish(this.user, mediaStream);
+        this.conversation.publish(mediaStream, { user: this.user, metadata: 'screen' });
       }
     }).catch((error: any) => {
       console.error("CAUGHT" + error);
