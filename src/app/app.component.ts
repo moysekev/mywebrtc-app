@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
 
-import { Credentials, Conversation, User } from 'mywebrtc/dist';
+import { Conversation, Topic, User, initialize } from 'mywebrtc/dist';
 
 
 @Component({
@@ -39,7 +39,26 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   }
 
   constructor() {
-
+    // const config = {
+    //     apiKey: "AIzaSyDf599V3XGBNF8bPlWKHmYMdQhcDsFx9iQ",
+    //     authDomain: "books-ce78f.firebaseapp.com",
+    //     projectId: "books-ce78f",
+    //     storageBucket: "books-ce78f.appspot.com",
+    //     messagingSenderId: "377647622575",
+    //     appId: "1:377647622575:web:8c2725e555b53edae2a75a",
+    //     measurementId: "G-YEBD2NGZFE"
+    // };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDyZO8Khqsyei-rydS3suHXKGjsm2ZM5RA",
+      authDomain: "apirtc-62375.firebaseapp.com",
+      databaseURL: "https://apirtc-62375-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "apirtc-62375",
+      storageBucket: "apirtc-62375.appspot.com",
+      messagingSenderId: "218645311456",
+      appId: "1:218645311456:web:920e5cf309f47b3d530585",
+      measurementId: "G-01GRGSWHFE"
+    };
+    initialize(firebaseConfig);
   }
 
   ngAfterViewInit() {
@@ -56,31 +75,37 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   }
 
   doGetConversationAndPublish(mediaStream: MediaStream) {
-    Conversation.getOrCreate('name', Credentials.buildWithPassword('username', 'password')).then((conversation: Conversation) => {
+
+    // Get or create Conversation
+    //
+    Conversation.getOrCreate('name').then((conversation: Conversation) => {
       console.log('conversation', conversation);
       this.conversation = conversation;
+
+      // Listen to other users added to the Conversation
+      //
       conversation.onRemoteUserAdded = (user: User) => {
         console.log('onRemoteUserAdded', user);
       };
       conversation.onRemoteUserRemoved = (user: User) => {
         console.log('onRemoteUserRemoved', user);
-        //this.channelsByPeer.delete(peer);
       };
 
-      conversation.onRemoteStreamPublished = (topic: { user: User, metadata: any }, streamId: string) => {
-        console.log('onRemoteStreamPublished', topic, streamId);
+      // Listen to streams remote users published
+      //
+      conversation.onRemoteStreamPublished = (topic: Topic) => {
+        console.log('onRemoteStreamPublished', topic);
 
         // TODO : decide to subscribe OR NOT to this streamId
-        conversation.subscribe(topic, streamId).then(mediaStream => {
-          this.doStoreStream(topic.user, streamId, mediaStream);
+        conversation.subscribe(topic).then(mediaStream => {
+          this.doStoreStreamByUserAndId(topic.user, topic.streamId, mediaStream);
         }).catch(error => {
           console.error('subscribe', error);
         });
       }
-
-      conversation.onRemoteStreamUnpublished = (topic: { user: User, metadata: any }, streamId: string) => {
-        console.log('onRemoteStreamUnpublished', topic, streamId);
-        this.streamsByUserAndId.get(topic.user)?.delete(streamId);
+      conversation.onRemoteStreamUnpublished = (topic: Topic) => {
+        console.log('onRemoteStreamUnpublished', topic);
+        this.streamsByUserAndId.get(topic.user)?.delete(topic.streamId);
       }
 
       // conversation.onStreamReady = (user: User, topic: any) => {
@@ -103,7 +128,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   }
 
   // TODO store by topic ? there can be a list of streams under same topic
-  private doStoreStream(user: User, streamId: string, mediaStream: MediaStream) {
+  private doStoreStreamByUserAndId(user: User, streamId: string, mediaStream: MediaStream) {
     if (!this.streamsByUserAndId.has(user)) {
       this.streamsByUserAndId.set(user, new Map());
     }
@@ -125,8 +150,30 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         this.conversation.publish(mediaStream, { user: this.user, metadata: 'screen' });
       }
     }).catch((error: any) => {
-      console.error("CAUGHT" + error);
+      console.error("shareScreen", error);
     });
+  }
+
+  goHd() {
+    if (this.localMediaStream) {
+      this.localMediaStream.getTracks().forEach(track => {
+        track.stop();
+      });
+    }
+
+    navigator.mediaDevices.getUserMedia({
+      video: { width: { exact: 1280 }, height: { exact: 720 } }
+    })
+      .then(mediaStream => {
+        const oldStream = this.localMediaStream;
+        this.localMediaStream = mediaStream;
+        if (this.conversation && oldStream) {
+          this.conversation.replaceStream(oldStream, mediaStream);
+        }
+      })
+      .catch(error => {
+        console.error("goHd", error);
+      });
   }
 
 }
