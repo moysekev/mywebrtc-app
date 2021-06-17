@@ -98,7 +98,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
         // TODO : decide to subscribe OR NOT to this streamId
         conversation.subscribe(topic).then(mediaStream => {
-          this.doStoreStreamByUserAndId(topic.user, topic.streamId, mediaStream);
+          this.doStoreStreamByUserAndStreamId(topic, mediaStream);
         }).catch(error => {
           console.error('subscribe', error);
         });
@@ -123,16 +123,22 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  unpublish() {
+    if (this.localMediaStream) {
+      this.conversation?.unpublish(this.localMediaStream);
+    }
+  }
+
   ngOnDestroy(): void {
     this.doCleanUp();
   }
 
   // TODO store by topic ? there can be a list of streams under same topic
-  private doStoreStreamByUserAndId(user: User, streamId: string, mediaStream: MediaStream) {
-    if (!this.streamsByUserAndId.has(user)) {
-      this.streamsByUserAndId.set(user, new Map());
+  private doStoreStreamByUserAndStreamId(topic: Topic, mediaStream: MediaStream) {
+    if (!this.streamsByUserAndId.has(topic.user)) {
+      this.streamsByUserAndId.set(topic.user, new Map());
     }
-    this.streamsByUserAndId.get(user)?.set(streamId, mediaStream);
+    this.streamsByUserAndId.get(topic.user)?.set(topic.streamId, mediaStream);
   }
 
   private doCleanUp() {
