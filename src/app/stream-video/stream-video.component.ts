@@ -23,6 +23,11 @@ export class StreamVideoComponent implements AfterViewInit {
     this._mirror = mirror;
   }
 
+  _fullscreen = false;
+  @Input() set fullscreen(fullscreen: boolean) {
+    this._fullscreen = fullscreen;
+  }
+
   ngAfterViewInit() {
     // remote stream is attached to DOM during ngAfterViewInit because @ViewChild is not bound before this stage
     if (this.videoRef) {

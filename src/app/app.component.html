@@ -28,10 +28,15 @@
         </div>
     </div> -->
 
+    <a #dwnld style="display:none;" href></a>
     <div *ngFor="let kv of streamsByUserAndId | keyvalue" class="row">
         <p>User {{kv.key.id}} </p>
         <div *ngFor="let kvj of kv.value | keyvalue" class="col">
             <app-stream-video [mediaStream]="kvj.value"></app-stream-video>
+            <div>
+                <button *ngIf="!mediaRecorder" (click)="record(kvj.value)">Record</button>
+                <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
+            </div>
         </div>
     </div>
 </div>

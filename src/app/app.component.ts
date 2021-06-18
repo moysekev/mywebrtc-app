@@ -1,7 +1,6 @@
-import { Component, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 
 import { Conversation, Topic, User, initialize } from 'mywebrtc/dist';
-
 
 @Component({
   selector: 'app-root',
@@ -19,6 +18,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   user: User | undefined;
 
   streamsByUserAndId: Map<User, Map<string, MediaStream>> = new Map();
+
+  @ViewChild("dwnld") aRef: ElementRef | undefined;
 
   // Note : beforeUnloadHandler alone does not work on android Chrome
   // seems it requires unloadHandler to do the same to work evrywhere...
@@ -96,21 +97,23 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       conversation.onRemoteStreamPublished = (topic: Topic) => {
         console.log('onRemoteStreamPublished', topic);
 
-        // TODO : decide to subscribe OR NOT to this streamId
-        conversation.subscribe(topic).then(mediaStream => {
-          this.doStoreStreamByUserAndStreamId(topic, mediaStream);
-        }).catch(error => {
-          console.error('subscribe', error);
-        });
+        // TODO : let user decide to subscribe OR NOT !
+        conversation.subscribe(topic);
       }
       conversation.onRemoteStreamUnpublished = (topic: Topic) => {
         console.log('onRemoteStreamUnpublished', topic);
-        this.streamsByUserAndId.get(topic.user)?.delete(topic.streamId);
+        this.doRemoveMediaStream(topic, mediaStream);
       }
 
-      // conversation.onStreamReady = (user: User, topic: any) => {
-      //   this.doStoreStream(user, streamId, mediaStream);
-      // }
+      conversation.onMediaStreamReady = (topic: any, mediaStream: MediaStream) => {
+        console.log('onMediaStreamReady', topic);
+        this.doStoreStreamByUserAndStreamId(topic, mediaStream);
+      }
+
+      conversation.onMediaStreamDied = (topic: any, mediaStream: MediaStream) => {
+        console.log('onMediaStreamDied', topic);
+        this.doRemoveMediaStream(topic, mediaStream);
+      }
 
       // Join the Conversation
       this.user = conversation.createParticipant();
@@ -129,6 +132,10 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  unsubscribe(topic: Topic) {
+    this.conversation?.unsubscribe(topic);
+  }
+
   ngOnDestroy(): void {
     this.doCleanUp();
   }
@@ -139,6 +146,9 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       this.streamsByUserAndId.set(topic.user, new Map());
     }
     this.streamsByUserAndId.get(topic.user)?.set(topic.streamId, mediaStream);
+  }
+  private doRemoveMediaStream(topic: Topic, mediaStream: MediaStream) {
+    this.streamsByUserAndId.get(topic.user)?.delete(topic.streamId);
   }
 
   private doCleanUp() {
@@ -180,6 +190,39 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       .catch(error => {
         console.error("goHd", error);
       });
+  }
+
+  mediaRecorder: MediaRecorder | undefined;
+  recordedBlobs: Array<Blob> = new Array();
+
+  record(mediaStream: MediaStream) {
+    this.mediaRecorder = new MediaRecorder(mediaStream);
+    this.mediaRecorder.onstop = (event: any) => {
+      console.log('Recorder stopped: ', event);
+    };
+    this.mediaRecorder.ondataavailable = (event: any) => {
+      console.log('ondataavailable', event);
+      if (event.data && event.data.size > 0) {
+        this.recordedBlobs.push(event.data);
+      }
+    };
+    this.mediaRecorder.start();
+  }
+  stopRecording() {
+    this.mediaRecorder?.stop();
+    setTimeout(() => {
+      const blob = new Blob(this.recordedBlobs, { type: 'video/webm' });
+      const url = window.URL.createObjectURL(blob);
+      if (this.aRef) {
+        const native = this.aRef.nativeElement;
+        native.href = url;
+        native.download = "video.webm";
+      }
+      this.aRef?.nativeElement.click();
+      window.URL.revokeObjectURL(url);
+
+      this.mediaRecorder = undefined;
+    }, 1000);
   }
 
 }
