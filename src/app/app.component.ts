@@ -69,14 +69,14 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     }).then((mediaStream: MediaStream) => {
       this.localMediaStream = mediaStream;
       console.log('ngAfterViewInit getUserMedia', mediaStream)
-      this.doGetConversationAndPublish(mediaStream);
+
     }).catch((error) => {
       console.error("CAUGHT" + error);
     });
+    this.dosetupConversation();
   }
 
-  doGetConversationAndPublish(mediaStream: MediaStream) {
-
+  dosetupConversation() {
     // Get or create Conversation
     //
     Conversation.getOrCreate('name').then((conversation: Conversation) => {
@@ -102,7 +102,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       }
       conversation.onRemoteStreamUnpublished = (topic: Topic) => {
         console.log('onRemoteStreamUnpublished', topic);
-        this.doRemoveMediaStream(topic, mediaStream);
+        this.doRemoveMediaStream(topic);
       }
 
       conversation.onMediaStreamReady = (topic: any, mediaStream: MediaStream) => {
@@ -112,18 +112,25 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
       conversation.onMediaStreamDied = (topic: any, mediaStream: MediaStream) => {
         console.log('onMediaStreamDied', topic);
-        this.doRemoveMediaStream(topic, mediaStream);
+        this.doRemoveMediaStream(topic);
       }
 
       // Join the Conversation
       this.user = conversation.createParticipant();
-
-      // Publish
-      this.conversation.publish(mediaStream, { user: this.user, metadata: 'webcam' });
-
     }).catch((error: Error) => {
       console.log('getOrCreateConversation error', error);
     });
+  }
+
+  publish() {
+    // Publish
+    //this.conversation.publish(mediaStream, this.user);
+    // Or
+    if (this.conversation && this.localMediaStream && this.user) {
+      this.conversation.publish(this.localMediaStream, this.user, 'webcam');
+    }
+    // Or
+    //this.conversation.publish(mediaStream, this.user, { type: 'webcam', foo: 'bar' });
   }
 
   unpublish() {
@@ -147,7 +154,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     }
     this.streamsByUserAndId.get(topic.user)?.set(topic.streamId, mediaStream);
   }
-  private doRemoveMediaStream(topic: Topic, mediaStream: MediaStream) {
+  private doRemoveMediaStream(topic: Topic) {
     this.streamsByUserAndId.get(topic.user)?.delete(topic.streamId);
   }
 
@@ -163,7 +170,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       this.localDisplayMediaStream = mediaStream;
       console.log('ngAfterViewInit getDisplayMedia', mediaStream)
       if (this.conversation && this.user) {
-        this.conversation.publish(mediaStream, { user: this.user, metadata: 'screen' });
+        this.conversation.publish(mediaStream, this.user, 'screen');
       }
     }).catch((error: any) => {
       console.error("shareScreen", error);
