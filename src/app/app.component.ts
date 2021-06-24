@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 
-import { Conversation, Topic, User, initialize } from 'mywebrtc/dist';
+import { Conversation, Topic, User, SubscribeOptions, initialize } from 'mywebrtc/dist';
 
 @Component({
   selector: 'app-root',
@@ -98,6 +98,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         console.log('onRemoteStreamPublished', topic);
 
         // TODO : let user decide to subscribe OR NOT !
+        //
+        //conversation.subscribe(topic, { audioOnly: true });
         conversation.subscribe(topic);
       }
       conversation.onRemoteStreamUnpublished = (topic: Topic) => {
