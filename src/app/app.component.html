@@ -31,7 +31,7 @@
     </div> -->
 
     <a #dwnld style="display:none;" href></a>
-    <div *ngFor="let kv of streamsByUserAndId | keyvalue" class="row">
+    <div *ngFor="let kv of mediaStreamsByUserAndStream | keyvalue" class="row">
         <p>User {{kv.key.id}} </p>
         <div *ngFor="let kvj of kv.value | keyvalue" class="col">
             <app-stream-video [mediaStream]="kvj.value"></app-stream-video>

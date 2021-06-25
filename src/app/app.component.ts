@@ -1,6 +1,10 @@
 import { Component, AfterViewInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 
-import { Conversation, Topic, User, SubscribeOptions, initialize } from 'mywebrtc/dist';
+import { Conversation, Stream, User, SubscribeOptions, initialize } from 'mywebrtc/dist';
+
+interface UserData {
+  nickname: string;
+}
 
 @Component({
   selector: 'app-root',
@@ -17,7 +21,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
   user: User | undefined;
 
-  streamsByUserAndId: Map<User, Map<string, MediaStream>> = new Map();
+  mediaStreamsByUserAndStream: Map<User, Map<Stream, MediaStream>> = new Map();
 
   @ViewChild("dwnld") aRef: ElementRef | undefined;
 
@@ -76,6 +80,18 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     this.dosetupConversation();
   }
 
+  ngOnDestroy(): void {
+    this.doCleanUp();
+  }
+
+  // --------------------------------------------------------------------------
+
+  private doCleanUp() {
+    if (this.conversation) {
+      this.conversation.close();
+    }
+  }
+
   dosetupConversation() {
     // Get or create Conversation
     //
@@ -87,6 +103,9 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       //
       conversation.onRemoteUserAdded = (user: User) => {
         console.log('onRemoteUserAdded', user);
+        user.onUserDataChange = (userData: UserData) => {
+          console.log('onUserDataChange', user, userData);
+        };
       };
       conversation.onRemoteUserRemoved = (user: User) => {
         console.log('onRemoteUserRemoved', user);
@@ -94,31 +113,28 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
       // Listen to streams remote users published
       //
-      conversation.onRemoteStreamPublished = (topic: Topic) => {
-        console.log('onRemoteStreamPublished', topic);
+      conversation.onRemoteStreamPublished = (user: User, stream: Stream) => {
+        console.log('onRemoteStreamPublished', stream);
 
         // TODO : let user decide to subscribe OR NOT !
         //
-        //conversation.subscribe(topic, { audioOnly: true });
-        conversation.subscribe(topic);
-      }
-      conversation.onRemoteStreamUnpublished = (topic: Topic) => {
-        console.log('onRemoteStreamUnpublished', topic);
-        this.doRemoveMediaStream(topic);
-      }
+        //conversation.subscribe(stream, { audioOnly: true });
+        conversation.subscribe(stream);
 
-      conversation.onMediaStreamReady = (topic: any, mediaStream: MediaStream) => {
-        console.log('onMediaStreamReady', topic);
-        this.doStoreStreamByUserAndStreamId(topic, mediaStream);
-      }
+        stream.onMediaStreamReady = (mediaStream: MediaStream) => {
+          console.log('onMediaStreamReady', stream);
+          this.doStoreStreamByUserAndStream(user, stream, mediaStream);
+        }
 
-      conversation.onMediaStreamDied = (topic: any, mediaStream: MediaStream) => {
-        console.log('onMediaStreamDied', topic);
-        this.doRemoveMediaStream(topic);
+      }
+      conversation.onRemoteStreamUnpublished = (user: User, stream: Stream) => {
+        console.log('onRemoteStreamUnpublished', stream);
+        this.doRemoveMediaStream(user, stream);
       }
 
       // Join the Conversation
-      this.user = conversation.createParticipant();
+      const userData: UserData = { nickname: 'kevin' };
+      this.user = conversation.createParticipant(userData);
     }).catch((error: Error) => {
       console.log('getOrCreateConversation error', error);
     });
@@ -141,30 +157,22 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  unsubscribe(topic: Topic) {
-    this.conversation?.unsubscribe(topic);
+  unsubscribe(stream: Stream) {
+    this.conversation?.unsubscribe(stream);
   }
 
-  ngOnDestroy(): void {
-    this.doCleanUp();
-  }
 
-  // TODO store by topic ? there can be a list of streams under same topic
-  private doStoreStreamByUserAndStreamId(topic: Topic, mediaStream: MediaStream) {
-    if (!this.streamsByUserAndId.has(topic.user)) {
-      this.streamsByUserAndId.set(topic.user, new Map());
+
+  private doStoreStreamByUserAndStream(user: User, stream: Stream, mediaStream: MediaStream) {
+    if (!this.mediaStreamsByUserAndStream.has(user)) {
+      this.mediaStreamsByUserAndStream.set(user, new Map());
     }
-    this.streamsByUserAndId.get(topic.user)?.set(topic.streamId, mediaStream);
+    this.mediaStreamsByUserAndStream.get(user)?.set(stream, mediaStream);
   }
-  private doRemoveMediaStream(topic: Topic) {
-    this.streamsByUserAndId.get(topic.user)?.delete(topic.streamId);
+  private doRemoveMediaStream(user: User, stream: Stream) {
+    const deleted = this.mediaStreamsByUserAndStream.get(user)?.delete(stream);
   }
 
-  private doCleanUp() {
-    if (this.conversation) {
-      this.conversation.close();
-    }
-  }
 
   shareScreen() {
     // @ts-ignore (https://github.com/microsoft/TypeScript/issues/33232)
