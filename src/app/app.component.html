@@ -8,6 +8,20 @@
         </div>
     </div>
 
+    <div>
+        <p *ngFor="let pair of messages">{{pair[0].nickname}}:{{pair[1]}}</p>
+    </div>
+
+    <form [formGroup]="messageFormGroup" (ngSubmit)="sendMessage()">
+        <mat-form-field appearance="fill">
+            <mat-label>Message</mat-label>
+            <input matInput #message maxlength="256" placeholder="Ex. I need help with..." formControlName="message">
+            <!-- <mat-hint align="start"><strong>Don't disclose personal info</strong> </mat-hint> -->
+            <mat-hint align="end">{{message.value.length}} / 256</mat-hint>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid" title="Send Message">Send&nbsp;<em class="bi bi-chat-left"></em></button>
+    </form>
+
     <div class="row">
         <div class="col">
             <p>Stream id : {{localMediaStream?.id}}</p>

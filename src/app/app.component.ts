@@ -1,9 +1,14 @@
 import { Component, AfterViewInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 
 import { Conversation, Stream, User, SubscribeOptions, initialize } from 'mywebrtc/dist';
 
 interface UserData {
   nickname: string;
+}
+
+interface Message {
+  text: string;
 }
 
 @Component({
@@ -15,6 +20,16 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   title = 'mywebrtc-app';
 
   conversation: Conversation | undefined;
+
+  // Messages (defined as an array of tuples)
+  public readonly messages: Array<[UserData, Message]> = new Array();
+
+  messageFormGroup = this.fb.group({
+    message: this.fb.control('', [Validators.required])
+  });
+  get messageFc(): FormControl {
+    return this.messageFormGroup.get('message') as FormControl;
+  }
 
   localMediaStream: MediaStream | undefined;
   localDisplayMediaStream: MediaStream | undefined;
@@ -43,7 +58,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     this.doCleanUp();
   }
 
-  constructor() {
+  constructor(private fb: FormBuilder) {
     // const config = {
     //     apiKey: "AIzaSyDf599V3XGBNF8bPlWKHmYMdQhcDsFx9iQ",
     //     authDomain: "books-ce78f.firebaseapp.com",
@@ -88,7 +103,9 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
   private doCleanUp() {
     if (this.conversation) {
-      this.conversation.close();
+      this.conversation.close()
+        .then(() => { console.log('Conversation closed') })
+        .catch(error => { console.log('Conversation closing error', error) });
     }
   }
 
@@ -132,12 +149,22 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         this.doRemoveMediaStream(user, stream);
       }
 
+      conversation.onMessage = (user: User, message: Message) => {
+        //
+        this.messages.push([user.userData as UserData, message]);
+      }
+
       // Join the Conversation
       const userData: UserData = { nickname: 'kevin' };
       this.user = conversation.createParticipant(userData);
     }).catch((error: Error) => {
       console.log('getOrCreateConversation error', error);
     });
+  }
+
+  sendMessage() {
+    if (this.user && this.conversation)
+      this.conversation.sendMessage(this.messageFc.value, this.user);
   }
 
   publish() {
