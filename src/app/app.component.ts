@@ -1,7 +1,9 @@
 import { Component, AfterViewInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 
-import { Conversation, Stream, User, SubscribeOptions, initialize } from 'mywebrtc/dist';
+import firebase from 'firebase';
+
+import { Conversation, Stream, User, SubscribeOptions } from 'mywebrtc/dist';
 
 interface UserData {
   nickname: string;
@@ -59,16 +61,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   }
 
   constructor(private fb: FormBuilder) {
-    // const config = {
-    //     apiKey: "AIzaSyDf599V3XGBNF8bPlWKHmYMdQhcDsFx9iQ",
-    //     authDomain: "books-ce78f.firebaseapp.com",
-    //     projectId: "books-ce78f",
-    //     storageBucket: "books-ce78f.appspot.com",
-    //     messagingSenderId: "377647622575",
-    //     appId: "1:377647622575:web:8c2725e555b53edae2a75a",
-    //     measurementId: "G-YEBD2NGZFE"
-    // };
-    const firebaseConfig = {
+
+    const firebaseOptions = {
       apiKey: "AIzaSyDyZO8Khqsyei-rydS3suHXKGjsm2ZM5RA",
       authDomain: "apirtc-62375.firebaseapp.com",
       databaseURL: "https://apirtc-62375-default-rtdb.europe-west1.firebasedatabase.app",
@@ -78,7 +72,31 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       appId: "1:218645311456:web:920e5cf309f47b3d530585",
       measurementId: "G-01GRGSWHFE"
     };
-    initialize(firebaseConfig);
+
+    firebase.initializeApp(firebaseOptions);
+
+    // firebase.auth().signInAnonymously()
+    //   .then(() => {
+    //     this.doSetupConversation();
+    //   })
+    //   .catch((error) => {
+    //     console.error(`firebase.signInAnonymously ${error.code}:${error.message}`)
+    //   });
+
+    // Or
+
+    firebase.auth().signInWithEmailAndPassword('kevin_moyse@yahoo.fr', 'elephant7')
+      .then((userCredential) => {
+        // Signed in
+        var user = userCredential.user;
+        console.log('Signed In', user);
+
+        this.doSetupConversation();
+        // ...
+      })
+      .catch((error) => {
+        console.error(`firebase.signInWithEmailAndPassword ${error.code}:${error.message}`)
+      });
   }
 
   ngAfterViewInit() {
@@ -87,12 +105,10 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       audio: true
     }).then((mediaStream: MediaStream) => {
       this.localMediaStream = mediaStream;
-      console.log('ngAfterViewInit getUserMedia', mediaStream)
-
+      console.log('ngAfterViewInit getUserMedia', mediaStream);
     }).catch((error) => {
       console.error("CAUGHT" + error);
     });
-    this.dosetupConversation();
   }
 
   ngOnDestroy(): void {
@@ -109,7 +125,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  dosetupConversation() {
+  doSetupConversation() {
     // Get or create Conversation
     //
     Conversation.getOrCreate('name').then((conversation: Conversation) => {
@@ -120,8 +136,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       //
       conversation.onRemoteUserAdded = (user: User) => {
         console.log('onRemoteUserAdded', user);
-        user.onUserDataChange = (userData: UserData) => {
-          console.log('onUserDataChange', user, userData);
+        user.onUserDataUpdate = (userData: UserData) => {
+          console.log('onUserDataUpdate', user, userData);
         };
       };
       conversation.onRemoteUserRemoved = (user: User) => {
@@ -156,7 +172,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
       // Join the Conversation
       const userData: UserData = { nickname: 'kevin' };
-      this.user = conversation.createParticipant(userData);
+      this.user = conversation.addParticipant(userData);
     }).catch((error: Error) => {
       console.log('getOrCreateConversation error', error);
     });
