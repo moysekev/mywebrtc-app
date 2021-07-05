@@ -75,6 +75,14 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
     firebase.initializeApp(firebaseOptions);
 
+    this.doFbSignIn().then((user: firebase.User) => {
+      this.doSetupConversation('name').then((conversation) => {
+        // Join the Conversation
+        const userData: UserData = { nickname: 'kevin' };
+        this.user = conversation.addParticipant(userData);
+      });
+    });
+
     // firebase.auth().signInAnonymously()
     //   .then(() => {
     //     this.doSetupConversation();
@@ -85,18 +93,68 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
     // Or
 
-    firebase.auth().signInWithEmailAndPassword('kevin_moyse@yahoo.fr', 'elephant7')
-      .then((userCredential) => {
-        // Signed in
-        var user = userCredential.user;
-        console.log('Signed In', user);
+    // firebase.auth().signInWithEmailAndPassword('kevin_moyse@yahoo.fr', 'elephant7')
+    //   .then((userCredential) => {
+    //     // Signed in
+    //     var user = userCredential.user;
+    //     console.log('Signed In', user);
 
-        this.doSetupConversation();
-        // ...
-      })
-      .catch((error) => {
-        console.error(`firebase.signInWithEmailAndPassword ${error.code}:${error.message}`)
+    //     this.doSetupConversation();
+    //     // ...
+    //   })
+    //   .catch((error) => {
+    //     console.error(`firebase.signInWithEmailAndPassword ${error.code}:${error.message}`)
+    //   });
+  }
+
+  doFbSignIn(): Promise<firebase.User> {
+    return new Promise<firebase.User>((resolve, reject) => {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      firebase.auth().languageCode = 'fr';
+      provider.setCustomParameters({
+        'display': 'popup'
       });
+      firebase
+        .auth()
+        .signInWithPopup(provider)
+        .then((result) => {
+          /** @type {firebase.auth.OAuthCredential} */
+          const credential: firebase.auth.OAuthCredential | null = result.credential;
+
+          if (credential === null) {
+            console.error('signInWithPopup', result);
+            return;
+          }
+
+          // The signed-in user info.
+          const user = result.user;
+
+          // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+          var accessToken = credential.accessToken;
+
+          // ...
+          console.log('signInWithPopup', result);
+
+          if (user === null) {
+            reject("user is null");
+            return;
+          }
+          resolve(user);
+        })
+        .catch((error) => {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // The email of the user's account used.
+          var email = error.email;
+          // The firebase.auth.AuthCredential type that was used.
+          var credential = error.credential;
+
+          // ...
+          console.error("signInWithPopup", error);
+          reject(error);
+        });
+    });
   }
 
   ngAfterViewInit() {
@@ -125,56 +183,59 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  doSetupConversation() {
-    // Get or create Conversation
-    //
-    Conversation.getOrCreate('name').then((conversation: Conversation) => {
-      console.log('conversation', conversation);
-      this.conversation = conversation;
+  doSetupConversation(name: string): Promise<Conversation> {
 
-      // Listen to other users added to the Conversation
+    return new Promise<Conversation>((resolve, reject) => {
+      // Get or create Conversation
       //
-      conversation.onRemoteUserAdded = (user: User) => {
-        console.log('onRemoteUserAdded', user);
-        user.onUserDataUpdate = (userData: UserData) => {
-          console.log('onUserDataUpdate', user, userData);
-        };
-      };
-      conversation.onRemoteUserRemoved = (user: User) => {
-        console.log('onRemoteUserRemoved', user);
-      };
+      Conversation.getOrCreate(name).then((conversation: Conversation) => {
+        console.log('conversation', conversation);
+        this.conversation = conversation;
 
-      // Listen to streams remote users published
-      //
-      conversation.onRemoteStreamPublished = (user: User, stream: Stream) => {
-        console.log('onRemoteStreamPublished', stream);
-
-        // TODO : let user decide to subscribe OR NOT !
+        // Listen to other users added to the Conversation
         //
-        //conversation.subscribe(stream, { audioOnly: true });
-        conversation.subscribe(stream);
+        conversation.onRemoteUserAdded = (user: User) => {
+          console.log('onRemoteUserAdded', user);
+          user.onUserDataUpdate = (userData: UserData) => {
+            console.log('onUserDataUpdate', user, userData);
+          };
+        };
+        conversation.onRemoteUserRemoved = (user: User) => {
+          console.log('onRemoteUserRemoved', user);
+        };
 
-        stream.onMediaStreamReady = (mediaStream: MediaStream) => {
-          console.log('onMediaStreamReady', stream);
-          this.doStoreStreamByUserAndStream(user, stream, mediaStream);
+        // Listen to streams remote users published
+        //
+        conversation.onRemoteStreamPublished = (user: User, stream: Stream) => {
+          console.log('onRemoteStreamPublished', stream);
+
+          // TODO : let user decide to subscribe OR NOT !
+          //
+          //conversation.subscribe(stream, { audioOnly: true });
+          conversation.subscribe(stream);
+
+          stream.onMediaStreamReady = (mediaStream: MediaStream) => {
+            console.log('onMediaStreamReady', stream);
+            this.doStoreStreamByUserAndStream(user, stream, mediaStream);
+          }
+
+        }
+        conversation.onRemoteStreamUnpublished = (user: User, stream: Stream) => {
+          console.log('onRemoteStreamUnpublished', stream);
+          this.doRemoveMediaStream(user, stream);
         }
 
-      }
-      conversation.onRemoteStreamUnpublished = (user: User, stream: Stream) => {
-        console.log('onRemoteStreamUnpublished', stream);
-        this.doRemoveMediaStream(user, stream);
-      }
+        conversation.onMessage = (user: User, message: Message) => {
+          //
+          this.messages.push([user.userData as UserData, message]);
+        }
 
-      conversation.onMessage = (user: User, message: Message) => {
-        //
-        this.messages.push([user.userData as UserData, message]);
-      }
+        resolve(conversation);
 
-      // Join the Conversation
-      const userData: UserData = { nickname: 'kevin' };
-      this.user = conversation.addParticipant(userData);
-    }).catch((error: Error) => {
-      console.log('getOrCreateConversation error', error);
+      }).catch((error: Error) => {
+        console.log('getOrCreateConversation error', error);
+        reject(error);
+      });
     });
   }
 
@@ -204,8 +265,6 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     this.conversation?.unsubscribe(stream);
   }
 
-
-
   private doStoreStreamByUserAndStream(user: User, stream: Stream, mediaStream: MediaStream) {
     if (!this.mediaStreamsByUserAndStream.has(user)) {
       this.mediaStreamsByUserAndStream.set(user, new Map());
@@ -215,7 +274,6 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   private doRemoveMediaStream(user: User, stream: Stream) {
     const deleted = this.mediaStreamsByUserAndStream.get(user)?.delete(stream);
   }
-
 
   shareScreen() {
     // @ts-ignore (https://github.com/microsoft/TypeScript/issues/33232)
