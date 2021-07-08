@@ -4,7 +4,7 @@
         <div class="col">
             <p>Conversation name : {{conversation?.name}}</p>
             <p>Conversation peerId : {{conversation?.peerId}}</p>
-            <p>User id : {{user?.id}}</p>
+            <p>User id : {{localParticipant?.id}}</p>
         </div>
     </div>
 
@@ -24,7 +24,8 @@
 
     <div class="row">
         <div class="col">
-            <p>Stream id : {{localMediaStream?.id}}</p>
+            <p>LocalStream id : {{localStream?.id}}</p>
+            <p>MediaStream id : {{localMediaStream?.id}}</p>
             <app-stream-video [mediaStream]="localMediaStream"></app-stream-video>
         </div>
     </div>
@@ -45,7 +46,7 @@
     </div> -->
 
     <a #dwnld style="display:none;" href></a>
-    <div *ngFor="let kv of mediaStreamsByUserAndStream | keyvalue" class="row">
+    <div *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" class="row">
         <p>User {{kv.key.id}} </p>
         <div *ngFor="let kvj of kv.value | keyvalue" class="col">
             <app-stream-video [mediaStream]="kvj.value"></app-stream-video>

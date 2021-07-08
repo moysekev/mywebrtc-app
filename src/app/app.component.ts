@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, Validators } from '@angular/forms';
 
 import firebase from 'firebase';
 
-import { Conversation, Stream, User, SubscribeOptions } from 'mywebrtc/dist';
+import { Conversation, LocalStream, RemoteStream, Participant, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
 
 interface UserData {
   nickname: string;
@@ -33,12 +33,13 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     return this.messageFormGroup.get('message') as FormControl;
   }
 
+  localStream: LocalStream | undefined;
   localMediaStream: MediaStream | undefined;
   localDisplayMediaStream: MediaStream | undefined;
 
-  user: User | undefined;
+  localParticipant: LocalParticipant | undefined;
 
-  mediaStreamsByUserAndStream: Map<User, Map<Stream, MediaStream>> = new Map();
+  mediaStreamsByParticipantAndStream: Map<RemoteParticipant, Map<RemoteStream, MediaStream>> = new Map();
 
   @ViewChild("dwnld") aRef: ElementRef | undefined;
 
@@ -79,7 +80,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       this.doSetupConversation('name').then((conversation) => {
         // Join the Conversation
         const userData: UserData = { nickname: 'kevin' };
-        this.user = conversation.addParticipant(userData);
+        this.localParticipant = conversation.addParticipant(userData);
       });
     });
 
@@ -194,40 +195,56 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
         // Listen to other users added to the Conversation
         //
-        conversation.onRemoteUserAdded = (user: User) => {
-          console.log('onRemoteUserAdded', user);
-          user.onUserDataUpdate = (userData: UserData) => {
-            console.log('onUserDataUpdate', user, userData);
+        conversation.onRemoteParticipantAdded = (participant: RemoteParticipant) => {
+          console.log('onRemoteParticipantAdded', participant);
+          participant.onUserDataUpdate = (userData: UserData) => {
+            console.log('onUserDataUpdate', participant, userData);
+          };
+          participant.onStreamPublished = (stream: RemoteStream) => {
+            console.log('onStreamPublished', participant, stream);
+
+            // TODO : let user decide to subscribe OR NOT !
+            //
+            //stream.subscribe(stream, { audioOnly: true });
+            stream.subscribe();
+
+            stream.onMediaStreamReady = (mediaStream: MediaStream) => {
+              console.log('onMediaStreamReady', stream);
+              this.doStoreMediaStreamByParticipantAndStream(participant, stream, mediaStream);
+            }
+          };
+          participant.onStreamUnpublished = (stream: RemoteStream) => {
+            console.log('onStreamUnpublished', stream);
+            this.doRemoveMediaStream(participant, stream);
           };
         };
-        conversation.onRemoteUserRemoved = (user: User) => {
-          console.log('onRemoteUserRemoved', user);
+        conversation.onRemoteParticipantRemoved = (participant: RemoteParticipant) => {
+          console.log('onRemoteParticipantRemoved', participant);
         };
 
         // Listen to streams remote users published
         //
-        conversation.onRemoteStreamPublished = (user: User, stream: Stream) => {
-          console.log('onRemoteStreamPublished', stream);
+        // conversation.onRemoteStreamPublished = (user: User, stream: Stream) => {
+        //   console.log('onRemoteStreamPublished', stream);
 
-          // TODO : let user decide to subscribe OR NOT !
+        //   // TODO : let user decide to subscribe OR NOT !
+        //   //
+        //   //stream.subscribe(stream, { audioOnly: true });
+        //   stream.subscribe();
+
+        //   stream.onMediaStreamReady = (mediaStream: MediaStream) => {
+        //     console.log('onMediaStreamReady', stream);
+        //     this.doStoreMediaStreamByUserAndStream(user, stream, mediaStream);
+        //   }
+        // }
+        // conversation.onRemoteStreamUnpublished = (user: User, stream: Stream) => {
+        //   console.log('onRemoteStreamUnpublished', stream);
+        //   this.doRemoveMediaStream(user, stream);
+        // }
+
+        conversation.onMessage = (participant: Participant, message: Message) => {
           //
-          //conversation.subscribe(stream, { audioOnly: true });
-          conversation.subscribe(stream);
-
-          stream.onMediaStreamReady = (mediaStream: MediaStream) => {
-            console.log('onMediaStreamReady', stream);
-            this.doStoreStreamByUserAndStream(user, stream, mediaStream);
-          }
-
-        }
-        conversation.onRemoteStreamUnpublished = (user: User, stream: Stream) => {
-          console.log('onRemoteStreamUnpublished', stream);
-          this.doRemoveMediaStream(user, stream);
-        }
-
-        conversation.onMessage = (user: User, message: Message) => {
-          //
-          this.messages.push([user.userData as UserData, message]);
+          this.messages.push([participant.userData as UserData, message]);
         }
 
         resolve(conversation);
@@ -240,39 +257,53 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   }
 
   sendMessage() {
-    if (this.user && this.conversation)
-      this.conversation.sendMessage(this.messageFc.value, this.user);
+    // if (this.user && this.conversation)
+    //   this.conversation.sendMessage(this.messageFc.value, this.user);
+    if (this.localParticipant) {
+      this.localParticipant.sendMessage(this.messageFc.value);
+    }
   }
 
   publish() {
     // Publish
-    //this.conversation.publish(mediaStream, this.user);
+    //this.conversation.publish(this.localMediaStream, this.user);
     // Or
-    if (this.conversation && this.localMediaStream && this.user) {
-      this.conversation.publish(this.localMediaStream, this.user, 'webcam');
+    // if (this.conversation && this.localMediaStream && this.user) {
+    //   this.conversation.publish(this.localMediaStream, this.user, 'webcam');
+    // }
+    // Or
+    //this.conversation.publish(this.localMediaStream, this.user, { type: 'webcam', foo: 'bar' });
+
+    if (this.localMediaStream && this.localParticipant) {
+      this.localStream = this.localParticipant.publish(this.localMediaStream, 'webcam');
+      // Or
+      //this.user.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
     }
-    // Or
-    //this.conversation.publish(mediaStream, this.user, { type: 'webcam', foo: 'bar' });
   }
 
   unpublish() {
+    // if (this.localMediaStream) {
+    //   this.conversation?.unpublish(this.localMediaStream);
+    // }
     if (this.localMediaStream) {
-      this.conversation?.unpublish(this.localMediaStream);
+      this.localParticipant?.unpublish(this.localMediaStream);
     }
   }
 
-  unsubscribe(stream: Stream) {
-    this.conversation?.unsubscribe(stream);
+  unsubscribe(stream: RemoteStream) {
+    //this.conversation?.unsubscribe(stream);
+    stream.unsubscribe();
   }
 
-  private doStoreStreamByUserAndStream(user: User, stream: Stream, mediaStream: MediaStream) {
-    if (!this.mediaStreamsByUserAndStream.has(user)) {
-      this.mediaStreamsByUserAndStream.set(user, new Map());
+  private doStoreMediaStreamByParticipantAndStream(participant: RemoteParticipant, stream: RemoteStream, mediaStream: MediaStream) {
+    if (!this.mediaStreamsByParticipantAndStream.has(participant)) {
+      this.mediaStreamsByParticipantAndStream.set(participant, new Map());
     }
-    this.mediaStreamsByUserAndStream.get(user)?.set(stream, mediaStream);
+    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream, mediaStream);
   }
-  private doRemoveMediaStream(user: User, stream: Stream) {
-    const deleted = this.mediaStreamsByUserAndStream.get(user)?.delete(stream);
+
+  private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {
+    const deleted = this.mediaStreamsByParticipantAndStream.get(participant)?.delete(stream);
   }
 
   shareScreen() {
@@ -280,8 +311,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     navigator.mediaDevices.getDisplayMedia().then((mediaStream: MediaStream) => {
       this.localDisplayMediaStream = mediaStream;
       console.log('ngAfterViewInit getDisplayMedia', mediaStream)
-      if (this.conversation && this.user) {
-        this.conversation.publish(mediaStream, this.user, 'screen');
+      if (this.localParticipant) {
+        this.localParticipant.publish(mediaStream, 'screen');
       }
     }).catch((error: any) => {
       console.error("shareScreen", error);
@@ -301,8 +332,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       .then(mediaStream => {
         const oldStream = this.localMediaStream;
         this.localMediaStream = mediaStream;
-        if (this.conversation && oldStream) {
-          this.conversation.replaceStream(oldStream, mediaStream);
+        if (this.localStream && oldStream) {
+          this.localStream.replaceMediaStream(oldStream, mediaStream);
         }
       })
       .catch(error => {
