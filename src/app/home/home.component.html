@@ -1,0 +1,62 @@
+<div class=container>
+
+    <div class="row">
+        <div class="col">
+            <p>Conversation id : {{conversation?.id}}</p>
+            <p>Conversation peerId : {{conversation?.peerId}}</p>
+            <p>User id : {{localParticipant?.id}}</p>
+            <p>Others can join at url
+                <a href="{{url}}" target="_blank" rel="noopener">{{url}}</a>
+            </p>
+        </div>
+    </div>
+
+    <div>
+        <p *ngFor="let pair of messages">{{pair[0].nickname}}:{{pair[1]}}</p>
+    </div>
+
+    <form [formGroup]="messageFormGroup" (ngSubmit)="sendMessage()">
+        <mat-form-field appearance="fill">
+            <mat-label>Message</mat-label>
+            <input matInput #message maxlength="256" placeholder="Ex. I need help with..." formControlName="message">
+            <!-- <mat-hint align="start"><strong>Don't disclose personal info</strong> </mat-hint> -->
+            <mat-hint align="end">{{message.value.length}} / 256</mat-hint>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid" title="Send Message">Send&nbsp;<em class="bi bi-chat-left"></em></button>
+    </form>
+
+    <div class="row">
+        <div class="col">
+            <p>LocalStream id : {{localStream?.id}}</p>
+            <p>MediaStream id : {{localMediaStream?.id}}</p>
+            <app-stream-video [mediaStream]="localMediaStream"></app-stream-video>
+        </div>
+    </div>
+    <div>
+        <button (click)="publish()">publish</button>
+    </div>
+    <div>
+        <button (click)="shareScreen()">shareScreen</button>
+    </div>
+    <div>
+        <button (click)="goHd()">goHd</button>
+    </div>
+
+    <!-- <div class="row">
+        <div *ngFor="let kv of conversation?.peersById | keyvalue" class="col">
+            <p>{{kv.key}} : {{kv.value.id}}</p>
+        </div>
+    </div> -->
+
+    <a #dwnld style="display:none;" href></a>
+    <div *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" class="row">
+        <p>User {{kv.key.id}} </p>
+        <div *ngFor="let kvj of kv.value | keyvalue" class="col">
+            <app-stream-video [mediaStream]="kvj.value"></app-stream-video>
+            <div>
+                <button *ngIf="!mediaRecorder" (click)="record(kvj.value)">Record</button>
+                <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
+            </div>
+        </div>
+    </div>
+</div>

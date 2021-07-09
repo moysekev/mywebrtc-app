@@ -9,10 +9,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { HomeComponent } from './home/home.component';
+
+import { WINDOW_PROVIDERS } from './windows-provider';
 
 @NgModule({
   declarations: [
-    AppComponent, StreamVideoComponent
+    AppComponent, StreamVideoComponent, HomeComponent
   ],
   imports: [
     BrowserModule,
@@ -21,7 +24,7 @@ import { MatButtonModule } from '@angular/material/button';
     FormsModule, ReactiveFormsModule,
     MatInputModule, MatButtonModule
   ],
-  providers: [],
+  providers: [WINDOW_PROVIDERS],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
