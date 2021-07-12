@@ -29,6 +29,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   // Messages (defined as an array of tuples)
   public readonly messages: Array<[UserData, Message]> = new Array();
 
+  remoteParticipants: Set<RemoteParticipant> = new Set();
+
   messageFormGroup = this.fb.group({
     message: this.fb.control('', [Validators.required])
   });
@@ -225,6 +227,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         //
         conversation.onRemoteParticipantAdded = (participant: RemoteParticipant) => {
           console.log('onRemoteParticipantAdded', participant);
+          this.remoteParticipants.add(participant);
+
           participant.onUserDataUpdate = (userData: UserData) => {
             console.log('onUserDataUpdate', participant, userData);
           };
@@ -248,6 +252,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         };
         conversation.onRemoteParticipantRemoved = (participant: RemoteParticipant) => {
           console.log('onRemoteParticipantRemoved', participant);
+          this.remoteParticipants.delete(participant);
         };
 
         // Listen to streams remote users published
