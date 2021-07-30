@@ -11,11 +11,27 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { HomeComponent } from './home/home.component';
 
+import { AuthGuard } from './auth.guard';
 import { WINDOW_PROVIDERS } from './windows-provider';
+
+import firebase from 'firebase';
+import { LoginComponent } from './login/login.component';
+const firebaseOptions = {
+  apiKey: "AIzaSyDyZO8Khqsyei-rydS3suHXKGjsm2ZM5RA",
+  authDomain: "apirtc-62375.firebaseapp.com",
+  databaseURL: "https://apirtc-62375-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "apirtc-62375",
+  storageBucket: "apirtc-62375.appspot.com",
+  messagingSenderId: "218645311456",
+  appId: "1:218645311456:web:920e5cf309f47b3d530585",
+  measurementId: "G-01GRGSWHFE"
+};
+
+firebase.initializeApp(firebaseOptions);
 
 @NgModule({
   declarations: [
-    AppComponent, StreamVideoComponent, HomeComponent
+    AppComponent, StreamVideoComponent, HomeComponent, LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -24,7 +40,11 @@ import { WINDOW_PROVIDERS } from './windows-provider';
     FormsModule, ReactiveFormsModule,
     MatInputModule, MatButtonModule
   ],
-  providers: [WINDOW_PROVIDERS],
+  providers: [WINDOW_PROVIDERS, AuthGuard],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+  constructor() {
+
+  }
+}

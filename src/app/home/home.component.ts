@@ -2,6 +2,7 @@ import { Component, AfterViewInit, OnDestroy, HostListener, ViewChild, ElementRe
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute } from "@angular/router";
 
+import { AuthService } from '../auth.service';
 import { WINDOW } from '../windows-provider';
 
 import firebase from 'firebase';
@@ -22,7 +23,6 @@ interface Message {
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
-  //title = 'mywebrtc-app';
 
   conversation: Conversation | undefined;
 
@@ -43,6 +43,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   localDisplayMediaStream: MediaStream | undefined;
 
   localParticipant: LocalParticipant | undefined;
+  localParticipantData: UserData | undefined;
 
   url: string | undefined;
 
@@ -70,20 +71,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   constructor(@Inject(WINDOW) public window: Window,
     private activatedRoute: ActivatedRoute,
-    private fb: FormBuilder) {
-
-    const firebaseOptions = {
-      apiKey: "AIzaSyDyZO8Khqsyei-rydS3suHXKGjsm2ZM5RA",
-      authDomain: "apirtc-62375.firebaseapp.com",
-      databaseURL: "https://apirtc-62375-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "apirtc-62375",
-      storageBucket: "apirtc-62375.appspot.com",
-      messagingSenderId: "218645311456",
-      appId: "1:218645311456:web:920e5cf309f47b3d530585",
-      measurementId: "G-01GRGSWHFE"
-    };
-
-    firebase.initializeApp(firebaseOptions);
+    private authService: AuthService,
+    private fb: FormBuilder
+  ) {
   }
 
   ngOnInit(): void {
@@ -104,15 +94,29 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
     console.log('conversationId', conversationId);
 
-    this.doFbSignIn().then((user: firebase.User) => {
-      this.doSetupConversation(conversationId).then((conversation) => {
-        // Join the Conversation
-        const userData: UserData = { nickname: 'kevin' };
-        this.localParticipant = conversation.addParticipant(userData);
-
-        this.url = `${baseUrl}/${conversation.id}`;
-      });
+    this.doSetupConversation(conversationId).then((conversation) => {
+      // Join the Conversation
+      //this.authService.user?.displayName
+      const userData: UserData = { nickname: this.authService.user?.displayName || 'guest' };
+      this.localParticipant = conversation.addParticipant(userData);
+      this.localParticipantData = userData;
+      this.localParticipant.onUserDataUpdate = (userData: UserData) => {
+        console.log('onUserDataUpdate', this.localParticipant, userData);
+        this.localParticipantData = userData;
+      };
+      this.url = `${baseUrl}/${conversation.id}`;
     });
+
+    // this.doFbSignIn().then((user: firebase.User) => {
+    //   console.log('doFbSignIn', user);
+    //   this.doSetupConversation(conversationId).then((conversation) => {
+    //     // Join the Conversation
+    //     const userData: UserData = { nickname: 'kevin' };
+    //     this.localParticipant = conversation.addParticipant(userData);
+
+    //     this.url = `${baseUrl}/${conversation.id}`;
+    //   });
+    // });
     // firebase.auth().signInAnonymously()
     //   .then(() => {
     //     this.doSetupConversation();
@@ -151,28 +155,26 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         .then((result) => {
           /** @type {firebase.auth.OAuthCredential} */
           const credential: firebase.auth.OAuthCredential | null = result.credential;
+          // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+          //var accessToken = credential.accessToken;
 
           if (credential === null) {
             console.error('signInWithPopup', result);
             return;
           }
+          console.log('signInWithPopup', result);
 
           // The signed-in user info.
           const user = result.user;
-
-          // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-          var accessToken = credential.accessToken;
-
-          // ...
-          console.log('signInWithPopup', result);
-
           if (user === null) {
-            reject("user is null");
+            reject("signInWithPopup: user is null");
             return;
           }
+
           resolve(user);
         })
         .catch((error) => {
+          console.error("signInWithPopup", error);
           // Handle Errors here.
           var errorCode = error.code;
           var errorMessage = error.message;
@@ -181,8 +183,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           // The firebase.auth.AuthCredential type that was used.
           var credential = error.credential;
 
-          // ...
-          console.error("signInWithPopup", error);
           reject(error);
         });
     });
@@ -210,7 +210,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (this.conversation) {
       this.conversation.close()
         .then(() => { console.log('Conversation closed') })
-        .catch(error => { console.log('Conversation closing error', error) });
+        .catch((error: any) => { console.log('Conversation closing error', error) });
     }
   }
 
@@ -219,7 +219,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     return new Promise<Conversation>((resolve, reject) => {
       // Get or create Conversation
       //
-      Conversation.create(id).then((conversation: Conversation) => {
+      Conversation.getOrCreate(id).then((conversation: Conversation) => {
         console.log('conversation', conversation);
         this.conversation = conversation;
 
@@ -239,11 +239,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             //
             //stream.subscribe(stream, { audioOnly: true });
             stream.subscribe();
-
             stream.onMediaStreamReady = (mediaStream: MediaStream) => {
               console.log('onMediaStreamReady', stream);
               this.doStoreMediaStreamByParticipantAndStream(participant, stream, mediaStream);
             }
+            // TODO : merge subscribe and onMediaStreamReady to just onMediaStreamReady ?
+            // well not sure... this would remove the subcribe word..
           };
           participant.onStreamUnpublished = (stream: RemoteStream) => {
             console.log('onStreamUnpublished', stream);
@@ -254,26 +255,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           console.log('onRemoteParticipantRemoved', participant);
           this.remoteParticipants.delete(participant);
         };
-
-        // Listen to streams remote users published
-        //
-        // conversation.onRemoteStreamPublished = (user: User, stream: Stream) => {
-        //   console.log('onRemoteStreamPublished', stream);
-
-        //   // TODO : let user decide to subscribe OR NOT !
-        //   //
-        //   //stream.subscribe(stream, { audioOnly: true });
-        //   stream.subscribe();
-
-        //   stream.onMediaStreamReady = (mediaStream: MediaStream) => {
-        //     console.log('onMediaStreamReady', stream);
-        //     this.doStoreMediaStreamByUserAndStream(user, stream, mediaStream);
-        //   }
-        // }
-        // conversation.onRemoteStreamUnpublished = (user: User, stream: Stream) => {
-        //   console.log('onRemoteStreamUnpublished', stream);
-        //   this.doRemoveMediaStream(user, stream);
-        // }
 
         conversation.onMessage = (participant: Participant, message: Message) => {
           //
@@ -298,19 +279,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   publish() {
-    // Publish
-    //this.conversation.publish(this.localMediaStream, this.user);
-    // Or
-    // if (this.conversation && this.localMediaStream && this.user) {
-    //   this.conversation.publish(this.localMediaStream, this.user, 'webcam');
-    // }
-    // Or
-    //this.conversation.publish(this.localMediaStream, this.user, { type: 'webcam', foo: 'bar' });
-
     if (this.localMediaStream && this.localParticipant) {
       this.localStream = this.localParticipant.publish(this.localMediaStream, 'webcam');
       // Or
-      //this.user.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
+      //this.localParticipant.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
     }
   }
 
