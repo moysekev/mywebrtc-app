@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, UrlSerializer } from '@angular/router';
 
 import firebase from 'firebase';
+
+import { USERS } from '../consts';
 
 @Component({
   selector: 'app-login',
@@ -10,12 +12,55 @@ import firebase from 'firebase';
 })
 export class LoginComponent implements OnInit {
 
-  constructor(private router: Router) { }
+  returnUrl: string | undefined;
+
+  constructor(private route: ActivatedRoute,
+    private router: Router) { }
 
   ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'];
   }
 
-  doFbSignIn(): Promise<firebase.User> {
+  anonymousSignIn() {
+    firebase.auth().signInAnonymously()
+      .then((userCredential: firebase.auth.UserCredential) => {
+        console.log(`Anonmymous user`, userCredential.user?.toJSON());
+        //this.router.navigate(['/home']);
+        this.router.navigateByUrl(this.returnUrl || '/home');
+      })
+      .catch((error) => {
+        console.error(`firebase.signInAnonymously ${error.code}:${error.message}`)
+      });
+  }
+
+  // firebase.auth().signInWithEmailAndPassword('kevin_moyse@yahoo.fr', 'elephant7')
+  //   .then((userCredential) => {
+  //     // Signed in
+  //     var user = userCredential.user;
+  //     console.log('Signed In', user);
+
+  //     this.doSetupConversation();
+  //     // ...
+  //   })
+  //   .catch((error) => {
+  //     console.error(`firebase.signInWithEmailAndPassword ${error.code}:${error.message}`)
+  //   });
+
+  fbSignIn() {
+    this.doFbSignIn().then((user: firebase.User) => {
+      firebase.database().ref('/').child(USERS).child(user.uid).update(
+        // Put at least uid: user.uid, because we are sure it is not empty
+        user.toJSON()).then(() => {
+          console.log(`User<${user.uid}> written in db`);
+        });
+      this.router.navigateByUrl(this.returnUrl || '/home');
+    }
+    ).catch((error) => {
+      console.error('doFbSignIn', error)
+    })
+  }
+
+  private doFbSignIn(): Promise<firebase.User> {
     return new Promise<firebase.User>((resolve, reject) => {
       const provider = new firebase.auth.FacebookAuthProvider();
       firebase.auth().languageCode = 'fr';
@@ -45,8 +90,6 @@ export class LoginComponent implements OnInit {
           }
 
           resolve(user);
-
-          this.router.navigate(['/home']);
         })
         .catch((error) => {
           console.error("signInWithPopup", error);

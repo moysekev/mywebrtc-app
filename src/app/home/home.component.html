@@ -33,8 +33,25 @@
             <app-stream-video [mediaStream]="localMediaStream"></app-stream-video>
         </div>
     </div>
+
+    <div class="row" *ngIf="isWaitingForAcceptance">
+        <div class="col">
+            <br>
+            <p class="text-center">
+                <mat-spinner [diameter]="16"></mat-spinner>
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        {{remoteCandidates.size}}
+        <div *ngFor="let candidate of remoteCandidates" class="col">
+            <button (click)="accept(candidate)">Accept {{candidate.userData?.nickname}}</button>
+        </div>
+    </div>
+
     <div>
-        <button (click)="publish()">publish</button>
+        <button (click)="localStream?unpublish():publish()">{{localStream?'unpublish':'publish'}}</button>
     </div>
     <div>
         <button (click)="shareScreen()">shareScreen</button>
@@ -53,8 +70,10 @@
     </div> -->
 
     <a #dwnld style="display:none;" href></a>
+    <span>mediaStreamsByParticipantAndStream.size = {{mediaStreamsByParticipantAndStream.size}}</span>
     <div *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" class="row">
         <p>User {{kv.key.id}} </p>
+        <span>kv.value.size = {{kv.value.size}}</span>
         <div *ngFor="let kvj of kv.value | keyvalue" class="col">
             <app-stream-video [mediaStream]="kvj.value"></app-stream-video>
             <div>

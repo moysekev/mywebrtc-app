@@ -9,6 +9,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { HomeComponent } from './home/home.component';
 
 import { AuthGuard } from './auth.guard';
@@ -38,7 +40,7 @@ firebase.initializeApp(firebaseOptions);
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule, ReactiveFormsModule,
-    MatInputModule, MatButtonModule
+    MatInputModule, MatButtonModule, MatProgressSpinnerModule
   ],
   providers: [WINDOW_PROVIDERS, AuthGuard],
   bootstrap: [AppComponent]

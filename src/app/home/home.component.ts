@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, OnDestroy, HostListener, ViewChild, ElementRef, Inject } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 
 import { AuthService } from '../auth.service';
 import { WINDOW } from '../windows-provider';
@@ -29,7 +29,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   // Messages (defined as an array of tuples)
   public readonly messages: Array<[UserData, Message]> = new Array();
 
-  remoteParticipants: Set<RemoteParticipant> = new Set();
+  readonly remoteCandidates: Set<RemoteParticipant> = new Set();
+  //  readonly remoteParticipants: Set<RemoteParticipant> = new Set();
 
   messageFormGroup = this.fb.group({
     message: this.fb.control('', [Validators.required])
@@ -48,6 +49,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   url: string | undefined;
 
   mediaStreamsByParticipantAndStream: Map<RemoteParticipant, Map<RemoteStream, MediaStream>> = new Map();
+
+  isWaitingForAcceptance = false;
 
   @ViewChild("dwnld") aRef: ElementRef | undefined;
 
@@ -71,6 +74,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   constructor(@Inject(WINDOW) public window: Window,
     private activatedRoute: ActivatedRoute,
+    private router: Router,
     private authService: AuthService,
     private fb: FormBuilder
   ) {
@@ -96,50 +100,26 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
     this.doSetupConversation(conversationId).then((conversation) => {
       // Join the Conversation
-      //this.authService.user?.displayName
       const userData: UserData = { nickname: this.authService.user?.displayName || 'guest' };
-      this.localParticipant = conversation.addParticipant(userData);
       this.localParticipantData = userData;
-      this.localParticipant.onUserDataUpdate = (userData: UserData) => {
-        console.log('onUserDataUpdate', this.localParticipant, userData);
-        this.localParticipantData = userData;
-      };
+
+      const isModerator: boolean = !this.authService.user?.isAnonymous;
+
+      this.isWaitingForAcceptance = true;
+      conversation.addParticipant(userData, isModerator).then((participant) => {
+        this.isWaitingForAcceptance = false;
+        this.localParticipant = participant;
+        this.localParticipant.onUserDataUpdate = (userData: UserData) => {
+          console.log('onUserDataUpdate', this.localParticipant, userData);
+          this.localParticipantData = userData;
+        };
+      }).catch(error => {
+        this.isWaitingForAcceptance = false;
+        console.error('addParticipant', error)
+      });
+
       this.url = `${baseUrl}/${conversation.id}`;
     });
-
-    // this.doFbSignIn().then((user: firebase.User) => {
-    //   console.log('doFbSignIn', user);
-    //   this.doSetupConversation(conversationId).then((conversation) => {
-    //     // Join the Conversation
-    //     const userData: UserData = { nickname: 'kevin' };
-    //     this.localParticipant = conversation.addParticipant(userData);
-
-    //     this.url = `${baseUrl}/${conversation.id}`;
-    //   });
-    // });
-    // firebase.auth().signInAnonymously()
-    //   .then(() => {
-    //     this.doSetupConversation();
-    //   })
-    //   .catch((error) => {
-    //     console.error(`firebase.signInAnonymously ${error.code}:${error.message}`)
-    //   });
-
-    // Or
-
-    // firebase.auth().signInWithEmailAndPassword('kevin_moyse@yahoo.fr', 'elephant7')
-    //   .then((userCredential) => {
-    //     // Signed in
-    //     var user = userCredential.user;
-    //     console.log('Signed In', user);
-
-    //     this.doSetupConversation();
-    //     // ...
-    //   })
-    //   .catch((error) => {
-    //     console.error(`firebase.signInWithEmailAndPassword ${error.code}:${error.message}`)
-    //   });
-
   }
 
   ngAfterViewInit() {
@@ -156,11 +136,27 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.doCleanUp();
-
   }
 
   public signOut() {
-    firebase.auth().signOut().then(() => { console.log('signed Out') });
+    if (this.conversation) {
+      this.conversation.close()
+        .then(() => {
+          this.conversation = undefined;
+          console.log('Conversation closed');
+          this.doSignOut();
+        })
+        .catch((error: any) => { this.doSignOut(); });
+    } else {
+      this.doSignOut();
+    }
+
+  }
+  private doSignOut() {
+    firebase.auth().signOut().then(() => {
+      console.log('signed Out');
+      this.router.navigate(['/login']);
+    }).catch(error => { console.error('doSignOut', error) });
   }
 
   // --------------------------------------------------------------------------
@@ -168,7 +164,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   private doCleanUp() {
     if (this.conversation) {
       this.conversation.close()
-        .then(() => { console.log('Conversation closed') })
+        .then(() => {
+          this.conversation = undefined;
+          console.log('Conversation closed');
+        })
         .catch((error: any) => { console.log('Conversation closing error', error) });
     }
   }
@@ -182,11 +181,22 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         console.log('conversation', conversation);
         this.conversation = conversation;
 
+        conversation.onRemoteCandidateAdded = (candidate: RemoteParticipant) => {
+          console.log('onRemoteCandidateAdded', candidate);
+          // Maintain local list of pending Candidates
+          this.remoteCandidates.add(candidate);
+        };
+        conversation.onRemoteCandidateRemoved = (candidate: RemoteParticipant) => {
+          console.log('onRemoteCandidateRemoved', candidate);
+          // Maintain local list of pending Candidates
+          this.remoteCandidates.delete(candidate);
+        };
+
         // Listen to other users added to the Conversation
         //
         conversation.onRemoteParticipantAdded = (participant: RemoteParticipant) => {
           console.log('onRemoteParticipantAdded', participant);
-          this.remoteParticipants.add(participant);
+          //this.remoteParticipants.add(participant);
 
           participant.onUserDataUpdate = (userData: UserData) => {
             console.log('onUserDataUpdate', participant, userData);
@@ -206,13 +216,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             // well not sure... this would remove the subcribe word..
           };
           participant.onStreamUnpublished = (stream: RemoteStream) => {
-            console.log('onStreamUnpublished', stream);
+            console.log('onStreamUnpublished', participant, stream);
             this.doRemoveMediaStream(participant, stream);
           };
         };
         conversation.onRemoteParticipantRemoved = (participant: RemoteParticipant) => {
           console.log('onRemoteParticipantRemoved', participant);
-          this.remoteParticipants.delete(participant);
+          this.doRemoveRemoteParticipant(participant);
         };
 
         conversation.onMessage = (participant: Participant, message: Message) => {
@@ -229,11 +239,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  accept(candidate: RemoteParticipant) {
+    this.conversation?.accept(candidate);
+  }
+
   sendMessage() {
     // if (this.user && this.conversation)
     //   this.conversation.sendMessage(this.messageFc.value, this.user);
     if (this.localParticipant) {
       this.localParticipant.sendMessage(this.messageFc.value);
+    } else {
+      console.error('Cannot sendMessage', this.localParticipant);
     }
   }
 
@@ -242,6 +258,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.localStream = this.localParticipant.publish(this.localMediaStream, 'webcam');
       // Or
       //this.localParticipant.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
+    } else {
+      console.error('Cannot publish', this.localMediaStream, this.localParticipant);
     }
   }
 
@@ -251,6 +269,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     // }
     if (this.localMediaStream) {
       this.localParticipant?.unpublish(this.localMediaStream);
+      this.localStream = undefined;
     }
   }
 
@@ -268,6 +287,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {
     const deleted = this.mediaStreamsByParticipantAndStream.get(participant)?.delete(stream);
+    console.log('doRemoveMediaStream', participant, stream, deleted);
+  }
+
+  private doRemoveRemoteParticipant(participant: RemoteParticipant) {
+    const deleted = this.mediaStreamsByParticipantAndStream.delete(participant);
+    console.log('doRemoveRemoteParticipant', participant, deleted, this.mediaStreamsByParticipantAndStream.size);
   }
 
   shareScreen() {
