@@ -30,7 +30,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   public readonly messages: Array<[UserData, Message]> = new Array();
 
   readonly remoteCandidates: Set<RemoteParticipant> = new Set();
-  //  readonly remoteParticipants: Set<RemoteParticipant> = new Set();
 
   messageFormGroup = this.fb.group({
     message: this.fb.control('', [Validators.required])
@@ -103,10 +102,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       const userData: UserData = { nickname: this.authService.user?.displayName || 'guest' };
       this.localParticipantData = userData;
 
-      const isModerator: boolean = !this.authService.user?.isAnonymous;
+      const moderator: boolean = !this.authService.user?.isAnonymous;
 
       this.isWaitingForAcceptance = true;
-      conversation.addParticipant(userData, isModerator).then((participant) => {
+      conversation.addParticipant(userData, moderator).then((participant) => {
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
         this.localParticipant.onUserDataUpdate = (userData: UserData) => {
@@ -196,7 +195,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         //
         conversation.onRemoteParticipantAdded = (participant: RemoteParticipant) => {
           console.log('onRemoteParticipantAdded', participant);
-          //this.remoteParticipants.add(participant);
 
           participant.onUserDataUpdate = (userData: UserData) => {
             console.log('onUserDataUpdate', participant, userData);
@@ -206,14 +204,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
             // TODO : let user decide to subscribe OR NOT !
             //
-            //stream.subscribe(stream, { audioOnly: true });
             stream.subscribe();
+            // Can also do :
+            //stream.subscribe({ audioOnly: true });
+
+            // TODO? : merge subscribe and onMediaStreamReady to just onMediaStreamReady ?
+            // well not sure... this would remove the subcribe word..
             stream.onMediaStreamReady = (mediaStream: MediaStream) => {
               console.log('onMediaStreamReady', stream);
               this.doStoreMediaStreamByParticipantAndStream(participant, stream, mediaStream);
             }
-            // TODO : merge subscribe and onMediaStreamReady to just onMediaStreamReady ?
-            // well not sure... this would remove the subcribe word..
+
           };
           participant.onStreamUnpublished = (stream: RemoteStream) => {
             console.log('onStreamUnpublished', participant, stream);
@@ -244,8 +245,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   sendMessage() {
-    // if (this.user && this.conversation)
-    //   this.conversation.sendMessage(this.messageFc.value, this.user);
     if (this.localParticipant) {
       this.localParticipant.sendMessage(this.messageFc.value);
     } else {
@@ -264,9 +263,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   unpublish() {
-    // if (this.localMediaStream) {
-    //   this.conversation?.unpublish(this.localMediaStream);
-    // }
     if (this.localMediaStream) {
       this.localParticipant?.unpublish(this.localMediaStream);
       this.localStream = undefined;
@@ -274,7 +270,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   unsubscribe(stream: RemoteStream) {
-    //this.conversation?.unsubscribe(stream);
     stream.unsubscribe();
   }
 
