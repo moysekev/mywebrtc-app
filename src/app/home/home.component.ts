@@ -7,7 +7,7 @@ import { WINDOW } from '../windows-provider';
 
 import firebase from 'firebase';
 
-import { Conversation, ConversationOptions, LocalStream, RemoteStream, Participant, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
+import { Conversation, ConversationOptions, LocalStream, RemoteStream, User, LocalUser, RemoteUser, SubscribeOptions } from 'mywebrtc/dist';
 
 interface UserData {
   nickname: string;
@@ -29,7 +29,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   // Messages (defined as an array of tuples)
   public readonly messages: Array<[UserData, Message]> = new Array();
 
-  readonly remoteCandidates: Set<RemoteParticipant> = new Set();
+  readonly remoteCandidates: Set<RemoteUser> = new Set();
 
   messageFormGroup = this.fb.group({
     message: this.fb.control('', [Validators.required])
@@ -42,12 +42,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   localMediaStream: MediaStream | undefined;
   localDisplayMediaStream: MediaStream | undefined;
 
-  localParticipant: LocalParticipant | undefined;
+  localParticipant: LocalUser | undefined;
   localParticipantData: UserData | undefined;
 
   url: string | undefined;
 
-  mediaStreamsByParticipantAndStream: Map<RemoteParticipant, Map<RemoteStream, MediaStream>> = new Map();
+  mediaStreamsByParticipantAndStream: Map<RemoteUser, Map<RemoteStream, [string, MediaStream]>> = new Map();
 
   isWaitingForAcceptance = false;
 
@@ -111,36 +111,33 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       conversation.onModerationChanged = (moderation: boolean) => {
         this.moderation = moderation;
       }
-      conversation.onRemoteCandidateAdded = (candidate: RemoteParticipant) => {
+      conversation.onRemoteCandidateAdded = (candidate: RemoteUser) => {
         console.log('onRemoteCandidateAdded', candidate);
         // Maintain local list of pending Candidates
         this.remoteCandidates.add(candidate);
       };
-      conversation.onRemoteCandidateRemoved = (candidate: RemoteParticipant) => {
+      conversation.onRemoteCandidateRemoved = (candidate: RemoteUser) => {
         console.log('onRemoteCandidateRemoved', candidate);
         // Maintain local list of pending Candidates
         this.remoteCandidates.delete(candidate);
       };
-      conversation.onRemoteParticipantAdded = (participant: RemoteParticipant) => {
+      conversation.onRemoteParticipantAdded = (participant: RemoteUser) => {
         console.log('onRemoteParticipantAdded', participant);
 
         participant.onUserDataUpdate = (userData: UserData) => {
           console.log('onUserDataUpdate', participant, userData);
         };
-        participant.onStreamPublished = (stream: RemoteStream) => {
-          console.log('onStreamPublished', participant, stream);
+        participant.onStreamPublished = (stream: RemoteStream, topic?: any) => {
+          console.log('onStreamPublished', participant, stream, topic);
 
-          // TODO : let user decide to subscribe OR NOT !
+          // Subscribe by listening to onMediaStreamReady
           //
-          stream.subscribe();
-          // Can also do :
-          //stream.subscribe({ audioOnly: true });
+          // Can optionnaly do :
+          //stream.setSubscribeOptions({ audioOnly: true });
 
-          // TODO? : merge subscribe and onMediaStreamReady to just onMediaStreamReady ?
-          // well not sure... this would remove the subcribe word..
           stream.onMediaStreamReady = (mediaStream: MediaStream) => {
             console.log('onMediaStreamReady', stream);
-            this.doStoreMediaStreamByParticipantAndStream(participant, stream, mediaStream);
+            this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
           }
 
         };
@@ -149,12 +146,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           this.doRemoveMediaStream(participant, stream);
         };
       };
-      conversation.onRemoteParticipantRemoved = (participant: RemoteParticipant) => {
+      conversation.onRemoteParticipantRemoved = (participant: RemoteUser) => {
         console.log('onRemoteParticipantRemoved', participant);
         this.doRemoveRemoteParticipant(participant);
       };
 
-      conversation.onMessage = (participant: Participant, message: Message) => {
+      conversation.onMessage = (participant: User, message: Message) => {
         this.messages.push([participant.userData as UserData, message]);
       }
 
@@ -239,8 +236,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.conversation?.setModeration(!this.moderation);
   }
 
-  accept(candidate: RemoteParticipant) {
-    this.conversation?.accept(candidate);
+  accept(candidate: RemoteUser) {
+    this.conversation?.acceptCandidate(candidate);
   }
 
   sendMessage() {
@@ -268,23 +265,19 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  unsubscribe(stream: RemoteStream) {
-    stream.unsubscribe();
-  }
-
-  private doStoreMediaStreamByParticipantAndStream(participant: RemoteParticipant, stream: RemoteStream, mediaStream: MediaStream) {
+  private doStoreMediaStreamByParticipantAndStream(participant: RemoteUser, stream: RemoteStream, topic: string, mediaStream: MediaStream) {
     if (!this.mediaStreamsByParticipantAndStream.has(participant)) {
       this.mediaStreamsByParticipantAndStream.set(participant, new Map());
     }
-    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream, mediaStream);
+    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream, [topic, mediaStream]);
   }
 
-  private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {
+  private doRemoveMediaStream(participant: RemoteUser, stream: RemoteStream) {
     const deleted = this.mediaStreamsByParticipantAndStream.get(participant)?.delete(stream);
     console.log('doRemoveMediaStream', participant, stream, deleted);
   }
 
-  private doRemoveRemoteParticipant(participant: RemoteParticipant) {
+  private doRemoveRemoteParticipant(participant: RemoteUser) {
     const deleted = this.mediaStreamsByParticipantAndStream.delete(participant);
     console.log('doRemoveRemoteParticipant', participant, deleted, this.mediaStreamsByParticipantAndStream.size);
   }
