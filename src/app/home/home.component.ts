@@ -7,7 +7,7 @@ import { WINDOW } from '../windows-provider';
 
 import firebase from 'firebase';
 
-import { Conversation, LocalStream, RemoteStream, Participant, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
+import { Conversation, ConversationOptions, LocalStream, RemoteStream, Participant, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
 
 interface UserData {
   nickname: string;
@@ -97,8 +97,69 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
     console.log('conversationId', conversationId);
 
-    this.doSetupConversation(conversationId).then((conversation) => {
-      // Join the Conversation
+    const options: ConversationOptions = {
+      moderation: this.moderation
+    }
+
+    Conversation.getOrCreate(conversationId, options).then((conversation: Conversation) => {
+      console.log('conversation', conversation);
+      this.conversation = conversation;
+
+
+      // Listen to Conversation events
+      //
+      conversation.onModerationChanged = (moderation: boolean) => {
+        this.moderation = moderation;
+      }
+      conversation.onRemoteCandidateAdded = (candidate: RemoteParticipant) => {
+        console.log('onRemoteCandidateAdded', candidate);
+        // Maintain local list of pending Candidates
+        this.remoteCandidates.add(candidate);
+      };
+      conversation.onRemoteCandidateRemoved = (candidate: RemoteParticipant) => {
+        console.log('onRemoteCandidateRemoved', candidate);
+        // Maintain local list of pending Candidates
+        this.remoteCandidates.delete(candidate);
+      };
+      conversation.onRemoteParticipantAdded = (participant: RemoteParticipant) => {
+        console.log('onRemoteParticipantAdded', participant);
+
+        participant.onUserDataUpdate = (userData: UserData) => {
+          console.log('onUserDataUpdate', participant, userData);
+        };
+        participant.onStreamPublished = (stream: RemoteStream) => {
+          console.log('onStreamPublished', participant, stream);
+
+          // TODO : let user decide to subscribe OR NOT !
+          //
+          stream.subscribe();
+          // Can also do :
+          //stream.subscribe({ audioOnly: true });
+
+          // TODO? : merge subscribe and onMediaStreamReady to just onMediaStreamReady ?
+          // well not sure... this would remove the subcribe word..
+          stream.onMediaStreamReady = (mediaStream: MediaStream) => {
+            console.log('onMediaStreamReady', stream);
+            this.doStoreMediaStreamByParticipantAndStream(participant, stream, mediaStream);
+          }
+
+        };
+        participant.onStreamUnpublished = (stream: RemoteStream) => {
+          console.log('onStreamUnpublished', participant, stream);
+          this.doRemoveMediaStream(participant, stream);
+        };
+      };
+      conversation.onRemoteParticipantRemoved = (participant: RemoteParticipant) => {
+        console.log('onRemoteParticipantRemoved', participant);
+        this.doRemoveRemoteParticipant(participant);
+      };
+
+      conversation.onMessage = (participant: Participant, message: Message) => {
+        this.messages.push([participant.userData as UserData, message]);
+      }
+
+      // Join the conversation
+
       const userData: UserData = { nickname: this.authService.user?.displayName || 'guest' };
       this.localParticipantData = userData;
 
@@ -171,73 +232,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  doSetupConversation(id: string | undefined | null): Promise<Conversation> {
 
-    return new Promise<Conversation>((resolve, reject) => {
-      // Get or create Conversation
-      //
-      Conversation.getOrCreate(id).then((conversation: Conversation) => {
-        console.log('conversation', conversation);
-        this.conversation = conversation;
+  moderation: boolean = false;
 
-        conversation.onRemoteCandidateAdded = (candidate: RemoteParticipant) => {
-          console.log('onRemoteCandidateAdded', candidate);
-          // Maintain local list of pending Candidates
-          this.remoteCandidates.add(candidate);
-        };
-        conversation.onRemoteCandidateRemoved = (candidate: RemoteParticipant) => {
-          console.log('onRemoteCandidateRemoved', candidate);
-          // Maintain local list of pending Candidates
-          this.remoteCandidates.delete(candidate);
-        };
-
-        // Listen to other users added to the Conversation
-        //
-        conversation.onRemoteParticipantAdded = (participant: RemoteParticipant) => {
-          console.log('onRemoteParticipantAdded', participant);
-
-          participant.onUserDataUpdate = (userData: UserData) => {
-            console.log('onUserDataUpdate', participant, userData);
-          };
-          participant.onStreamPublished = (stream: RemoteStream) => {
-            console.log('onStreamPublished', participant, stream);
-
-            // TODO : let user decide to subscribe OR NOT !
-            //
-            stream.subscribe();
-            // Can also do :
-            //stream.subscribe({ audioOnly: true });
-
-            // TODO? : merge subscribe and onMediaStreamReady to just onMediaStreamReady ?
-            // well not sure... this would remove the subcribe word..
-            stream.onMediaStreamReady = (mediaStream: MediaStream) => {
-              console.log('onMediaStreamReady', stream);
-              this.doStoreMediaStreamByParticipantAndStream(participant, stream, mediaStream);
-            }
-
-          };
-          participant.onStreamUnpublished = (stream: RemoteStream) => {
-            console.log('onStreamUnpublished', participant, stream);
-            this.doRemoveMediaStream(participant, stream);
-          };
-        };
-        conversation.onRemoteParticipantRemoved = (participant: RemoteParticipant) => {
-          console.log('onRemoteParticipantRemoved', participant);
-          this.doRemoveRemoteParticipant(participant);
-        };
-
-        conversation.onMessage = (participant: Participant, message: Message) => {
-          //
-          this.messages.push([participant.userData as UserData, message]);
-        }
-
-        resolve(conversation);
-
-      }).catch((error: Error) => {
-        console.log('getOrCreateConversation error', error);
-        reject(error);
-      });
-    });
+  toggleModeration() {
+    this.conversation?.setModeration(!this.moderation);
   }
 
   accept(candidate: RemoteParticipant) {
