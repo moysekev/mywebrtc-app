@@ -1,4 +1,51 @@
-<div class=container>
+<div>
+    <!-- <div *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" class="row">
+        <p>User {{kv.key.id}} </p>
+        <span>kv.value.size = {{kv.value.size}}</span>
+        <div *ngFor="let kvj of kv.value | keyvalue" class="col">
+            <span>{{kvj.value[0]}}</span>
+            <app-stream-video [mediaStream]="kvj.value[1]"></app-stream-video>
+            <div>
+                <button *ngIf="!mediaRecorder" (click)="record(kvj.value[1])">Record</button>
+                <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- rowHeight="100px" -->
+
+    <mat-grid-list cols="1">
+        <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" [colspan]="1" [rowspan]="1">
+            <mat-card class="example-card">
+                <mat-card-header>
+                    <!-- <div mat-card-avatar class="example-header-image"></div> -->
+                    <mat-card-title>{{kv.key.userData.nickname}}</mat-card-title>
+                    <mat-card-subtitle>{{kv.key.id}}</mat-card-subtitle>
+                </mat-card-header>
+                <!-- <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu"> -->
+                <mat-card-content class="container">
+                    <div *ngFor="let kvj of kv.value | keyvalue" class="col">
+                        <app-stream-video [mediaStream]="kvj.value[1]" [fullscreen]="true"></app-stream-video>
+                        <div *ngIf="moderator">
+                            <button *ngIf="!mediaRecorder" (click)="record(kvj.value[1])">Record</button>
+                            <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col over">
+                            <!-- <p>LocalStream id : {{localStream?.id}}</p>
+                                <p>MediaStream id : {{localMediaStream?.id}}</p> -->
+                            <app-stream-video [mediaStream]="localMediaStream"></app-stream-video>
+                        </div>
+                    </div>
+                </mat-card-content>
+                <!-- <mat-card-actions>
+                    <button mat-button>LIKE</button>
+                    <button mat-button>SHARE</button>
+                </mat-card-actions> -->
+            </mat-card>
+        </mat-grid-tile>
+    </mat-grid-list>
 
     <div class="row">
         <div class="col">
@@ -28,14 +75,6 @@
         </mat-form-field>
         <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid" title="Send Message">Send&nbsp;<em class="bi bi-chat-left"></em></button>
     </form>
-
-    <div class="row">
-        <div class="col">
-            <p>LocalStream id : {{localStream?.id}}</p>
-            <p>MediaStream id : {{localMediaStream?.id}}</p>
-            <app-stream-video [mediaStream]="localMediaStream"></app-stream-video>
-        </div>
-    </div>
 
     <div class="row" *ngIf="isWaitingForAcceptance">
         <div class="col">
@@ -74,16 +113,5 @@
 
     <a #dwnld style="display:none;" href></a>
     <span>mediaStreamsByParticipantAndStream.size = {{mediaStreamsByParticipantAndStream.size}}</span>
-    <div *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" class="row">
-        <p>User {{kv.key.id}} </p>
-        <span>kv.value.size = {{kv.value.size}}</span>
-        <div *ngFor="let kvj of kv.value | keyvalue" class="col">
-            <span>{{kvj.value[0]}}</span>
-            <app-stream-video [mediaStream]="kvj.value[1]"></app-stream-video>
-            <div>
-                <button *ngIf="!mediaRecorder" (click)="record(kvj.value[1])">Record</button>
-                <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
-            </div>
-        </div>
-    </div>
+
 </div>

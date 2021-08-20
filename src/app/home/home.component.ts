@@ -11,6 +11,7 @@ import { Conversation, ConversationOptions, LocalStream, RemoteStream, User, Loc
 
 interface UserData {
   nickname: string;
+  isModerator: boolean;
 }
 
 interface Message {
@@ -44,6 +45,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   localParticipant: LocalUser | undefined;
   localParticipantData: UserData | undefined;
+
+  moderator: boolean = false;
 
   url: string | undefined;
 
@@ -80,6 +83,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+
+    this.moderator = !this.authService.user?.isAnonymous;
+
     // Get conversation name and base url from current path (pattern : "/path/to/<conversationid>")
     //
     const conversationId = this.activatedRoute.snapshot.paramMap.get("id");
@@ -155,13 +161,15 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
       // Join the conversation
 
-      const userData: UserData = { nickname: this.authService.user?.displayName || 'guest' };
+
+      const userData: UserData = {
+        nickname: this.authService.user?.displayName || 'guest',
+        isModerator: this.moderator
+      };
       this.localParticipantData = userData;
 
-      const moderator: boolean = !this.authService.user?.isAnonymous;
-
       this.isWaitingForAcceptance = true;
-      conversation.addParticipant(userData, moderator).then((participant) => {
+      conversation.addParticipant(userData, this.moderator).then((participant) => {
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
         this.localParticipant.onUserDataUpdate = (userData: UserData) => {
