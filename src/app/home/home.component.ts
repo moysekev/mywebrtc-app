@@ -127,19 +127,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         participant.onUserDataUpdate = (userData: UserData) => {
           console.log('onUserDataUpdate', participant, userData);
         };
-        participant.onStreamPublished = (stream: RemoteStream, topic?: any) => {
+        participant.onStreamPublished = (stream: RemoteStream, topic: any) => {
           console.log('onStreamPublished', participant, stream, topic);
-
-          // Subscribe by listening to onMediaStreamReady
-          //
-          // Can optionnaly do :
-          //stream.setSubscribeOptions({ audioOnly: true });
-
+          // First set listener(s) to onMediaStreamReady
           stream.onMediaStreamReady = (mediaStream: MediaStream) => {
             console.log('onMediaStreamReady', stream);
             this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
           }
-
+          // And then, subscribe
+          stream.subscribe();
+          // or 
+          //stream.subscribe({ audio: true, video: false });
         };
         participant.onStreamUnpublished = (stream: RemoteStream) => {
           console.log('onStreamUnpublished', participant, stream);
@@ -247,6 +245,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       console.error('Cannot sendMessage', this.localParticipant);
     }
   }
+
+  // TODO : implement a sendPrivateMessage in the library ?
 
   publish() {
     if (this.localMediaStream && this.localParticipant) {
