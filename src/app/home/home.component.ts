@@ -104,7 +104,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     console.log('conversationId', conversationId);
 
     const options: ConversationOptions = {
-      moderation: this.moderation
+      moderated: this.moderated
     }
 
     Conversation.getOrCreate(conversationId, options).then((conversation: Conversation) => {
@@ -114,8 +114,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
       // Listen to Conversation events
       //
-      conversation.onModerationChanged = (moderation: boolean) => {
-        this.moderation = moderation;
+      conversation.onModeratedChanged = (moderated: boolean) => {
+        this.moderated = moderated;
       }
       conversation.onRemoteCandidateAdded = (candidate: RemoteUser) => {
         console.log('onRemoteCandidateAdded', candidate);
@@ -236,10 +236,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
 
-  moderation: boolean = false;
+  moderated: boolean = false;
 
   toggleModeration() {
-    this.conversation?.setModeration(!this.moderation);
+    this.conversation?.setModerated(!this.moderated);
   }
 
   accept(candidate: RemoteUser) {
