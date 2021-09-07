@@ -14,13 +14,23 @@
 
     <!-- rowHeight="100px" -->
 
+    <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size===0">
+        <div class="col">
+            <p>MediaStream id : {{localMediaStream?.id}}</p> -->
+            <app-stream-video [mediaStream]="localMediaStream"></app-stream-video>
+        </div>
+    </div>
+
     <mat-grid-list cols="1">
         <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" [colspan]="1" [rowspan]="1">
             <mat-card class="example-card">
                 <mat-card-header>
                     <!-- <div mat-card-avatar class="example-header-image"></div> -->
-                    <mat-card-title>{{kv.key.userData.nickname}}</mat-card-title>
+                    <mat-card-title>{{kv.key.userData?.nickname}}</mat-card-title>
                     <mat-card-subtitle>{{kv.key.id}}</mat-card-subtitle>
+                    <div *ngIf="moderator">
+                        <button (click)="eject(kv.key)">Eject</button>
+                    </div>
                 </mat-card-header>
                 <!-- <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu"> -->
                 <mat-card-content class="container">
@@ -31,7 +41,7 @@
                             <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row" *ngIf="localMediaStream">
                         <div class="col over">
                             <!-- <p>LocalStream id : {{localStream?.id}}</p>
                                 <p>MediaStream id : {{localMediaStream?.id}}</p> -->
@@ -52,10 +62,11 @@
             <p>Conversation id : {{conversation?.id}}</p>
             <p>User id : {{localParticipant?.id}}</p>
             <p>User nickname : {{localParticipantData?.nickname}}</p>
+            <p>User moderator : {{moderator}}</p>
             <p>Others can join at url
                 <a href="{{url}}" target="_blank" rel="noopener">{{url}}</a>
             </p>
-            <p>Conversation moderation : {{moderation}}</p>
+            <p>Conversation moderated : {{moderated}}</p>
             <p>
                 <button (click)="toggleModeration()">toggleModeration</button>
             </p>
@@ -89,6 +100,7 @@
         {{remoteCandidates.size}}
         <div *ngFor="let candidate of remoteCandidates" class="col">
             <button (click)="accept(candidate)">Accept {{candidate.userData.nickname}}</button>
+            <button (click)="accept(candidate)">Reject {{candidate.userData.nickname}}</button>
         </div>
     </div>
 

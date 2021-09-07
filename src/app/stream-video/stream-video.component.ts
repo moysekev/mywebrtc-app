@@ -29,6 +29,7 @@ export class StreamVideoComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
+    console.log('StreamVideoComponent::ngAfterViewInit', this.videoRef);
     // remote stream is attached to DOM during ngAfterViewInit because @ViewChild is not bound before this stage
     if (this.videoRef) {
       this.videoRef.nativeElement.srcObject = this._mediaStream;

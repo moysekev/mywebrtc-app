@@ -2,6 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, UrlSerializer } from '@angular/router';
 
 import firebase from 'firebase';
+// import firebase from 'firebase/app';
+// import 'firebase/database';
+// import 'firebase/auth';
+
 
 import { USERS } from '../consts';
 

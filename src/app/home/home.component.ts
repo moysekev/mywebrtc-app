@@ -6,6 +6,9 @@ import { AuthService } from '../auth.service';
 import { WINDOW } from '../windows-provider';
 
 import firebase from 'firebase';
+// import firebase from 'firebase/app';
+// import 'firebase/database';
+// import 'firebase/auth';
 
 import { Conversation, ConversationOptions, LocalStream, RemoteStream, User, LocalUser, RemoteUser, SubscribeOptions } from 'mywebrtc/dist';
 
@@ -46,6 +49,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   localParticipant: LocalUser | undefined;
   localParticipantData: UserData | undefined;
 
+  moderated: boolean = false;
   moderator: boolean = false;
 
   url: string | undefined;
@@ -117,18 +121,18 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       conversation.onModeratedChanged = (moderated: boolean) => {
         this.moderated = moderated;
       }
-      conversation.onRemoteCandidateAdded = (candidate: RemoteUser) => {
-        console.log('onRemoteCandidateAdded', candidate);
+      conversation.onCandidateAdded = (candidate: RemoteUser) => {
+        console.log('onCandidateAdded', candidate);
         // Maintain local list of pending Candidates
         this.remoteCandidates.add(candidate);
       };
-      conversation.onRemoteCandidateRemoved = (candidate: RemoteUser) => {
-        console.log('onRemoteCandidateRemoved', candidate);
+      conversation.onCandidateRemoved = (candidate: RemoteUser) => {
+        console.log('onCandidateRemoved', candidate);
         // Maintain local list of pending Candidates
         this.remoteCandidates.delete(candidate);
       };
-      conversation.onRemoteParticipantAdded = (participant: RemoteUser) => {
-        console.log('onRemoteParticipantAdded', participant);
+      conversation.onParticipantAdded = (participant: RemoteUser) => {
+        console.log('onParticipantAdded', participant);
 
         participant.onUserDataUpdate = (userData: UserData) => {
           console.log('onUserDataUpdate', participant, userData);
@@ -150,9 +154,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           this.doRemoveMediaStream(participant, stream);
         };
       };
-      conversation.onRemoteParticipantRemoved = (participant: RemoteUser) => {
-        console.log('onRemoteParticipantRemoved', participant);
-        this.doRemoveRemoteParticipant(participant);
+      conversation.onParticipantRemoved = (participant: RemoteUser | LocalUser) => {
+        console.log('onParticipantRemoved', participant);
+        if (participant instanceof RemoteUser) {
+          this.doRemoveRemoteParticipant(participant);
+        }
+        else if (participant instanceof LocalUser) {
+          console.log('localuser removed ?!', participant);
+        }
       };
 
       conversation.onMessage = (participant: User, message: Message) => {
@@ -160,8 +169,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       }
 
       // Join the conversation
-
-
       const userData: UserData = {
         nickname: this.authService.user?.displayName || 'guest',
         isModerator: this.moderator
@@ -170,6 +177,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
       this.isWaitingForAcceptance = true;
       conversation.addParticipant(userData, this.moderator).then((participant) => {
+        console.log('addParticipant succeed', participant);
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
         this.localParticipant.onUserDataUpdate = (userData: UserData) => {
@@ -177,8 +185,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           this.localParticipantData = userData;
         };
       }).catch(error => {
+        console.log('addParticipant failed', error);
         this.isWaitingForAcceptance = false;
-        console.error('addParticipant', error)
       });
 
       this.url = `${baseUrl}/${conversation.id}`;
@@ -193,7 +201,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.localMediaStream = mediaStream;
       console.log('ngAfterViewInit getUserMedia', mediaStream);
     }).catch((error) => {
-      console.error("CAUGHT" + error);
+      console.error('ngAfterViewInit getUserMedia', error);
     });
   }
 
@@ -235,15 +243,20 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-
-  moderated: boolean = false;
-
   toggleModeration() {
     this.conversation?.setModerated(!this.moderated);
   }
 
   accept(candidate: RemoteUser) {
     this.conversation?.acceptCandidate(candidate);
+  }
+
+  reject(candidate: RemoteUser) {
+    this.conversation?.rejectCandidate(candidate);
+  }
+
+  eject(participant: RemoteUser) {
+    this.conversation?.removeParticipant(participant);
   }
 
   sendMessage() {

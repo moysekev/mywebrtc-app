@@ -3,6 +3,9 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 import firebase from 'firebase';
+// import firebase from 'firebase/app';
+// import 'firebase/database';
+// import 'firebase/auth';
 
 @Injectable({
   providedIn: 'root'

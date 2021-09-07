@@ -19,6 +19,10 @@ import { AuthGuard } from './auth.guard';
 import { WINDOW_PROVIDERS } from './windows-provider';
 
 import firebase from 'firebase';
+// import firebase from 'firebase/app';
+// import 'firebase/database';
+// import 'firebase/auth';
+
 import { LoginComponent } from './login/login.component';
 const firebaseOptions = {
   apiKey: "AIzaSyDyZO8Khqsyei-rydS3suHXKGjsm2ZM5RA",
@@ -31,7 +35,9 @@ const firebaseOptions = {
   measurementId: "G-01GRGSWHFE"
 };
 
-firebase.initializeApp(firebaseOptions);
+console.log('initializeApp', firebaseOptions);
+const app = firebase.initializeApp(firebaseOptions);
+console.log('initializeApp returned', app);
 
 import { initialize as initializeMyWebrtc } from 'mywebrtc/dist';
 
