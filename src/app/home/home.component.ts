@@ -10,7 +10,7 @@ import firebase from 'firebase';
 // import 'firebase/database';
 // import 'firebase/auth';
 
-import { Conversation, ConversationOptions, LocalStream, RemoteStream, User, LocalUser, RemoteUser, SubscribeOptions } from 'mywebrtc/dist';
+import { Conversation, ConversationOptions, LocalStream, RemoteStream, User, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
 
 interface UserData {
   nickname: string;
@@ -33,7 +33,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   // Messages (defined as an array of tuples)
   public readonly messages: Array<[UserData, Message]> = new Array();
 
-  readonly remoteCandidates: Set<RemoteUser> = new Set();
+  readonly remoteCandidates: Set<User> = new Set();
 
   messageFormGroup = this.fb.group({
     message: this.fb.control('', [Validators.required])
@@ -46,7 +46,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   localMediaStream: MediaStream | undefined;
   localDisplayMediaStream: MediaStream | undefined;
 
-  localParticipant: LocalUser | undefined;
+  localParticipant: LocalParticipant | undefined;
   localParticipantData: UserData | undefined;
 
   moderated: boolean = false;
@@ -54,7 +54,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   url: string | undefined;
 
-  mediaStreamsByParticipantAndStream: Map<RemoteUser, Map<RemoteStream, [string, MediaStream]>> = new Map();
+  mediaStreamsByParticipantAndStream: Map<RemoteParticipant, Map<RemoteStream, [string, MediaStream]>> = new Map();
 
   isWaitingForAcceptance = false;
 
@@ -121,20 +121,20 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       conversation.onModeratedChanged = (moderated: boolean) => {
         this.moderated = moderated;
       }
-      conversation.onCandidateAdded = (candidate: RemoteUser) => {
+      conversation.onCandidateAdded = (candidate: User) => {
         console.log('onCandidateAdded', candidate);
         // Maintain local list of pending Candidates
         this.remoteCandidates.add(candidate);
       };
-      conversation.onCandidateRemoved = (candidate: RemoteUser) => {
+      conversation.onCandidateRemoved = (candidate: User) => {
         console.log('onCandidateRemoved', candidate);
         // Maintain local list of pending Candidates
         this.remoteCandidates.delete(candidate);
       };
-      conversation.onParticipantAdded = (participant: RemoteUser) => {
+      conversation.onParticipantAdded = (participant: RemoteParticipant) => {
         console.log('onParticipantAdded', participant);
 
-        participant.onUserDataUpdate = (userData: UserData) => {
+        participant.getUser().onUserDataUpdate = (userData: UserData) => {
           console.log('onUserDataUpdate', participant, userData);
         };
         participant.onStreamPublished = (stream: RemoteStream, topic: any) => {
@@ -145,21 +145,22 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
           }
           // And then, subscribe
-          stream.subscribe();
+          // stream.subscribe();
+          this.localParticipant?.subscribe(stream);
           // or 
-          //stream.subscribe({ audio: true, video: false });
+          //this.localParticipant?.subscribe(stream, { audio: true, video: false });
         };
         participant.onStreamUnpublished = (stream: RemoteStream) => {
           console.log('onStreamUnpublished', participant, stream);
           this.doRemoveMediaStream(participant, stream);
         };
       };
-      conversation.onParticipantRemoved = (participant: RemoteUser | LocalUser) => {
+      conversation.onParticipantRemoved = (participant: RemoteParticipant | LocalParticipant) => {
         console.log('onParticipantRemoved', participant);
-        if (participant instanceof RemoteUser) {
+        if (participant instanceof RemoteParticipant) {
           this.doRemoveRemoteParticipant(participant);
         }
-        else if (participant instanceof LocalUser) {
+        else if (participant instanceof LocalParticipant) {
           console.log('localuser removed ?!', participant);
         }
       };
@@ -180,7 +181,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         console.log('addParticipant succeed', participant);
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
-        this.localParticipant.onUserDataUpdate = (userData: UserData) => {
+        this.localParticipant.getUser().onUserDataUpdate = (userData: UserData) => {
           console.log('onUserDataUpdate', this.localParticipant, userData);
           this.localParticipantData = userData;
         };
@@ -247,15 +248,15 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.conversation?.setModerated(!this.moderated);
   }
 
-  accept(candidate: RemoteUser) {
+  accept(candidate: User) {
     this.conversation?.acceptCandidate(candidate);
   }
 
-  reject(candidate: RemoteUser) {
+  reject(candidate: User) {
     this.conversation?.rejectCandidate(candidate);
   }
 
-  eject(participant: RemoteUser) {
+  eject(participant: RemoteParticipant) {
     this.conversation?.removeParticipant(participant);
   }
 
@@ -286,19 +287,19 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private doStoreMediaStreamByParticipantAndStream(participant: RemoteUser, stream: RemoteStream, topic: string, mediaStream: MediaStream) {
+  private doStoreMediaStreamByParticipantAndStream(participant: RemoteParticipant, stream: RemoteStream, topic: string, mediaStream: MediaStream) {
     if (!this.mediaStreamsByParticipantAndStream.has(participant)) {
       this.mediaStreamsByParticipantAndStream.set(participant, new Map());
     }
     this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream, [topic, mediaStream]);
   }
 
-  private doRemoveMediaStream(participant: RemoteUser, stream: RemoteStream) {
+  private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {
     const deleted = this.mediaStreamsByParticipantAndStream.get(participant)?.delete(stream);
     console.log('doRemoveMediaStream', participant, stream, deleted);
   }
 
-  private doRemoveRemoteParticipant(participant: RemoteUser) {
+  private doRemoveRemoteParticipant(participant: RemoteParticipant) {
     const deleted = this.mediaStreamsByParticipantAndStream.delete(participant);
     console.log('doRemoveRemoteParticipant', participant, deleted, this.mediaStreamsByParticipantAndStream.size);
   }
