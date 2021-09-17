@@ -115,7 +115,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       console.log('conversation', conversation);
       this.conversation = conversation;
 
-
       // Listen to Conversation events
       //
       conversation.onModeratedChanged = (moderated: boolean) => {
