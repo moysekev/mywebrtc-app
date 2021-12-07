@@ -100,10 +100,17 @@
     </div>
 
     <div class="row">
-        {{remoteCandidates.size}}
+        <p>({{remoteCandidates.size}}) remoteCandidates</p>
         <div *ngFor="let candidate of remoteCandidates" class="col">
             <button (click)="accept(candidate)">Accept {{candidate.userData.nickname}}</button>
             <button (click)="accept(candidate)">Reject {{candidate.userData.nickname}}</button>
+        </div>
+    </div>
+    <div class="row">
+        <p>({{remoteParticipants.size}}) remoteParticipants</p>
+        <div *ngFor="let participant of remoteParticipants" class="col">
+            <p>{{participant.user.id}}</p>
+            <button *ngIf="moderator"(click)="eject(participant)">Eject</button>
         </div>
     </div>
 

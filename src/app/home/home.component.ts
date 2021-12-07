@@ -34,6 +34,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   public readonly messages: Array<[UserData, Message]> = new Array();
 
   readonly remoteCandidates: Set<User> = new Set();
+  readonly remoteParticipants: Set<RemoteParticipant> = new Set();
 
   messageFormGroup = this.fb.group({
     message: this.fb.control('', [Validators.required])
@@ -133,6 +134,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       conversation.onParticipantAdded = (participant: RemoteParticipant) => {
         console.log('onParticipantAdded', participant);
 
+        this.remoteParticipants.add(participant);
+
         participant.getUser().onUserDataUpdate = (userData: UserData) => {
           console.log('onUserDataUpdate', participant, userData);
         };
@@ -176,7 +179,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.localParticipantData = userData;
 
       this.isWaitingForAcceptance = true;
-      conversation.addParticipant(userData, this.moderator).then((participant) => {
+      conversation.addParticipant(userData, { moderator: this.moderator }).then((participant) => {
         console.log('addParticipant succeed', participant);
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
@@ -299,6 +302,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   private doRemoveRemoteParticipant(participant: RemoteParticipant) {
+    this.remoteParticipants.delete(participant);
     const deleted = this.mediaStreamsByParticipantAndStream.delete(participant);
     console.log('doRemoveRemoteParticipant', participant, deleted, this.mediaStreamsByParticipantAndStream.size);
   }
