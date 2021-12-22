@@ -13,12 +13,18 @@ import firebase from 'firebase';
 import { Conversation, ConversationOptions, LocalStream, RemoteStream, User, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
 
 interface UserData {
-  nickname: string;
-  isModerator: boolean;
+  nickname: string
+  isModerator: boolean
 }
 
 interface Message {
-  text: string;
+  text: string
+}
+
+interface RemoteStreamData {
+  topic: any
+  mediaStream: MediaStream
+  remoteAudioEnabled: boolean
 }
 
 @Component({
@@ -45,6 +51,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   localStream: LocalStream | undefined;
   localMediaStream: MediaStream | undefined;
+
   localDisplayMediaStream: MediaStream | undefined;
 
   localParticipant: LocalParticipant | undefined;
@@ -55,7 +62,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   url: string | undefined;
 
-  mediaStreamsByParticipantAndStream: Map<RemoteParticipant, Map<RemoteStream, [string, MediaStream]>> = new Map();
+  mediaStreamsByParticipantAndStream: Map<RemoteParticipant, Map<RemoteStream, RemoteStreamData>> = new Map();
 
   isWaitingForAcceptance = false;
 
@@ -141,13 +148,27 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         };
         participant.onStreamPublished = (stream: RemoteStream, topic: any) => {
           console.log('onStreamPublished', participant, stream, topic);
-          // First set listener(s) to onMediaStreamReady
+          // First, set listener(s)
           stream.onMediaStreamReady = (mediaStream: MediaStream) => {
-            console.log('onMediaStreamReady', stream);
+            console.log('onMediaStreamReady', stream, mediaStream);
             this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
+            this.doListenToTracksEvents(mediaStream, "PEER:");
+          }
+          stream.onTracksStatusesChanged = (tracks: any) => {
+            console.log('onTracksStatusesChanged', stream, tracks);
+
+            for (let key in tracks) {
+              let track = tracks[key];
+              if (track.kind === 'audio') {
+                const remoteData = this.mediaStreamsByParticipantAndStream.get(participant)?.get(stream);
+                if (remoteData) {
+                  remoteData.remoteAudioEnabled = track.enabled;
+                }
+              }
+            }
+
           }
           // And then, subscribe
-          // stream.subscribe();
           this.localParticipant?.subscribe(stream);
           // or 
           //this.localParticipant?.subscribe(stream, { audio: true, video: false });
@@ -201,11 +222,36 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       video: true,
       audio: true
     }).then((mediaStream: MediaStream) => {
-      this.localMediaStream = mediaStream;
       console.log('ngAfterViewInit getUserMedia', mediaStream);
+      this.doStoreAndBindLocalMediaStream(mediaStream);
     }).catch((error) => {
       console.error('ngAfterViewInit getUserMedia', error);
     });
+  }
+
+  doStoreAndBindLocalMediaStream(mediaStream: MediaStream) {
+    this.localMediaStream = mediaStream;
+    this.doListenToTracksEvents(mediaStream, "LOCAL:");
+  }
+
+  doListenToTracksEvents(mediaStream: MediaStream, logPrefix: string) {
+    mediaStream.getTracks().forEach((track: MediaStreamTrack) => {
+      track.onmute = (event) => {
+        console.log(logPrefix + "onmute", mediaStream, track, event)
+        if (this.localStream && (this.localStream.getMediaStream() === mediaStream)) {
+          this.localStream.notifyTracksStatusesChanged();
+        }
+      }
+      track.onunmute = (event) => {
+        console.log(logPrefix + "onunmute", mediaStream, track, event)
+        if (this.localStream && (this.localStream.getMediaStream() === mediaStream)) {
+          this.localStream.notifyTracksStatusesChanged();
+        }
+      }
+      track.onended = (event) => {
+        console.log(logPrefix + "onended", mediaStream, track, event)
+      }
+    })
   }
 
   ngOnDestroy(): void {
@@ -293,7 +339,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (!this.mediaStreamsByParticipantAndStream.has(participant)) {
       this.mediaStreamsByParticipantAndStream.set(participant, new Map());
     }
-    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream, [topic, mediaStream]);
+    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream, { topic: topic, mediaStream: mediaStream, remoteAudioEnabled: true });
   }
 
   private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {
@@ -331,10 +377,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       video: { width: { exact: 1280 }, height: { exact: 720 } }
     })
       .then(mediaStream => {
-        const oldStream = this.localMediaStream;
-        this.localMediaStream = mediaStream;
-        if (this.localStream && oldStream) {
-          this.localStream.replaceMediaStream(oldStream, mediaStream);
+        //const oldStream = this.localMediaStream;
+        this.doStoreAndBindLocalMediaStream(mediaStream);
+        if (this.localStream) {
+          this.localStream.replaceMediaStream(mediaStream);
         }
       })
       .catch(error => {

@@ -15,15 +15,24 @@
     <!-- rowHeight="100px" -->
 
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size===0">
-        <div class="col">
-            <p>MediaStream id : {{localMediaStream?.id}}</p> -->
+        <div class="col-6">
+            <p>MediaStream id : {{localMediaStream?.id}}</p>
             <app-stream-video [mediaStream]="localMediaStream"></app-stream-video>
+            <!-- <div class="content-overlay">
+                    <button mat-mini-fab aria-label="audio" (click)="toggleAudio()">
+                        <mat-icon>{{localMediaStreamAudioEnabled ? 'mic':'mic_off'}}</mat-icon>
+                    </button>
+                    <button mat-mini-fab aria-label="video" (click)="toggleVideo()">
+                        <mat-icon>{{localMediaStreamVideoEnabled ? 'videocam':'videocam_off'}}</mat-icon>
+                    </button>
+                </div> -->
         </div>
     </div>
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size>0">
-        <div class="col">
+        <div class="col position-relative">
             <mat-grid-list cols="1">
-                <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" [colspan]="1" [rowspan]="1">
+                <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" [colspan]="1"
+                    [rowspan]="1">
                     <mat-card class="example-card">
                         <mat-card-header>
                             <!-- <div mat-card-avatar class="example-header-image"></div> -->
@@ -34,19 +43,19 @@
                             </div>
                         </mat-card-header>
                         <!-- <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu"> -->
-                        <mat-card-content class="container">
+                        <mat-card-content class="content">
                             <div *ngFor="let kvj of kv.value | keyvalue" class="col">
-                                <app-stream-video [mediaStream]="kvj.value[1]" [fullscreen]="true"></app-stream-video>
+                                <app-stream-video [mediaStream]="kvj.value.mediaStream" [fullscreen]="true"
+                                    [remoteAudioEnabled]="kvj.value.remoteAudioEnabled"></app-stream-video>
                                 <div *ngIf="moderator">
-                                    <button *ngIf="!mediaRecorder" (click)="record(kvj.value[1])">Record</button>
+                                    <button *ngIf="!mediaRecorder" (click)="record(kvj.value.mediaStream)">Record</button>
                                     <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
                                 </div>
                             </div>
                             <div class="row" *ngIf="localMediaStream">
-                                <div class="col over">
+                                <div class="col">
                                     <!-- <p>LocalStream id : {{localStream?.id}}</p>
                                 <p>MediaStream id : {{localMediaStream?.id}}</p> -->
-                                    <app-stream-video [mediaStream]="localMediaStream"></app-stream-video>
                                 </div>
                             </div>
                         </mat-card-content>
@@ -57,6 +66,10 @@
                     </mat-card>
                 </mat-grid-tile>
             </mat-grid-list>
+            <app-stream-video class="position-absolute top-0 start-0" [mediaStream]="localMediaStream"
+                (onAudioEnabled)="localStream?.notifyTracksStatusesChanged()"
+                (onVideoEnabled)="localStream?.notifyTracksStatusesChanged()">
+            </app-stream-video>
         </div>
     </div>
 
@@ -87,7 +100,8 @@
             <!-- <mat-hint align="start"><strong>Don't disclose personal info</strong> </mat-hint> -->
             <mat-hint align="end">{{message.value.length}} / 256</mat-hint>
         </mat-form-field>
-        <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid" title="Send Message">Send&nbsp;<em class="bi bi-chat-left"></em></button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid"
+            title="Send Message">Send&nbsp;<em class="bi bi-chat-left"></em></button>
     </form>
 
     <div class="row" *ngIf="isWaitingForAcceptance">
@@ -110,7 +124,7 @@
         <p>({{remoteParticipants.size}}) remoteParticipants</p>
         <div *ngFor="let participant of remoteParticipants" class="col">
             <p>{{participant.user.id}}</p>
-            <button *ngIf="moderator"(click)="eject(participant)">Eject</button>
+            <button *ngIf="moderator" (click)="eject(participant)">Eject</button>
         </div>
     </div>
 

@@ -9,6 +9,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
@@ -62,7 +63,8 @@ initializeMyWebrtc({
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule, ReactiveFormsModule,
-    MatInputModule, MatButtonModule, MatProgressSpinnerModule, MatGridListModule, MatCardModule
+    MatInputModule, MatButtonModule, MatIconModule,
+    MatProgressSpinnerModule, MatGridListModule, MatCardModule
   ],
   providers: [WINDOW_PROVIDERS, AuthGuard],
   bootstrap: [AppComponent]

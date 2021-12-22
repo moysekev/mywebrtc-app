@@ -31,6 +31,7 @@ export class LoginComponent implements OnInit {
         console.log(`Anonmymous user`, userCredential.user?.toJSON());
         //this.router.navigate(['/home']);
         this.router.navigateByUrl(this.returnUrl || '/home');
+        
       })
       .catch((error) => {
         console.error(`firebase.signInAnonymously ${error.code}:${error.message}`)
@@ -57,6 +58,7 @@ export class LoginComponent implements OnInit {
         user.toJSON()).then(() => {
           console.log(`User<${user.uid}> written in db`);
         });
+      console.log('navigateByUrl', this.returnUrl);
       this.router.navigateByUrl(this.returnUrl || '/home');
     }
     ).catch((error) => {
