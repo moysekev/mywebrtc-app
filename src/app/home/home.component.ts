@@ -25,6 +25,7 @@ interface RemoteStreamData {
   topic: any
   mediaStream: MediaStream
   remoteAudioEnabled: boolean
+  remoteVideoEnabled: boolean
 }
 
 @Component({
@@ -154,15 +155,19 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
             this.doListenToTracksEvents(mediaStream, "PEER:");
           }
-          stream.onTracksStatusesChanged = (tracks: any) => {
-            console.log('onTracksStatusesChanged', stream, tracks);
-
+          stream.onTracksStatusChanged = (tracks: any) => {
+            console.log('onTracksStatusChanged', stream, tracks);
+            const remoteData = this.mediaStreamsByParticipantAndStream.get(participant)?.get(stream);
             for (let key in tracks) {
               let track = tracks[key];
               if (track.kind === 'audio') {
-                const remoteData = this.mediaStreamsByParticipantAndStream.get(participant)?.get(stream);
                 if (remoteData) {
                   remoteData.remoteAudioEnabled = track.enabled;
+                }
+              }
+              if (track.kind === 'video') {
+                if (remoteData) {
+                  remoteData.remoteVideoEnabled = track.enabled;
                 }
               }
             }
@@ -239,13 +244,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       track.onmute = (event) => {
         console.log(logPrefix + "onmute", mediaStream, track, event)
         if (this.localStream && (this.localStream.getMediaStream() === mediaStream)) {
-          this.localStream.notifyTracksStatusesChanged();
+          this.localStream.notifyTracksStatusChanged();
         }
       }
       track.onunmute = (event) => {
         console.log(logPrefix + "onunmute", mediaStream, track, event)
         if (this.localStream && (this.localStream.getMediaStream() === mediaStream)) {
-          this.localStream.notifyTracksStatusesChanged();
+          this.localStream.notifyTracksStatusChanged();
         }
       }
       track.onended = (event) => {
@@ -339,7 +344,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (!this.mediaStreamsByParticipantAndStream.has(participant)) {
       this.mediaStreamsByParticipantAndStream.set(participant, new Map());
     }
-    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream, { topic: topic, mediaStream: mediaStream, remoteAudioEnabled: true });
+    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream,
+      { topic: topic, mediaStream: mediaStream, remoteAudioEnabled: true, remoteVideoEnabled: true });
   }
 
   private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {

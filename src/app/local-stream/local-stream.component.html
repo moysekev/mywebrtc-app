@@ -1,0 +1,11 @@
+<div class="position-relative">
+    <app-stream-video [mediaStream]="_mediaStream"></app-stream-video>
+    <div class="position-absolute top-0 end-0">
+        <button mat-mini-fab color="primary" aria-label="audio" (click)="toggleAudio()">
+            <mat-icon>{{audioEnabled ? 'mic':'mic_off'}}</mat-icon>
+        </button>
+        <button mat-mini-fab color="primary" aria-label="video" (click)="toggleVideo()">
+            <mat-icon>{{videoEnabled ? 'videocam':'videocam_off'}}</mat-icon>
+        </button>
+    </div>
+</div>

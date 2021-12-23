@@ -1,0 +1,20 @@
+<div class="position-relative">
+    <app-stream-video [mediaStream]="_mediaStream" [fullscreen]="_fullscreen" [mirror]="_mirror"></app-stream-video>
+    <div class="position-absolute top-0 end-0">
+        <button *ngIf="_remoteAudioEnabled!==undefined" mat-mini-fab color="primary" aria-label="remote-audio"
+            title="remote audio">
+            <mat-icon>{{_remoteAudioEnabled ? 'mic':'mic_off'}}</mat-icon>
+        </button>
+        <button *ngIf="_remoteVideoEnabled!==undefined" mat-mini-fab color="primary" aria-label="remote-video"
+            title="remote video">
+            <mat-icon>{{_remoteVideoEnabled ? 'videocam':'videocam_off'}}
+            </mat-icon>
+        </button>
+        <button mat-mini-fab aria-label="audio" (click)="toggleAudio()">
+            <mat-icon>{{audioEnabled ? 'volume_up':'volume_off'}}</mat-icon>
+        </button>
+        <button mat-mini-fab aria-label="video" (click)="toggleVideo()">
+            <mat-icon>{{videoEnabled ? 'videocam':'videocam_off'}}</mat-icon>
+        </button>
+    </div>
+</div>

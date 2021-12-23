@@ -41,6 +41,9 @@ const app = firebase.initializeApp(firebaseOptions);
 console.log('initializeApp returned', app);
 
 import { initialize as initializeMyWebrtc } from 'mywebrtc/dist';
+import { ByeComponent } from './bye/bye.component';
+import { LocalStreamComponent } from './local-stream/local-stream.component';
+import { RemoteStreamComponent } from './remote-stream/remote-stream.component';
 
 initializeMyWebrtc({
   iceServers: [
@@ -56,7 +59,7 @@ initializeMyWebrtc({
 
 @NgModule({
   declarations: [
-    AppComponent, StreamVideoComponent, HomeComponent, LoginComponent
+    AppComponent, StreamVideoComponent, HomeComponent, LoginComponent, ByeComponent, LocalStreamComponent, RemoteStreamComponent
   ],
   imports: [
     BrowserModule,

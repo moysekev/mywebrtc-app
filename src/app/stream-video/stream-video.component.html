@@ -1,13 +1,2 @@
-<div class="position-relative">
-    <video [ngClass]="{'mirror': _mirror, 'fullscreen': _fullscreen}" #video autoplay playsinline>
-    </video>
-    <div class="position-absolute top-0 end-0">
-        <mat-icon *ngIf="_remoteAudioEnabled!==undefined">{{_remoteAudioEnabled ? 'mic':'mic_off'}}</mat-icon>
-        <button mat-mini-fab aria-label="audio" (click)="toggleAudio()">
-            <mat-icon>{{audioEnabled ? 'mic':'mic_off'}}</mat-icon>
-        </button>
-        <button mat-mini-fab aria-label="video" (click)="toggleVideo()">
-            <mat-icon>{{videoEnabled ? 'videocam':'videocam_off'}}</mat-icon>
-        </button>
-    </div>
-</div>
+<video [ngClass]="{'mirror': _mirror, 'fullscreen': _fullscreen}" #video autoplay playsinline>
+</video>

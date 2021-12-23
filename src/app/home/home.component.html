@@ -17,7 +17,8 @@
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size===0">
         <div class="col-6">
             <p>MediaStream id : {{localMediaStream?.id}}</p>
-            <app-stream-video [mediaStream]="localMediaStream"></app-stream-video>
+            <app-local-stream [mediaStream]="localMediaStream"
+                (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
             <!-- <div class="content-overlay">
                     <button mat-mini-fab aria-label="audio" (click)="toggleAudio()">
                         <mat-icon>{{localMediaStreamAudioEnabled ? 'mic':'mic_off'}}</mat-icon>
@@ -45,10 +46,12 @@
                         <!-- <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu"> -->
                         <mat-card-content class="content">
                             <div *ngFor="let kvj of kv.value | keyvalue" class="col">
-                                <app-stream-video [mediaStream]="kvj.value.mediaStream" [fullscreen]="true"
-                                    [remoteAudioEnabled]="kvj.value.remoteAudioEnabled"></app-stream-video>
+                                <app-remote-stream [remoteStream]="kvj.key" [mediaStream]="kvj.value.mediaStream"
+                                    [fullscreen]="true" [remoteAudioEnabled]="kvj.value.remoteAudioEnabled"
+                                    [remoteVideoEnabled]="kvj.value.remoteVideoEnabled"></app-remote-stream>
                                 <div *ngIf="moderator">
-                                    <button *ngIf="!mediaRecorder" (click)="record(kvj.value.mediaStream)">Record</button>
+                                    <button *ngIf="!mediaRecorder"
+                                        (click)="record(kvj.value.mediaStream)">Record</button>
                                     <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
                                 </div>
                             </div>
@@ -66,10 +69,9 @@
                     </mat-card>
                 </mat-grid-tile>
             </mat-grid-list>
-            <app-stream-video class="position-absolute top-0 start-0" [mediaStream]="localMediaStream"
-                (onAudioEnabled)="localStream?.notifyTracksStatusesChanged()"
-                (onVideoEnabled)="localStream?.notifyTracksStatusesChanged()">
-            </app-stream-video>
+            <app-local-stream class="position-absolute top-0 start-0" [mediaStream]="localMediaStream"
+                (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()">
+            </app-local-stream>
         </div>
     </div>
 
@@ -149,5 +151,7 @@
 
     <a #dwnld style="display:none;" href></a>
     <span>mediaStreamsByParticipantAndStream.size = {{mediaStreamsByParticipantAndStream.size}}</span>
+
+    <p><a routerLink="/bye">Bye</a></p>
 
 </div>
