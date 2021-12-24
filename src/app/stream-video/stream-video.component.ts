@@ -12,10 +12,7 @@ export class StreamVideoComponent implements AfterViewInit {
   _mediaStream: MediaStream | undefined;
   @Input() set mediaStream(mediaStream: MediaStream | undefined) {
     this._mediaStream = mediaStream;
-    if (this.videoRef) {
-      this.videoRef.nativeElement.srcObject = this._mediaStream;
-      this.videoRef.nativeElement.muted = false;
-    }
+    this.doAttach();
   }
 
   _mirror = false;
@@ -31,10 +28,17 @@ export class StreamVideoComponent implements AfterViewInit {
   ngAfterViewInit() {
     console.log('StreamVideoComponent::ngAfterViewInit', this.videoRef);
     // remote stream is attached to DOM during ngAfterViewInit because @ViewChild is not bound before this stage
+    this.doAttach();
+  }
+
+  doAttach() {
     if (this.videoRef) {
       this.videoRef.nativeElement.srcObject = this._mediaStream;
       this.videoRef.nativeElement.muted = false;
+      // this.videoRef.nativeElement.height = '150';
+      // this.videoRef.nativeElement.width = '200';
     }
   }
+
 
 }

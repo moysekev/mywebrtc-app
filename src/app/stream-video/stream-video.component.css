@@ -10,7 +10,8 @@
     width: 100vw;
 }
 
-video {
-    min-height: 100%;
-    min-width: 100%;
-}
+/* video {
+    height: 100%;
+    width: 100%;
+} */
+

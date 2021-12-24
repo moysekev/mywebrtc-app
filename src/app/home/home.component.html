@@ -1,4 +1,4 @@
-<div>
+<div class="container-fluid">
     <!-- <div *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" class="row">
         <p>User {{kv.key.id}} </p>
         <span>kv.value.size = {{kv.value.size}}</span>
@@ -13,6 +13,22 @@
     </div> -->
 
     <!-- rowHeight="100px" -->
+
+
+    <mat-grid-list class="vw-100 vh-100" cols="1" rowHeight="fit" gutterSize="2px">
+        <mat-grid-tile>
+            <app-local-stream class="h-100" [mediaStream]="localMediaStream"
+                (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
+        </mat-grid-tile>
+        <mat-grid-tile>
+            <app-local-stream [mediaStream]="localMediaStream"
+                (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
+        </mat-grid-tile>
+        <mat-grid-tile>
+            <app-local-stream [mediaStream]="localMediaStream"
+                (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
+        </mat-grid-tile>
+    </mat-grid-list>
 
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size===0">
         <div class="col-6">
@@ -31,10 +47,10 @@
     </div>
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size>0">
         <div class="col position-relative">
-            <mat-grid-list cols="1">
+            <mat-grid-list class="vw-100 vh-100" cols="1">
                 <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" [colspan]="1"
                     [rowspan]="1">
-                    <mat-card class="example-card">
+                    <mat-card class="w-100 h-100">
                         <mat-card-header>
                             <!-- <div mat-card-avatar class="example-header-image"></div> -->
                             <mat-card-title>{{kv.key.user.userData?.nickname}}</mat-card-title>
@@ -43,11 +59,10 @@
                                 <button (click)="eject(kv.key)">Eject</button>
                             </div>
                         </mat-card-header>
-                        <!-- <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu"> -->
                         <mat-card-content class="content">
                             <div *ngFor="let kvj of kv.value | keyvalue" class="col">
                                 <app-remote-stream [remoteStream]="kvj.key" [mediaStream]="kvj.value.mediaStream"
-                                    [fullscreen]="true" [remoteAudioEnabled]="kvj.value.remoteAudioEnabled"
+                                    [fullscreen]="false" [remoteAudioEnabled]="kvj.value.remoteAudioEnabled"
                                     [remoteVideoEnabled]="kvj.value.remoteVideoEnabled"></app-remote-stream>
                                 <div *ngIf="moderator">
                                     <button *ngIf="!mediaRecorder"
