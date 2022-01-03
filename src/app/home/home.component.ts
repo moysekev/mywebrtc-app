@@ -5,12 +5,12 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from '../auth.service';
 import { WINDOW } from '../windows-provider';
 
-import firebase from 'firebase';
-// import firebase from 'firebase/app';
-// import 'firebase/database';
-// import 'firebase/auth';
+//import firebase from 'firebase';
+import firebase from 'firebase/app';
+import 'firebase/database';
+import 'firebase/auth';
 
-import { Conversation, ConversationOptions, LocalStream, RemoteStream, User, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
+import { Conversation, ConversationOptions, LocalStream, RemoteStream, TrackInfo, User, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
 
 interface UserData {
   nickname: string
@@ -49,6 +49,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   get messageFc(): FormControl {
     return this.messageFormGroup.get('message') as FormControl;
   }
+
+  readonly year: number = new Date().getFullYear();
 
   localStream: LocalStream | undefined;
   localMediaStream: MediaStream | undefined;
@@ -120,7 +122,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       moderated: this.moderated
     }
 
-    Conversation.getOrCreate(conversationId, options).then((conversation: Conversation) => {
+    Conversation.getOrCreate(conversationId, firebase.database().ref('/').child("Conversations"), options).then((conversation: Conversation) => {
       console.log('conversation', conversation);
       this.conversation = conversation;
 
@@ -155,11 +157,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
             this.doListenToTracksEvents(mediaStream, "PEER:");
           }
-          stream.onTracksStatusChanged = (tracks: any) => {
-            console.log('onTracksStatusChanged', stream, tracks);
+          stream.onTracksStatusChanged = (tracksById: Map<string, TrackInfo>) => {
+            console.log('onTracksStatusChanged', stream, tracksById);
             const remoteData = this.mediaStreamsByParticipantAndStream.get(participant)?.get(stream);
-            for (let key in tracks) {
-              let track = tracks[key];
+            tracksById.forEach((track) => {
               if (track.kind === 'audio') {
                 if (remoteData) {
                   remoteData.remoteAudioEnabled = track.enabled;
@@ -170,8 +171,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
                   remoteData.remoteVideoEnabled = track.enabled;
                 }
               }
-            }
-
+            });
           }
           // And then, subscribe
           this.localParticipant?.subscribe(stream);
@@ -219,6 +219,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       });
 
       this.url = `${baseUrl}/${conversation.id}`;
+    }).catch(error => {
+      console.error("getOrcreate failed", error);
     });
   }
 
