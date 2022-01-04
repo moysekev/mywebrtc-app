@@ -408,6 +408,30 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       });
   }
 
+  static doAppyAudioConstraint(mediaStream: MediaStream, constraintName: string, value: ConstrainULong | ConstrainDouble | ConstrainBoolean | ConstrainDOMString) {
+    mediaStream.getAudioTracks().forEach(track => {
+      const settings: MediaTrackSettings = track.getSettings();
+      const constrainsts: any = settings;
+      constrainsts[constraintName] = value;
+      track.applyConstraints(constrainsts);
+    });
+  }
+
+  goHDByApplyConstraints() {
+    //MediaStreamTrack shoud have method :
+    //Promise<undefined> applyConstraints(optional MediaTrackConstraints constraints = {});
+    if (this.localMediaStream) {
+      this.localMediaStream.getVideoTracks().forEach(track => {
+        const constraints: MediaTrackConstraints = { width: { exact: 1280 }, height: { exact: 720 } }
+        track.applyConstraints(constraints).then(() => {
+          console.log("applyConstraints done", this.localMediaStream, constraints);
+        }).catch(error => {
+          console.error("applyConstraints error", error);
+        });
+      });
+    }
+  }
+
   mediaRecorder: MediaRecorder | undefined;
   recordedBlobs: Array<Blob> = new Array();
 
