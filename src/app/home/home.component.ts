@@ -55,6 +55,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   localStream: LocalStream | undefined;
   localMediaStream: MediaStream | undefined;
 
+  videoTrackCapabilities: MediaTrackCapabilities | undefined;
+  videoTrackSettings: MediaTrackSettings | undefined;
+
   localDisplayMediaStream: MediaStream | undefined;
 
   localParticipant: LocalParticipant | undefined;
@@ -238,6 +241,15 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   doStoreAndBindLocalMediaStream(mediaStream: MediaStream) {
     this.localMediaStream = mediaStream;
+    for (const track of mediaStream.getVideoTracks()) {
+      if (typeof track.getCapabilities === 'function') {
+        this.videoTrackCapabilities = track.getCapabilities();
+        this.videoTrackSettings = track.getSettings();
+      } else {
+        console.log("getCapabilities not supported by browser")
+      }
+      break;
+    }
     this.doListenToTracksEvents(mediaStream, "LOCAL:");
   }
 

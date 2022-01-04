@@ -26,7 +26,7 @@
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size===0">
         <div class="col-6">
             <p>MediaStream id : {{localMediaStream?.id}}</p>
-            <app-local-stream [mediaStream]="localMediaStream"
+            <app-local-stream class="h-100" [mediaStream]="localMediaStream"
                 (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
             <!-- <div class="content-overlay">
                     <button mat-mini-fab aria-label="audio" (click)="toggleAudio()">
@@ -38,6 +38,14 @@
                 </div> -->
         </div>
     </div>
+
+    <div>Capabilities:
+        {{videoTrackCapabilities | json}}
+    </div>
+    <div>Settings:
+        {{videoTrackSettings | json}}
+    </div>
+
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size>0">
         <div class="col position-relative">
             <mat-grid-list class="vw-100 vh-100" cols="1">
