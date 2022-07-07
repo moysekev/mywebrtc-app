@@ -39,11 +39,21 @@
         </div>
     </div>
 
-    <div>Capabilities:
-        {{videoTrackCapabilities | json}}
-    </div>
-    <div>Settings:
-        {{videoTrackSettings | json}}
+    <div class="row mt-5">
+        <div class="col mt-5">
+            <div>Capabilities:
+                <p>audio: {{audioTrackCapabilities | json}}</p>
+                <p>video: {{videoTrackCapabilities | json}}</p>
+            </div>
+            <div>Constraints:
+                <p>audio: {{audioTrackConstraints | json}}</p>
+                <p>video: {{videoTrackConstraints | json}}</p>
+            </div>
+            <div>Settings:
+                <p>audio: {{audioTrackSettings | json}}</p>
+                <p>video: {{videoTrackSettings | json}}</p>
+            </div>
+        </div>
     </div>
 
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size>0">
@@ -65,6 +75,13 @@
                                 <app-remote-stream [remoteStream]="kvj.key" [mediaStream]="kvj.value.mediaStream"
                                     [fullscreen]="false" [remoteAudioEnabled]="kvj.value.remoteAudioEnabled"
                                     [remoteVideoEnabled]="kvj.value.remoteVideoEnabled"></app-remote-stream>
+                                <div>
+                                    <button (click)="getMediaStreamConstraints(kvj.key)">getConstraints</button>
+                                </div>
+                                <div>
+                                    <button (click)="applyMediaStreamConstraintsHD(kvj.key)">HD</button>
+                                    <button (click)="applyMediaStreamConstraintsVGA(kvj.key)">VGA</button>
+                                </div>
                                 <div *ngIf="moderator">
                                     <button *ngIf="!mediaRecorder"
                                         (click)="record(kvj.value.mediaStream)">Record</button>
@@ -158,6 +175,17 @@
     <div>
         <button (click)="goHDByApplyConstraints()">goHDByApplyConstraints</button>
     </div>
+    <div>
+        <button (click)="frameRate24()">frameRate24</button>
+    </div>
+    <div>
+        <button (click)="doAppyAudioConstraint('echoCancellation',!echoCancellation);echoCancellation=!echoCancellation">doAppyAudioConstraint </button>
+    </div>
+
+    <div>
+        <button (click)="blur()">blur </button>
+    </div>
+    
     <div>
         <button (click)="signOut()">signOut</button>
     </div>

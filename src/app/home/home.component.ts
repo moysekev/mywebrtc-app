@@ -12,6 +12,8 @@ import 'firebase/auth';
 
 import { Conversation, ConversationOptions, LocalStream, RemoteStream, TrackInfo, User, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
 
+import { MediaStreamHelper } from '../MediaStreamHelper'
+
 interface UserData {
   nickname: string
   isModerator: boolean
@@ -55,7 +57,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   localStream: LocalStream | undefined;
   localMediaStream: MediaStream | undefined;
 
+  audioTrackCapabilities: MediaTrackCapabilities | undefined;
+  audioTrackConstraints: MediaTrackConstraints | undefined;
+  audioTrackSettings: MediaTrackSettings | undefined;
   videoTrackCapabilities: MediaTrackCapabilities | undefined;
+  videoTrackConstraints: MediaTrackConstraints | undefined;
   videoTrackSettings: MediaTrackSettings | undefined;
 
   localDisplayMediaStream: MediaStream | undefined;
@@ -208,7 +214,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.localParticipantData = userData;
 
       this.isWaitingForAcceptance = true;
-      conversation.addParticipant(userData, { moderator: this.moderator }).then((participant) => {
+      conversation.addParticipant(userData, { moderator: this.moderator }).then((participant: LocalParticipant) => {
         console.log('addParticipant succeed', participant);
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
@@ -216,13 +222,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           console.log('onUserDataUpdate', this.localParticipant, userData);
           this.localParticipantData = userData;
         };
-      }).catch(error => {
+      }).catch((error: any) => {
         console.log('addParticipant failed', error);
         this.isWaitingForAcceptance = false;
       });
 
       this.url = `${baseUrl}/${conversation.id}`;
-    }).catch(error => {
+    }).catch((error: any) => {
       console.error("getOrcreate failed", error);
     });
   }
@@ -241,16 +247,51 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   doStoreAndBindLocalMediaStream(mediaStream: MediaStream) {
     this.localMediaStream = mediaStream;
-    for (const track of mediaStream.getVideoTracks()) {
-      if (typeof track.getCapabilities === 'function') {
-        this.videoTrackCapabilities = track.getCapabilities();
-        this.videoTrackSettings = track.getSettings();
-      } else {
-        console.log("getCapabilities not supported by browser")
-      }
-      break;
-    }
+    this.doGatherCapConstSettings();
     this.doListenToTracksEvents(mediaStream, "LOCAL:");
+  }
+
+  echoCancellation = true;
+
+  doGatherCapConstSettings() {
+    if (this.localMediaStream) {
+      for (const track of this.localMediaStream.getAudioTracks()) {
+        if (typeof track.getCapabilities === 'function') {
+          this.audioTrackCapabilities = track.getCapabilities();
+        } else {
+          console.log("getCapabilities not supported by browser")
+        }
+        if (typeof track.getConstraints === 'function') {
+          this.audioTrackConstraints = track.getConstraints();
+        } else {
+          console.log("getConstraints not supported by browser")
+        }
+        if (typeof track.getSettings === 'function') {
+          this.audioTrackSettings = track.getSettings();
+        } else {
+          console.log("getSettings not supported by browser")
+        }
+        break;
+      }
+      for (const track of this.localMediaStream.getVideoTracks()) {
+        if (typeof track.getCapabilities === 'function') {
+          this.videoTrackCapabilities = track.getCapabilities();
+        } else {
+          console.log("getCapabilities not supported by browser")
+        }
+        if (typeof track.getConstraints === 'function') {
+          this.videoTrackConstraints = track.getConstraints();
+        } else {
+          console.log("getConstraints not supported by browser")
+        }
+        if (typeof track.getSettings === 'function') {
+          this.videoTrackSettings = track.getSettings();
+        } else {
+          console.log("getSettings not supported by browser")
+        }
+        break;
+      }
+    }
   }
 
   doListenToTracksEvents(mediaStream: MediaStream, logPrefix: string) {
@@ -271,6 +312,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         console.log(logPrefix + "onended", mediaStream, track, event)
       }
     })
+  }
+
+  blurredMediaStream: MediaStream | undefined;
+
+  blur() {
+    if (this.localStream && this.localMediaStream) {
+      this.blurredMediaStream = this.localMediaStream;
+      this.localMediaStream = MediaStreamHelper.blur(this.localMediaStream)
+      this.localStream.replaceMediaStream(this.localMediaStream);
+    }
+
   }
 
   ngOnDestroy(): void {
@@ -408,13 +460,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  static doAppyAudioConstraint(mediaStream: MediaStream, constraintName: string, value: ConstrainULong | ConstrainDouble | ConstrainBoolean | ConstrainDOMString) {
-    mediaStream.getAudioTracks().forEach(track => {
-      const settings: MediaTrackSettings = track.getSettings();
-      const constrainsts: any = settings;
-      constrainsts[constraintName] = value;
-      track.applyConstraints(constrainsts);
-    });
+  doAppyAudioConstraint(constraintName: string, value: ConstrainULong | ConstrainDouble | ConstrainBoolean | ConstrainDOMString) {
+    if (this.localMediaStream) {
+      this.localMediaStream.getAudioTracks().forEach(track => {
+        const settings: MediaTrackSettings = track.getSettings();
+        const constrainsts: any = settings;
+        constrainsts[constraintName] = value;
+        track.applyConstraints(constrainsts).then(() => {
+          this.doGatherCapConstSettings();
+        });
+      });
+    }
   }
 
   goHDByApplyConstraints() {
@@ -425,11 +481,52 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         const constraints: MediaTrackConstraints = { width: { exact: 1280 }, height: { exact: 720 } }
         track.applyConstraints(constraints).then(() => {
           console.log("applyConstraints done", this.localMediaStream, constraints);
+          this.doGatherCapConstSettings();
         }).catch(error => {
           console.error("applyConstraints error", error);
         });
       });
     }
+  }
+
+  frameRate24() {
+    //MediaStreamTrack shoud have method :
+    //Promise<undefined> applyConstraints(optional MediaTrackConstraints constraints = {});
+    if (this.localMediaStream) {
+      this.localMediaStream.getVideoTracks().forEach(track => {
+        const constraints: MediaTrackConstraints = { frameRate: 24 }
+        track.applyConstraints(constraints).then(() => {
+          console.log("applyConstraints done", this.localMediaStream, constraints);
+          this.doGatherCapConstSettings();
+        }).catch(error => {
+          console.error("applyConstraints error", error);
+        });
+      });
+    }
+  }
+
+  getMediaStreamConstraints(remoteStream: RemoteStream) {
+    remoteStream.getMediaStreamConstraints().
+      then((constraints: MediaStreamConstraints) => { console.log('getMediaStreamConstraints', constraints) })
+      .catch((error: any) => { console.error('getMediaStreamConstraints', error) });
+  }
+
+  applyMediaStreamConstraintsHD(remoteStream: RemoteStream) {
+    //const constraints: MediaStreamConstraints | any = ;
+    //const constraints: MediaStreamConstraints = { video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ zoom: 4 }] } };
+    //, advanced: [{ zoom: 2 }]
+    remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ torch: true }] } })
+      .then(() => { console.log('applyMediaStreamConstraints done') })
+      .catch((error: any) => { console.error('applyMediaStreamConstraints', error) });
+  }
+
+  applyMediaStreamConstraintsVGA(remoteStream: RemoteStream) {
+    //const constraints: MediaStreamConstraints | any = ;
+    //{ video: { zoom: 4 } }
+    //{ video: { height: { exact: 480 }, width: { exact: 640 } } }
+    remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 480 }, width: { exact: 640 }, advanced: [{ torch: false }] } })
+      .then(() => { console.log('applyMediaStreamConstraints done') })
+      .catch((error: any) => { console.error('applyMediaStreamConstraints', error) });
   }
 
   mediaRecorder: MediaRecorder | undefined;
