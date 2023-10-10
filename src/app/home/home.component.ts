@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, OnDestroy, HostListener, ViewChild, ElementRef, Inject } from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from "@angular/router";
 
 import { AuthService } from '../auth.service';
@@ -48,8 +48,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   messageFormGroup = this.fb.group({
     message: this.fb.control('', [Validators.required])
   });
-  get messageFc(): FormControl {
-    return this.messageFormGroup.get('message') as FormControl;
+  get messageFc(): UntypedFormControl {
+    return this.messageFormGroup.get('message') as UntypedFormControl;
   }
 
   readonly year: number = new Date().getFullYear();
@@ -102,7 +102,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) {
   }
 

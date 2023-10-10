@@ -103,6 +103,5 @@
                 }
             }
         }
-    },
-    "defaultProject": "mywebrtc-app"
+    }
 }
