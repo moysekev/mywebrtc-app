@@ -25,7 +25,7 @@
 
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size===0">
         <div class="col-6">
-            <p>MediaStream id : {{localMediaStream?.id}}</p>
+            <p>MediaStream id : {{localMediaStream.id}}</p>
             <app-local-stream class="h-100" [mediaStream]="localMediaStream"
                 (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
             <!-- <div class="content-overlay">
@@ -57,11 +57,14 @@
     </div>
 
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size>0">
-        <div class="col position-relative">
-            <mat-grid-list class="vw-100 vh-100" cols="1">
+        <!-- position-relative -->
+        <div class="col-xs-12 col-sm-6 col-md-8 col-lg-10">
+            <!-- class="vw-100 vh-100" -->
+            <mat-grid-list cols="1">
                 <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" [colspan]="1"
                     [rowspan]="1">
-                    <mat-card class="w-100 h-100">
+                    <!-- class="w-100 h-100" -->
+                    <mat-card>
                         <mat-card-header>
                             <!-- <div mat-card-avatar class="example-header-image"></div> -->
                             <mat-card-title>{{kv.key.user.userData?.nickname}}</mat-card-title>
@@ -102,7 +105,11 @@
                     </mat-card>
                 </mat-grid-tile>
             </mat-grid-list>
-            <app-local-stream class="position-absolute top-0 start-0" [mediaStream]="localMediaStream"
+
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
+            <!-- class="position-absolute top-0 start-0" -->
+            <app-local-stream [mediaStream]="localMediaStream"
                 (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()">
             </app-local-stream>
         </div>
@@ -179,13 +186,15 @@
         <button (click)="frameRate24()">frameRate24</button>
     </div>
     <div>
-        <button (click)="doAppyAudioConstraint('echoCancellation',!echoCancellation);echoCancellation=!echoCancellation">doAppyAudioConstraint </button>
+        <button
+            (click)="doAppyAudioConstraint('echoCancellation',!echoCancellation);echoCancellation=!echoCancellation">doAppyAudioConstraint
+        </button>
     </div>
 
     <div>
         <button (click)="blur()">blur </button>
     </div>
-    
+
     <div>
         <button (click)="signOut()">signOut</button>
     </div>

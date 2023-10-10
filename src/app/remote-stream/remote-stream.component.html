@@ -1,6 +1,6 @@
-<div class="position-relative">
+<div class="position-relative d-inline-flex">
     <app-stream-video [mediaStream]="_mediaStream" [fullscreen]="_fullscreen" [mirror]="_mirror"></app-stream-video>
-    <div class="position-absolute top-0 end-0">
+    <div class="position-absolute top-0 mt-1 end-0 me-1">
         <button *ngIf="_remoteAudioEnabled!==undefined" mat-mini-fab color="primary" aria-label="remote-audio"
             title="remote audio">
             <mat-icon>{{_remoteAudioEnabled ? 'mic':'mic_off'}}</mat-icon>

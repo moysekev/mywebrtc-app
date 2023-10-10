@@ -81,7 +81,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   @ViewChild("dwnld") aRef: ElementRef | undefined;
 
   // Note : beforeUnloadHandler alone does not work on android Chrome
-  // seems it requires unloadHandler to do the same to work evrywhere...
+  // seems it requires unloadHandler to do the same to work everywhere...
   // https://stackoverflow.com/questions/35779372/window-onbeforeunload-doesnt-trigger-on-android-chrome-alt-solution
   //
   @HostListener('window:unload', ['$event'])
@@ -91,7 +91,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   // Use BEFORE unload to hangup (works for Firefox at least)
-  // This is usefull if user closes the tab, or refreshes the page
+  // This is useful if user closes the tab, or refreshes the page
   @HostListener('window:beforeunload', ['$event'])
   beforeUnloadHandler(event: any) {
     console.log("beforeUnloadHandler", event);
@@ -198,7 +198,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           this.doRemoveRemoteParticipant(participant);
         }
         else if (participant instanceof LocalParticipant) {
-          console.log('localuser removed ?!', participant);
+          console.log('local user removed ?!', participant);
         }
       };
 
@@ -240,6 +240,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }).then((mediaStream: MediaStream) => {
       console.log('ngAfterViewInit getUserMedia', mediaStream);
       this.doStoreAndBindLocalMediaStream(mediaStream);
+      this.publish()
     }).catch((error) => {
       console.error('ngAfterViewInit getUserMedia', error);
     });

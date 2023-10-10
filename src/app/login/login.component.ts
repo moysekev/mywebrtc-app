@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, UrlSerializer } from '@angular/router';
 
 //import firebase from 'firebase';
@@ -14,7 +14,7 @@ import { USERS } from '../consts';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements AfterViewInit, OnInit {
 
   returnUrl: string | undefined;
 
@@ -25,15 +25,18 @@ export class LoginComponent implements OnInit {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'];
   }
 
+  ngAfterViewInit() {
+    // For tests sake !
+    this.anonymousSignIn()
+  }
+
   anonymousSignIn() {
     firebase.auth().signInAnonymously()
       .then((userCredential: firebase.auth.UserCredential) => {
-        console.log(`Anonmymous user`, userCredential.user?.toJSON());
+        console.log(`Anonymous user`, userCredential.user?.toJSON());
         //this.router.navigate(['/home']);
         this.router.navigateByUrl(this.returnUrl || '/home');
-        
-      })
-      .catch((error) => {
+      }).catch((error) => {
         console.error(`firebase.signInAnonymously ${error.code}:${error.message}`)
       });
   }

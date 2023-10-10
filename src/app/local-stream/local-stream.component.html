@@ -1,6 +1,7 @@
-<div class="position-relative h-100">
-    <app-stream-video class="h-100" [mediaStream]="_mediaStream"></app-stream-video>
-    <div class="position-absolute top-0 end-0">
+<div class="position-relative d-inline-flex">
+    <!-- class="h-100" -->
+    <app-stream-video [mediaStream]="_mediaStream"></app-stream-video>
+    <div class="position-absolute top-0 mt-1 end-0 me-1">
         <button mat-mini-fab color="primary" aria-label="audio" (click)="toggleAudio()">
             <mat-icon>{{audioEnabled ? 'mic':'mic_off'}}</mat-icon>
         </button>
