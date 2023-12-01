@@ -64,7 +64,7 @@
                 <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" [colspan]="1"
                     [rowspan]="1">
                     <!-- class="w-100 h-100" -->
-                    <mat-card>
+                    <mat-card appearance="outlined">
                         <mat-card-header>
                             <!-- <div mat-card-avatar class="example-header-image"></div> -->
                             <mat-card-title>{{kv.key.user.userData?.nickname}}</mat-card-title>
