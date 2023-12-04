@@ -11,35 +11,23 @@
             </div>
         </div>
     </div> -->
-
     <!-- rowHeight="100px" -->
-
-    {{year}}
-
+    <!-- {{year}} -->
     <!-- <mat-grid-list class="vw-100 vh-100" cols="1" rowHeight="fit" gutterSize="2px">
         <mat-grid-tile>
             <app-local-stream class="h-100" [mediaStream]="localMediaStream"
                 (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
         </mat-grid-tile>
     </mat-grid-list> -->
-
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size===0">
         <div class="col-6">
             <p>MediaStream id : {{localMediaStream.id}}</p>
             <app-local-stream class="h-100" [mediaStream]="localMediaStream"
                 (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
-            <!-- <div class="content-overlay">
-                    <button mat-mini-fab aria-label="audio" (click)="toggleAudio()">
-                        <mat-icon>{{localMediaStreamAudioEnabled ? 'mic':'mic_off'}}</mat-icon>
-                    </button>
-                    <button mat-mini-fab aria-label="video" (click)="toggleVideo()">
-                        <mat-icon>{{localMediaStreamVideoEnabled ? 'videocam':'videocam_off'}}</mat-icon>
-                    </button>
-                </div> -->
         </div>
     </div>
 
-    <div class="row mt-5">
+    <!-- <div class="row mt-5">
         <div class="col mt-5">
             <div>Capabilities:
                 <p>audio: {{audioTrackCapabilities | json}}</p>
@@ -54,7 +42,7 @@
                 <p>video: {{videoTrackSettings | json}}</p>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size>0">
         <!-- position-relative -->

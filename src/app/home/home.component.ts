@@ -52,7 +52,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     return this.messageFormGroup.get('message') as UntypedFormControl;
   }
 
-  readonly year: number = new Date().getFullYear();
+  // readonly year: number = new Date().getFullYear();
 
   localStream: LocalStream | undefined;
   localMediaStream: MediaStream | undefined;

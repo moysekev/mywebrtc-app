@@ -15,6 +15,11 @@ export class StreamVideoComponent implements AfterViewInit {
     this.doAttach();
   }
 
+  _muted = false;
+  @Input() set muted(muted: boolean) {
+    this._muted = muted;
+  }
+
   _mirror = false;
   @Input() set mirror(mirror: boolean) {
     this._mirror = mirror;
@@ -34,7 +39,7 @@ export class StreamVideoComponent implements AfterViewInit {
   doAttach() {
     if (this.videoRef) {
       this.videoRef.nativeElement.srcObject = this._mediaStream;
-      this.videoRef.nativeElement.muted = false;
+      this.videoRef.nativeElement.muted = this._muted;
       // this.videoRef.nativeElement.height = '150';
       // this.videoRef.nativeElement.width = '200';
     }
