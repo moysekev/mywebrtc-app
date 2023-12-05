@@ -392,7 +392,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   publish() {
     if (this.localMediaStream && this.localParticipant) {
-      this.localStream = this.localParticipant.publish(this.localMediaStream, 'webcam');
+      this.localStream = this.localParticipant.publish(this.localMediaStream, { topic: 'webcam' });
       // Or
       //this.localParticipant.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
     } else {
@@ -432,7 +432,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.localDisplayMediaStream = mediaStream;
       console.log('ngAfterViewInit getDisplayMedia', mediaStream)
       if (this.localParticipant) {
-        this.localParticipant.publish(mediaStream, 'screen');
+        this.localParticipant.publish(mediaStream, { topic: 'screen' });
       }
     }).catch((error: any) => {
       console.error("shareScreen", error);
