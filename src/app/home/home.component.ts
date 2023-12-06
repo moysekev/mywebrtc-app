@@ -23,11 +23,9 @@ interface Message {
   text: string
 }
 
-interface RemoteStreamData {
-  topic: any
+type RemoteStreamData = {
+  topic: any,
   mediaStream: MediaStream
-  remoteAudioEnabled: boolean
-  remoteVideoEnabled: boolean
 }
 
 @Component({
@@ -164,24 +162,24 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           stream.onMediaStreamReady = (mediaStream: MediaStream) => {
             console.log('onMediaStreamReady', stream, mediaStream);
             this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
-            this.doListenToTracksEvents(mediaStream, "PEER:");
+            //this.doListenToTracksEvents(mediaStream, "PEER:");
           }
-          stream.onTracksStatusChanged = (tracksById: Map<string, TrackInfo>) => {
-            console.log('onTracksStatusChanged', stream, tracksById);
-            const remoteData = this.mediaStreamsByParticipantAndStream.get(participant)?.get(stream);
-            tracksById.forEach((track) => {
-              if (track.kind === 'audio') {
-                if (remoteData) {
-                  remoteData.remoteAudioEnabled = track.enabled;
-                }
-              }
-              if (track.kind === 'video') {
-                if (remoteData) {
-                  remoteData.remoteVideoEnabled = track.enabled;
-                }
-              }
-            });
-          }
+          // stream.onTracksStatusChanged = (tracksById: Map<string, TrackInfo>) => {
+          //   console.log('onTracksStatusChanged', stream, tracksById);
+          //   const remoteData = this.mediaStreamsByParticipantAndStream.get(participant)?.get(stream);
+          //   tracksById.forEach((track) => {
+          //     if (track.kind === 'audio') {
+          //       if (remoteData) {
+          //         remoteData.remoteAudioEnabled = track.enabled;
+          //       }
+          //     }
+          //     if (track.kind === 'video') {
+          //       if (remoteData) {
+          //         remoteData.remoteVideoEnabled = track.enabled;
+          //       }
+          //     }
+          //   });
+          // }
           // And then, subscribe
           this.localParticipant?.subscribe(stream);
           // or 
@@ -249,7 +247,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   doStoreAndBindLocalMediaStream(mediaStream: MediaStream) {
     this.localMediaStream = mediaStream;
     this.doGatherCapConstSettings();
-    this.doListenToTracksEvents(mediaStream, "LOCAL:");
+    //this.doListenToTracksEvents(mediaStream, "LOCAL:");
   }
 
   echoCancellation = true;
@@ -295,25 +293,25 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  doListenToTracksEvents(mediaStream: MediaStream, logPrefix: string) {
-    mediaStream.getTracks().forEach((track: MediaStreamTrack) => {
-      track.onmute = (event) => {
-        console.log(logPrefix + "onmute", mediaStream, track, event)
-        if (this.localStream && (this.localStream.getMediaStream() === mediaStream)) {
-          this.localStream.notifyTracksStatusChanged();
-        }
-      }
-      track.onunmute = (event) => {
-        console.log(logPrefix + "onunmute", mediaStream, track, event)
-        if (this.localStream && (this.localStream.getMediaStream() === mediaStream)) {
-          this.localStream.notifyTracksStatusChanged();
-        }
-      }
-      track.onended = (event) => {
-        console.log(logPrefix + "onended", mediaStream, track, event)
-      }
-    })
-  }
+  // doListenToTracksEvents(mediaStream: MediaStream, logPrefix: string) {
+  //   mediaStream.getTracks().forEach((track: MediaStreamTrack) => {
+  //     track.onmute = (event) => {
+  //       console.log(logPrefix + "onmute", mediaStream, track, event)
+  //       if (this.localStream && (this.localStream.getMediaStream() === mediaStream)) {
+  //         this.localStream.notifyTracksStatusChanged();
+  //       }
+  //     }
+  //     track.onunmute = (event) => {
+  //       console.log(logPrefix + "onunmute", mediaStream, track, event)
+  //       if (this.localStream && (this.localStream.getMediaStream() === mediaStream)) {
+  //         this.localStream.notifyTracksStatusChanged();
+  //       }
+  //     }
+  //     track.onended = (event) => {
+  //       console.log(logPrefix + "onended", mediaStream, track, event)
+  //     }
+  //   })
+  // }
 
   blurredMediaStream: MediaStream | undefined;
 
@@ -392,7 +390,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   publish() {
     if (this.localMediaStream && this.localParticipant) {
-      this.localStream = this.localParticipant.publish(this.localMediaStream, { topic: 'webcam' });
+      this.localStream = this.localParticipant.publish(this.localMediaStream, { topic: 'webcam', audio: true });
       // Or
       //this.localParticipant.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
     } else {
@@ -412,7 +410,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.mediaStreamsByParticipantAndStream.set(participant, new Map());
     }
     this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream,
-      { topic: topic, mediaStream: mediaStream, remoteAudioEnabled: true, remoteVideoEnabled: true });
+      { topic: topic, mediaStream: mediaStream });
   }
 
   private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {

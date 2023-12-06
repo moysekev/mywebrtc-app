@@ -22,8 +22,8 @@
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size===0">
         <div class="col-6">
             <p>MediaStream id : {{localMediaStream.id}}</p>
-            <app-local-stream class="h-100" [mediaStream]="localMediaStream"
-                (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
+            <!-- (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()" -->
+            <app-local-stream class="h-100" [mediaStream]="localMediaStream"></app-local-stream>
         </div>
     </div>
 
@@ -64,8 +64,7 @@
                         <mat-card-content class="content">
                             <div *ngFor="let kvj of kv.value | keyvalue" class="col">
                                 <app-remote-stream [remoteStream]="kvj.key" [mediaStream]="kvj.value.mediaStream"
-                                    [fullscreen]="false" [remoteAudioEnabled]="kvj.value.remoteAudioEnabled"
-                                    [remoteVideoEnabled]="kvj.value.remoteVideoEnabled"></app-remote-stream>
+                                    [fullscreen]="false"></app-remote-stream>
                                 <div>
                                     <button (click)="getMediaStreamConstraints(kvj.key)">getConstraints</button>
                                 </div>
@@ -97,8 +96,8 @@
         </div>
         <div class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
             <!-- class="position-absolute top-0 start-0" -->
-            <app-local-stream [mediaStream]="localMediaStream"
-                (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()">
+            <!-- (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()" -->
+            <app-local-stream [mediaStream]="localMediaStream">
             </app-local-stream>
         </div>
     </div>

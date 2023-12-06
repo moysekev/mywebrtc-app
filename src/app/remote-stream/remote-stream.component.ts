@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 import { RemoteStream } from 'mywebrtc/dist';
 
@@ -11,10 +11,20 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
 })
 export class RemoteStreamComponent implements OnInit {
 
+  remoteAudioEnabled = false;
+  remoteVideoEnabled = false;
+
   _remoteStream: RemoteStream | undefined;
   @Input() set remoteStream(remoteStream: RemoteStream | undefined) {
     this._remoteStream = remoteStream;
+    if (this._remoteStream) {
+      this.remoteAudioEnabled = this._remoteStream.getSubscribeOptions().audio;
+      this.remoteVideoEnabled = this._remoteStream.getSubscribeOptions().video;
+    }
   }
+
+  audioEnabled = false;
+  videoEnabled = false;
 
   _mediaStream: MediaStream | undefined;
   @Input() set mediaStream(mediaStream: MediaStream | undefined) {
@@ -35,17 +45,14 @@ export class RemoteStreamComponent implements OnInit {
     this._fullscreen = fullscreen;
   }
 
-  _remoteAudioEnabled: boolean | undefined;
-  @Input() set remoteAudioEnabled(remoteAudioEnabled: boolean | undefined) {
-    this._remoteAudioEnabled = remoteAudioEnabled;
-  }
-  _remoteVideoEnabled: boolean | undefined;
-  @Input() set remoteVideoEnabled(remoteVideoEnabled: boolean | undefined) {
-    this._remoteVideoEnabled = remoteVideoEnabled;
-  }
-
-  audioEnabled = false;
-  videoEnabled = false;
+  // _remoteAudioEnabled: boolean | undefined;
+  // @Input() set remoteAudioEnabled(remoteAudioEnabled: boolean | undefined) {
+  //   this._remoteAudioEnabled = remoteAudioEnabled;
+  // }
+  // _remoteVideoEnabled: boolean | undefined;
+  // @Input() set remoteVideoEnabled(remoteVideoEnabled: boolean | undefined) {
+  //   this._remoteVideoEnabled = remoteVideoEnabled;
+  // }
 
   constructor() { }
 
@@ -59,16 +66,19 @@ export class RemoteStreamComponent implements OnInit {
       } else {
         MediaStreamHelper.enableAudio(this._mediaStream);
       }
+      this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
     }
+  }
+
+  toggleRemoteAudio() {
     if (this._remoteStream) {
-      const subscribeOptions = this._remoteStream.getSubscribeOptions();
-      if (this.audioEnabled) {
-        this._remoteStream.updateSubscribeOptions({ audio: false, video: subscribeOptions.video })
+      if (this._remoteStream.getSubscribeOptions().audio) {
+        this._remoteStream.updateSubscribeOptions({ audio: false })
       } else {
-        this._remoteStream.updateSubscribeOptions({ audio: true, video: subscribeOptions.video })
+        this._remoteStream.updateSubscribeOptions({ audio: true })
       }
+      this.remoteAudioEnabled = this._remoteStream.getSubscribeOptions().audio;
     }
-    this.audioEnabled = !this.audioEnabled;
   }
 
   toggleVideo() {
@@ -78,16 +88,19 @@ export class RemoteStreamComponent implements OnInit {
       } else {
         MediaStreamHelper.enableVideo(this._mediaStream);
       }
+      this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
     }
+  }
+
+  toggleRemoteVideo() {
     if (this._remoteStream) {
-      const subscribeOptions = this._remoteStream.getSubscribeOptions();
-      if (this.videoEnabled) {
-        this._remoteStream.updateSubscribeOptions({ audio: subscribeOptions.audio, video: false })
+      if (this._remoteStream.getSubscribeOptions().video) {
+        this._remoteStream.updateSubscribeOptions({ video: false })
       } else {
-        this._remoteStream.updateSubscribeOptions({ audio: subscribeOptions.audio, video: true })
+        this._remoteStream.updateSubscribeOptions({ video: true })
       }
+      this.remoteVideoEnabled = this._remoteStream.getSubscribeOptions().video;
     }
-    this.videoEnabled = !this.videoEnabled;
   }
 
 }

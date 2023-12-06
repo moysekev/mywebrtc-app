@@ -4,6 +4,12 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
+import { setLogLevel } from './logLevel';
+import { setLogLevel as setMyWebRtcLogLevel } from 'mywebrtc/dist';
+
+setLogLevel('debug')
+setMyWebRtcLogLevel('debug')
+
 if (environment.production) {
   enableProdMode();
 }

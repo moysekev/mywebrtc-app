@@ -1,4 +1,4 @@
-import { Component, Input, Output, ViewChild, ElementRef, AfterViewInit, EventEmitter } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-stream-video',
@@ -11,6 +11,9 @@ export class StreamVideoComponent implements AfterViewInit {
 
   _mediaStream: MediaStream | undefined;
   @Input() set mediaStream(mediaStream: MediaStream | undefined) {
+    if (globalThis.logLevel.isDebugEnabled) {
+      console.debug(`${this.constructor.name}|set mediaStream`, mediaStream);
+    }
     this._mediaStream = mediaStream;
     this.doAttach();
   }
@@ -31,7 +34,9 @@ export class StreamVideoComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    console.log('StreamVideoComponent::ngAfterViewInit', this.videoRef);
+    if (globalThis.logLevel.isDebugEnabled) {
+      console.debug(`${this.constructor.name}|ngAfterViewInit`, this.videoRef);
+    }
     // remote stream is attached to DOM during ngAfterViewInit because @ViewChild is not bound before this stage
     this.doAttach();
   }
