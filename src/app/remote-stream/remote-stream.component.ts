@@ -25,34 +25,35 @@ export class RemoteStreamComponent implements OnInit {
       this.remoteVideoEnabled = this._remoteStream.getSubscribeOptions().video;
 
       this.mediaStream = this._remoteStream.getMediaStream();
-      // this._mediaStream = this._remoteStream.getMediaStream();
-      // this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
-      // this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
 
-      this._remoteStream.onMediaStreamReady = (mediaStream: MediaStream) => {
-        //console.log('onMediaStreamReady', stream, mediaStream);
+      this._remoteStream.onMediaStream = (mediaStream: MediaStream) => {
         if (globalThis.logLevel.isDebugEnabled) {
           console.debug(`${this.constructor.name}|onMediaStreamReady`, mediaStream);
         }
         this.mediaStream = mediaStream;
-        // this._mediaStream = mediaStream;
-        // this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
-        // this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
-      }
-
-      this._remoteStream.onTracksStatusChanged = () => {
-        this.audioEnabled = this._mediaStream ? MediaStreamHelper.isAudioEnabled(this._mediaStream) : false;
-        this.videoEnabled = this._mediaStream ? MediaStreamHelper.isVideoEnabled(this._mediaStream) : false;
       }
     }
+  }
+
+  private doUpdateStates() {
+    this.audioEnabled = this._mediaStream ? MediaStreamHelper.isAudioEnabled(this._mediaStream) : false;
+    this.videoEnabled = this._mediaStream ? MediaStreamHelper.isVideoEnabled(this._mediaStream) : false;
   }
 
   _mediaStream: MediaStream | undefined;
   set mediaStream(mediaStream: MediaStream | undefined) {
     this._mediaStream = mediaStream;
+    this.doUpdateStates()
     if (this._mediaStream) {
-      this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
-      this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
+      this._mediaStream.onaddtrack = (event: MediaStreamTrackEvent) => {
+        console.log(`${RemoteStream.name}|MediaStream::onaddtrack`, event);
+        this.doUpdateStates()
+      };
+
+      this._mediaStream.onremovetrack = (event: MediaStreamTrackEvent) => {
+        console.log(`${RemoteStream.name}|MediaStream::onremovetrack`, event);
+        this.doUpdateStates()
+      };
     }
   }
 
@@ -65,15 +66,6 @@ export class RemoteStreamComponent implements OnInit {
   @Input() set fullscreen(fullscreen: boolean) {
     this._fullscreen = fullscreen;
   }
-
-  // _remoteAudioEnabled: boolean | undefined;
-  // @Input() set remoteAudioEnabled(remoteAudioEnabled: boolean | undefined) {
-  //   this._remoteAudioEnabled = remoteAudioEnabled;
-  // }
-  // _remoteVideoEnabled: boolean | undefined;
-  // @Input() set remoteVideoEnabled(remoteVideoEnabled: boolean | undefined) {
-  //   this._remoteVideoEnabled = remoteVideoEnabled;
-  // }
 
   constructor() { }
 

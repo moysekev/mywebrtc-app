@@ -18,8 +18,6 @@ export class LocalStreamComponent implements OnInit {
     }
   }
 
-  // @Output() onTracksStatusChanged = new EventEmitter<void>();
-
   audioEnabled = false;
   videoEnabled = false;
 
@@ -37,7 +35,6 @@ export class LocalStreamComponent implements OnInit {
         MediaStreamHelper.enableAudio(this._mediaStream);
         this.audioEnabled = true;
       }
-      // this.onTracksStatusChanged.emit();
     }
   }
 
@@ -50,7 +47,6 @@ export class LocalStreamComponent implements OnInit {
         MediaStreamHelper.enableVideo(this._mediaStream);
         this.videoEnabled = true;
       }
-      // this.onTracksStatusChanged.emit();
     }
   }
 
