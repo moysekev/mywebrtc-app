@@ -12,7 +12,7 @@ export class StreamVideoComponent implements AfterViewInit {
   _mediaStream: MediaStream | undefined;
   @Input() set mediaStream(mediaStream: MediaStream | undefined) {
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|set mediaStream`, mediaStream);
+      console.debug(`${this.constructor.name}|set mediaStream`, mediaStream, mediaStream?.getTracks().length);
     }
     this._mediaStream = mediaStream;
     this.doAttach();

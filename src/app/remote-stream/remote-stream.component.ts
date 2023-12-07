@@ -11,6 +11,9 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
 })
 export class RemoteStreamComponent implements OnInit {
 
+  audioEnabled = false;
+  videoEnabled = false;
+
   remoteAudioEnabled = false;
   remoteVideoEnabled = false;
 
@@ -20,14 +23,32 @@ export class RemoteStreamComponent implements OnInit {
     if (this._remoteStream) {
       this.remoteAudioEnabled = this._remoteStream.getSubscribeOptions().audio;
       this.remoteVideoEnabled = this._remoteStream.getSubscribeOptions().video;
+
+      this.mediaStream = this._remoteStream.getMediaStream();
+      // this._mediaStream = this._remoteStream.getMediaStream();
+      // this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
+      // this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
+
+      this._remoteStream.onMediaStreamReady = (mediaStream: MediaStream) => {
+        //console.log('onMediaStreamReady', stream, mediaStream);
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${this.constructor.name}|onMediaStreamReady`, mediaStream);
+        }
+        this.mediaStream = mediaStream;
+        // this._mediaStream = mediaStream;
+        // this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
+        // this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
+      }
+
+      this._remoteStream.onTracksStatusChanged = () => {
+        this.audioEnabled = this._mediaStream ? MediaStreamHelper.isAudioEnabled(this._mediaStream) : false;
+        this.videoEnabled = this._mediaStream ? MediaStreamHelper.isVideoEnabled(this._mediaStream) : false;
+      }
     }
   }
 
-  audioEnabled = false;
-  videoEnabled = false;
-
   _mediaStream: MediaStream | undefined;
-  @Input() set mediaStream(mediaStream: MediaStream | undefined) {
+  set mediaStream(mediaStream: MediaStream | undefined) {
     this._mediaStream = mediaStream;
     if (this._mediaStream) {
       this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
@@ -57,6 +78,7 @@ export class RemoteStreamComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+
   }
 
   toggleAudio() {

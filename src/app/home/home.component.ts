@@ -25,7 +25,7 @@ interface Message {
 
 type RemoteStreamData = {
   topic: any,
-  mediaStream: MediaStream
+  // mediaStream: MediaStream
 }
 
 @Component({
@@ -159,11 +159,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         participant.onStreamPublished = (stream: RemoteStream, topic: any) => {
           console.log('onStreamPublished', participant, stream, topic);
           // First, set listener(s)
-          stream.onMediaStreamReady = (mediaStream: MediaStream) => {
-            console.log('onMediaStreamReady', stream, mediaStream);
-            this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
-            //this.doListenToTracksEvents(mediaStream, "PEER:");
-          }
+          this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic);
+          // stream.onMediaStreamReady = (mediaStream: MediaStream) => {
+          //   console.log('onMediaStreamReady', stream, mediaStream);
+          //   this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
+          //   //this.doListenToTracksEvents(mediaStream, "PEER:");
+          // }
           // stream.onTracksStatusChanged = (tracksById: Map<string, TrackInfo>) => {
           //   console.log('onTracksStatusChanged', stream, tracksById);
           //   const remoteData = this.mediaStreamsByParticipantAndStream.get(participant)?.get(stream);
@@ -405,13 +406,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private doStoreMediaStreamByParticipantAndStream(participant: RemoteParticipant, stream: RemoteStream, topic: string, mediaStream: MediaStream) {
+
+  private doStoreMediaStreamByParticipantAndStream(participant: RemoteParticipant, stream: RemoteStream, topic: string) {
     if (!this.mediaStreamsByParticipantAndStream.has(participant)) {
       this.mediaStreamsByParticipantAndStream.set(participant, new Map());
     }
-    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream,
-      { topic: topic, mediaStream: mediaStream });
+    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream, { topic: topic });
   }
+
+  // private doStoreMediaStreamByParticipantAndStream(participant: RemoteParticipant, stream: RemoteStream, topic: string, mediaStream: MediaStream) {
+  //   if (!this.mediaStreamsByParticipantAndStream.has(participant)) {
+  //     this.mediaStreamsByParticipantAndStream.set(participant, new Map());
+  //   }
+  //   this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream,
+  //     { topic: topic, mediaStream: mediaStream });
+  // }
 
   private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {
     const deleted = this.mediaStreamsByParticipantAndStream.get(participant)?.delete(stream);

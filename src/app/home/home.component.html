@@ -63,7 +63,8 @@
                         </mat-card-header>
                         <mat-card-content class="content">
                             <div *ngFor="let kvj of kv.value | keyvalue" class="col">
-                                <app-remote-stream [remoteStream]="kvj.key" [mediaStream]="kvj.value.mediaStream"
+                                <!-- [mediaStream]="kvj.value.mediaStream" -->
+                                <app-remote-stream [remoteStream]="kvj.key" 
                                     [fullscreen]="false"></app-remote-stream>
                                 <div>
                                     <button (click)="getMediaStreamConstraints(kvj.key)">getConstraints</button>
@@ -72,11 +73,11 @@
                                     <button (click)="applyMediaStreamConstraintsHD(kvj.key)">HD</button>
                                     <button (click)="applyMediaStreamConstraintsVGA(kvj.key)">VGA</button>
                                 </div>
-                                <div *ngIf="moderator">
+                                <!-- <div *ngIf="moderator">
                                     <button *ngIf="!mediaRecorder"
                                         (click)="record(kvj.value.mediaStream)">Record</button>
                                     <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
-                                </div>
+                                </div> -->
                             </div>
                             <div class="row" *ngIf="localMediaStream">
                                 <div class="col">
