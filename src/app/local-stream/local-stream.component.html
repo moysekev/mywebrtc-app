@@ -2,6 +2,15 @@
     <!-- class="h-100" -->
     <app-stream-video [mediaStream]="_mediaStream" [muted]="true"></app-stream-video>
     <div class="position-absolute top-0 mt-1 end-0 me-1">
+        <button mat-mini-fab color="accent" aria-label="publish-audio" title="publish audio"
+            (click)="togglePublishAudio()">
+            <mat-icon>{{publishAudio ? 'mic':'mic_off'}}</mat-icon>
+        </button>
+        <button mat-mini-fab color="accent" aria-label="publish-video" title="publish video"
+            (click)="togglePublishVideo()">
+            <mat-icon>{{publishVideo ? 'videocam':'videocam_off'}}
+            </mat-icon>
+        </button>
         <button mat-mini-fab color="primary" aria-label="audio" (click)="toggleAudio()">
             <mat-icon>{{audioEnabled ? 'mic':'mic_off'}}</mat-icon>
         </button>

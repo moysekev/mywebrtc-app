@@ -14,15 +14,15 @@ export class RemoteStreamComponent implements OnInit {
   audioEnabled = false;
   videoEnabled = false;
 
-  remoteAudioEnabled = false;
-  remoteVideoEnabled = false;
+  subscribeAudio = false;
+  subscribeVideo = false;
 
   _remoteStream: RemoteStream | undefined;
   @Input() set remoteStream(remoteStream: RemoteStream | undefined) {
     this._remoteStream = remoteStream;
     if (this._remoteStream) {
-      this.remoteAudioEnabled = this._remoteStream.getSubscribeOptions().audio;
-      this.remoteVideoEnabled = this._remoteStream.getSubscribeOptions().video;
+      this.subscribeAudio = this._remoteStream.getSubscribeOptions().audio;
+      this.subscribeVideo = this._remoteStream.getSubscribeOptions().video;
 
       this.mediaStream = this._remoteStream.getMediaStream();
 
@@ -84,14 +84,14 @@ export class RemoteStreamComponent implements OnInit {
     }
   }
 
-  toggleRemoteAudio() {
+  toggleSubscribeAudio() {
     if (this._remoteStream) {
       if (this._remoteStream.getSubscribeOptions().audio) {
         this._remoteStream.updateSubscribeOptions({ audio: false })
       } else {
         this._remoteStream.updateSubscribeOptions({ audio: true })
       }
-      this.remoteAudioEnabled = this._remoteStream.getSubscribeOptions().audio;
+      this.subscribeAudio = this._remoteStream.getSubscribeOptions().audio;
     }
   }
 
@@ -106,14 +106,14 @@ export class RemoteStreamComponent implements OnInit {
     }
   }
 
-  toggleRemoteVideo() {
+  toggleSubscribeVideo() {
     if (this._remoteStream) {
       if (this._remoteStream.getSubscribeOptions().video) {
         this._remoteStream.updateSubscribeOptions({ video: false })
       } else {
         this._remoteStream.updateSubscribeOptions({ video: true })
       }
-      this.remoteVideoEnabled = this._remoteStream.getSubscribeOptions().video;
+      this.subscribeVideo = this._remoteStream.getSubscribeOptions().video;
     }
   }
 

@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, HostListener, ViewChild, ElementRef, Inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from "@angular/router";
 
@@ -7,12 +7,12 @@ import { WINDOW } from '../windows-provider';
 
 //import firebase from 'firebase';
 import firebase from 'firebase/app';
-import 'firebase/database';
 import 'firebase/auth';
+import 'firebase/database';
 
-import { Conversation, ConversationOptions, LocalStream, RemoteStream, TrackInfo, User, LocalParticipant, RemoteParticipant, SubscribeOptions } from 'mywebrtc/dist';
+import { Conversation, ConversationOptions, LocalParticipant, LocalStream, RemoteParticipant, RemoteStream, User } from 'mywebrtc/dist';
 
-import { MediaStreamHelper } from '../MediaStreamHelper'
+import { MediaStreamHelper } from '../MediaStreamHelper';
 
 interface UserData {
   nickname: string

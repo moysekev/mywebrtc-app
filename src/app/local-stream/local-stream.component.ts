@@ -1,5 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
+import { LocalStream } from 'mywebrtc/dist';
+
 import { MediaStreamHelper } from '../MediaStreamHelper';
 
 @Component({
@@ -9,8 +11,20 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
 })
 export class LocalStreamComponent implements OnInit {
 
+  _localStream: LocalStream | undefined;
+  @Input() set localStream(localStream: LocalStream | undefined) {
+    this._localStream = localStream;
+    if (this._localStream) {
+      this.publishAudio = this._localStream.getPublishOptions().audio;
+      this.publishVideo = this._localStream.getPublishOptions().video;
+
+      this.mediaStream = this._localStream.getMediaStream();
+    }
+  }
+
   _mediaStream: MediaStream | undefined;
-  @Input() set mediaStream(mediaStream: MediaStream | undefined) {
+  // @Input() 
+  set mediaStream(mediaStream: MediaStream | undefined) {
     this._mediaStream = mediaStream;
     if (this._mediaStream) {
       this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
@@ -20,6 +34,9 @@ export class LocalStreamComponent implements OnInit {
 
   audioEnabled = false;
   videoEnabled = false;
+
+  publishAudio = false;
+  publishVideo = false
 
   constructor() { }
 
@@ -47,6 +64,28 @@ export class LocalStreamComponent implements OnInit {
         MediaStreamHelper.enableVideo(this._mediaStream);
         this.videoEnabled = true;
       }
+    }
+  }
+
+  togglePublishAudio() {
+    if (this._localStream) {
+      if (this._localStream.getPublishOptions().audio) {
+        this._localStream.updatePublishOptions({ audio: false })
+      } else {
+        this._localStream.updatePublishOptions({ audio: true })
+      }
+      this.publishAudio = this._localStream.getPublishOptions().audio;
+    }
+  }
+
+  togglePublishVideo() {
+    if (this._localStream) {
+      if (this._localStream.getPublishOptions().video) {
+        this._localStream.updatePublishOptions({ video: false })
+      } else {
+        this._localStream.updatePublishOptions({ video: true })
+      }
+      this.publishVideo = this._localStream.getPublishOptions().video;
     }
   }
 
