@@ -5,7 +5,6 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from '../auth.service';
 import { WINDOW } from '../windows-provider';
 
-//import firebase from 'firebase';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
@@ -228,7 +227,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
       this.url = `${baseUrl}/${conversation.id}`;
     }).catch((error: any) => {
-      console.error("getOrcreate failed", error);
+      console.error("getOrCreate failed", error);
     });
   }
 

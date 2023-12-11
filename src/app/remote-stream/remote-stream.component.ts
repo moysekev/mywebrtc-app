@@ -58,12 +58,16 @@ export class RemoteStreamComponent implements OnInit {
     this.doUpdateStates()
     if (this._mediaStream) {
       this._mediaStream.onaddtrack = (event: MediaStreamTrackEvent) => {
-        console.log(`${RemoteStream.name}|MediaStream::onaddtrack`, event);
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${RemoteStream.name}|MediaStream::onaddtrack`, event);
+        }
         this.doUpdateStates()
       };
 
       this._mediaStream.onremovetrack = (event: MediaStreamTrackEvent) => {
-        console.log(`${RemoteStream.name}|MediaStream::onremovetrack`, event);
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${RemoteStream.name}|MediaStream::onremovetrack`, event);
+        }
         this.doUpdateStates()
       };
     }
@@ -96,14 +100,6 @@ export class RemoteStreamComponent implements OnInit {
   }
 
   togglePublishVideo() {
-    // if (this._remoteStream) {
-    //   if (this._remoteStream.getPublishOptions().video) {
-    //     this._remoteStream.updatePublishOptions({ video: false })
-    //   } else {
-    //     this._remoteStream.updatePublishOptions({ video: true })
-    //   }
-    //   this.publishVideo = this._remoteStream.getPublishOptions().video;
-    // }
     if (this._remoteStream) {
       const stream = this._remoteStream;
       stream.updatePublishOptions({ video: !stream.getPublishOptions().video })

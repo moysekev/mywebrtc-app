@@ -1,11 +1,11 @@
 <div class="position-relative d-inline-flex">
     <app-stream-video [mediaStream]="_mediaStream" [fullscreen]="_fullscreen" [mirror]="_mirror"></app-stream-video>
     <div class="position-absolute top-0 mt-1 end-0 me-1">
-        <button mat-mini-fab color="accent" aria-label="publish-audio" title="publish audio"
+        <button mat-mini-fab color="primary" aria-label="publish-audio" title="publish audio"
             (click)="togglePublishAudio()">
             <mat-icon>{{publishAudio ? 'mic':'mic_off'}}</mat-icon>
         </button>
-        <button mat-mini-fab color="accent" aria-label="publish-video" title="publish video"
+        <button mat-mini-fab color="primary" aria-label="publish-video" title="publish video"
             (click)="togglePublishVideo()">
             <mat-icon>{{publishVideo ? 'videocam':'videocam_off'}}
             </mat-icon>
@@ -19,10 +19,10 @@
             <mat-icon>{{subscribeVideo ? 'videocam':'videocam_off'}}
             </mat-icon>
         </button>
-        <button mat-mini-fab aria-label="audio" color="primary" (click)="toggleAudio()">
+        <button mat-mini-fab aria-label="audio" color="basic" (click)="toggleAudio()">
             <mat-icon>{{audioEnabled ? 'mic':'mic_off'}}</mat-icon>
         </button>
-        <button mat-mini-fab aria-label="video" color="primary" (click)="toggleVideo()">
+        <button mat-mini-fab aria-label="video" color="basic" (click)="toggleVideo()">
             <mat-icon>{{videoEnabled ? 'videocam':'videocam_off'}}</mat-icon>
         </button>
     </div>

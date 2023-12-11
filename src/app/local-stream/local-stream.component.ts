@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 import { LocalStream } from 'mywebrtc/dist';
 
@@ -10,6 +10,12 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
   styleUrls: ['./local-stream.component.css']
 })
 export class LocalStreamComponent implements OnInit {
+
+  publishAudio = false;
+  publishVideo = false;
+
+  audioEnabled = false;
+  videoEnabled = false;
 
   _localStream: LocalStream | undefined;
   @Input() set localStream(localStream: LocalStream | undefined) {
@@ -36,12 +42,6 @@ export class LocalStreamComponent implements OnInit {
       this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
     }
   }
-
-  audioEnabled = false;
-  videoEnabled = false;
-
-  publishAudio = false;
-  publishVideo = false
 
   constructor() { }
 
