@@ -11,16 +11,28 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
 })
 export class RemoteStreamComponent implements OnInit {
 
-  audioEnabled = false;
-  videoEnabled = false;
+  publishAudio = false;
+  publishVideo = false;
 
   subscribeAudio = false;
   subscribeVideo = false;
+
+  audioEnabled = false;
+  videoEnabled = false;
 
   _remoteStream: RemoteStream | undefined;
   @Input() set remoteStream(remoteStream: RemoteStream | undefined) {
     this._remoteStream = remoteStream;
     if (this._remoteStream) {
+
+      this.publishAudio = this._remoteStream.getPublishOptions().audio;
+      this.publishVideo = this._remoteStream.getPublishOptions().video;
+      const l_stream = this._remoteStream;
+      l_stream.onPublishOptionsUpdate = () => {
+        this.publishAudio = l_stream.getPublishOptions().audio;
+        this.publishVideo = l_stream.getPublishOptions().video;
+      };
+
       this.subscribeAudio = this._remoteStream.getSubscribeOptions().audio;
       this.subscribeVideo = this._remoteStream.getSubscribeOptions().video;
 
@@ -73,6 +85,48 @@ export class RemoteStreamComponent implements OnInit {
 
   }
 
+  togglePublishAudio() {
+    if (this._remoteStream) {
+      const stream = this._remoteStream;
+      stream.updatePublishOptions({ audio: !stream.getPublishOptions().audio })
+        .then(() => {
+          this.publishAudio = stream.getPublishOptions().audio;
+        })
+    }
+  }
+
+  togglePublishVideo() {
+    // if (this._remoteStream) {
+    //   if (this._remoteStream.getPublishOptions().video) {
+    //     this._remoteStream.updatePublishOptions({ video: false })
+    //   } else {
+    //     this._remoteStream.updatePublishOptions({ video: true })
+    //   }
+    //   this.publishVideo = this._remoteStream.getPublishOptions().video;
+    // }
+    if (this._remoteStream) {
+      const stream = this._remoteStream;
+      stream.updatePublishOptions({ video: !stream.getPublishOptions().video })
+        .then(() => {
+          this.publishVideo = stream.getPublishOptions().video;
+        })
+    }
+  }
+
+  toggleSubscribeAudio() {
+    if (this._remoteStream) {
+      this._remoteStream.updateSubscribeOptions({ audio: !this._remoteStream.getSubscribeOptions().audio })
+      this.subscribeAudio = this._remoteStream.getSubscribeOptions().audio;
+    }
+  }
+
+  toggleSubscribeVideo() {
+    if (this._remoteStream) {
+      this._remoteStream.updateSubscribeOptions({ video: !this._remoteStream.getSubscribeOptions().video })
+      this.subscribeVideo = this._remoteStream.getSubscribeOptions().video;
+    }
+  }
+
   toggleAudio() {
     if (this._mediaStream) {
       if (MediaStreamHelper.isAudioEnabled(this._mediaStream)) {
@@ -84,17 +138,6 @@ export class RemoteStreamComponent implements OnInit {
     }
   }
 
-  toggleSubscribeAudio() {
-    if (this._remoteStream) {
-      if (this._remoteStream.getSubscribeOptions().audio) {
-        this._remoteStream.updateSubscribeOptions({ audio: false })
-      } else {
-        this._remoteStream.updateSubscribeOptions({ audio: true })
-      }
-      this.subscribeAudio = this._remoteStream.getSubscribeOptions().audio;
-    }
-  }
-
   toggleVideo() {
     if (this._mediaStream) {
       if (MediaStreamHelper.isVideoEnabled(this._mediaStream)) {
@@ -103,17 +146,6 @@ export class RemoteStreamComponent implements OnInit {
         MediaStreamHelper.enableVideo(this._mediaStream);
       }
       this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
-    }
-  }
-
-  toggleSubscribeVideo() {
-    if (this._remoteStream) {
-      if (this._remoteStream.getSubscribeOptions().video) {
-        this._remoteStream.updateSubscribeOptions({ video: false })
-      } else {
-        this._remoteStream.updateSubscribeOptions({ video: true })
-      }
-      this.subscribeVideo = this._remoteStream.getSubscribeOptions().video;
     }
   }
 

@@ -1,6 +1,15 @@
 <div class="position-relative d-inline-flex">
     <app-stream-video [mediaStream]="_mediaStream" [fullscreen]="_fullscreen" [mirror]="_mirror"></app-stream-video>
     <div class="position-absolute top-0 mt-1 end-0 me-1">
+        <button mat-mini-fab color="accent" aria-label="publish-audio" title="publish audio"
+            (click)="togglePublishAudio()">
+            <mat-icon>{{publishAudio ? 'mic':'mic_off'}}</mat-icon>
+        </button>
+        <button mat-mini-fab color="accent" aria-label="publish-video" title="publish video"
+            (click)="togglePublishVideo()">
+            <mat-icon>{{publishVideo ? 'videocam':'videocam_off'}}
+            </mat-icon>
+        </button>
         <button mat-mini-fab color="accent" aria-label="subscribe-audio" title="subscribe audio"
             (click)="toggleSubscribeAudio()">
             <mat-icon>{{subscribeAudio ? 'mic':'mic_off'}}</mat-icon>

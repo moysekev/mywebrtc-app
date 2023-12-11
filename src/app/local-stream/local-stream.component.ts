@@ -17,6 +17,11 @@ export class LocalStreamComponent implements OnInit {
     if (this._localStream) {
       this.publishAudio = this._localStream.getPublishOptions().audio;
       this.publishVideo = this._localStream.getPublishOptions().video;
+      const l_stream = this._localStream;
+      l_stream.onPublishOptionsUpdate = () => {
+        this.publishAudio = l_stream.getPublishOptions().audio;
+        this.publishVideo = l_stream.getPublishOptions().video;
+      };
 
       this.mediaStream = this._localStream.getMediaStream();
     }
@@ -43,6 +48,26 @@ export class LocalStreamComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  togglePublishAudio() {
+    if (this._localStream) {
+      const localStream = this._localStream;
+      this._localStream.updatePublishOptions({ audio: !this._localStream.getPublishOptions().audio })
+        .then(() => {
+          this.publishAudio = localStream.getPublishOptions().audio;
+        })
+    }
+  }
+
+  togglePublishVideo() {
+    if (this._localStream) {
+      const localStream = this._localStream;
+      this._localStream.updatePublishOptions({ video: !this._localStream.getPublishOptions().video })
+        .then(() => {
+          this.publishVideo = localStream.getPublishOptions().video;
+        })
+    }
+  }
+
   toggleAudio() {
     if (this._mediaStream) {
       if (MediaStreamHelper.isAudioEnabled(this._mediaStream)) {
@@ -64,28 +89,6 @@ export class LocalStreamComponent implements OnInit {
         MediaStreamHelper.enableVideo(this._mediaStream);
         this.videoEnabled = true;
       }
-    }
-  }
-
-  togglePublishAudio() {
-    if (this._localStream) {
-      if (this._localStream.getPublishOptions().audio) {
-        this._localStream.updatePublishOptions({ audio: false })
-      } else {
-        this._localStream.updatePublishOptions({ audio: true })
-      }
-      this.publishAudio = this._localStream.getPublishOptions().audio;
-    }
-  }
-
-  togglePublishVideo() {
-    if (this._localStream) {
-      if (this._localStream.getPublishOptions().video) {
-        this._localStream.updatePublishOptions({ video: false })
-      } else {
-        this._localStream.updatePublishOptions({ video: true })
-      }
-      this.publishVideo = this._localStream.getPublishOptions().video;
     }
   }
 
