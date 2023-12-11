@@ -122,15 +122,22 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       baseUrl = `${this.window.location.href}`;
     }
 
-    console.log('conversationId', conversationId);
+    if (globalThis.logLevel.isDebugEnabled) {
+      console.debug(`${this.constructor.name}|ngOnInit baseUrl conversationId`, baseUrl, conversationId);
+    }
 
     const options: ConversationOptions = {
       moderated: this.moderated
     }
 
     Conversation.getOrCreate(conversationId, firebase.database().ref('/').child("Conversations"), options).then((conversation: Conversation) => {
-      console.log('conversation', conversation);
+      if (globalThis.logLevel.isInfoEnabled) {
+        console.log(`${this.constructor.name}|conversation`, conversation);
+      }
+
       this.conversation = conversation;
+
+      //window.history.replaceState({}, '', `${baseUrl}/${conversation.id}`)
 
       // Listen to Conversation events
       //
@@ -138,65 +145,60 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         this.moderated = moderated;
       }
       conversation.onCandidateAdded = (candidate: User) => {
-        console.log('onCandidateAdded', candidate);
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${this.constructor.name}|onCandidateAdded`, candidate);
+        }
         // Maintain local list of pending Candidates
         this.remoteCandidates.add(candidate);
       };
       conversation.onCandidateRemoved = (candidate: User) => {
-        console.log('onCandidateRemoved', candidate);
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${this.constructor.name}|onCandidateRemoved`, candidate);
+        }
         // Maintain local list of pending Candidates
         this.remoteCandidates.delete(candidate);
       };
       conversation.onParticipantAdded = (participant: RemoteParticipant) => {
-        console.log('onParticipantAdded', participant);
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${this.constructor.name}|onParticipantAdded`, participant);
+        }
 
         this.remoteParticipants.add(participant);
 
         participant.getUser().onUserDataUpdate = (userData: UserData) => {
-          console.log('onUserDataUpdate', participant, userData);
+          if (globalThis.logLevel.isInfoEnabled) {
+            console.log(`${this.constructor.name}|onUserDataUpdate`, participant, userData);
+          }
         };
         participant.onStreamPublished = (stream: RemoteStream, topic: any) => {
-          console.log('onStreamPublished', participant, stream, topic);
+          if (globalThis.logLevel.isInfoEnabled) {
+            console.log(`${this.constructor.name}|onStreamPublished`, participant, stream, topic);
+          }
           // First, set listener(s)
           this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic);
-          // stream.onMediaStreamReady = (mediaStream: MediaStream) => {
-          //   console.log('onMediaStreamReady', stream, mediaStream);
-          //   this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic, mediaStream);
-          //   //this.doListenToTracksEvents(mediaStream, "PEER:");
-          // }
-          // stream.onTracksStatusChanged = (tracksById: Map<string, TrackInfo>) => {
-          //   console.log('onTracksStatusChanged', stream, tracksById);
-          //   const remoteData = this.mediaStreamsByParticipantAndStream.get(participant)?.get(stream);
-          //   tracksById.forEach((track) => {
-          //     if (track.kind === 'audio') {
-          //       if (remoteData) {
-          //         remoteData.remoteAudioEnabled = track.enabled;
-          //       }
-          //     }
-          //     if (track.kind === 'video') {
-          //       if (remoteData) {
-          //         remoteData.remoteVideoEnabled = track.enabled;
-          //       }
-          //     }
-          //   });
-          // }
           // And then, subscribe
           this.localParticipant?.subscribe(stream);
           // or 
           //this.localParticipant?.subscribe(stream, { audio: true, video: false });
         };
         participant.onStreamUnpublished = (stream: RemoteStream) => {
-          console.log('onStreamUnpublished', participant, stream);
+          if (globalThis.logLevel.isInfoEnabled) {
+            console.log(`${this.constructor.name}|onStreamUnpublished`, participant, stream);
+          }
           this.doRemoveMediaStream(participant, stream);
         };
       };
       conversation.onParticipantRemoved = (participant: RemoteParticipant | LocalParticipant) => {
-        console.log('onParticipantRemoved', participant);
+        if (globalThis.logLevel.isInfoEnabled) {
+          console.log(`${this.constructor.name}|onParticipantRemoved`, participant);
+        }
         if (participant instanceof RemoteParticipant) {
           this.doRemoveRemoteParticipant(participant);
         }
         else if (participant instanceof LocalParticipant) {
-          console.log('local user removed ?!', participant);
+          if (globalThis.logLevel.isInfoEnabled) {
+            console.log(`${this.constructor.name}|local user removed ?!`, participant);
+          }
         }
       };
 
@@ -213,21 +215,27 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
       this.isWaitingForAcceptance = true;
       conversation.addParticipant(userData, { moderator: this.moderator }).then((participant: LocalParticipant) => {
-        console.log('addParticipant succeed', participant);
+        if (globalThis.logLevel.isInfoEnabled) {
+          console.log(`${this.constructor.name}|addParticipant succeed`, participant);
+        }
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
         this.localParticipant.getUser().onUserDataUpdate = (userData: UserData) => {
-          console.log('onUserDataUpdate', this.localParticipant, userData);
+          if (globalThis.logLevel.isInfoEnabled) {
+            console.log(`${this.constructor.name}|onUserDataUpdate`, this.localParticipant, userData);
+          }
           this.localParticipantData = userData;
         };
       }).catch((error: any) => {
-        console.log('addParticipant failed', error);
+        if (globalThis.logLevel.isWarnEnabled) {
+          console.warn(`${this.constructor.name}|addParticipant failed`, error);
+        }
         this.isWaitingForAcceptance = false;
       });
 
       this.url = `${baseUrl}/${conversation.id}`;
     }).catch((error: any) => {
-      console.error("getOrCreate failed", error);
+      console.error(`${this.constructor.name}|getOrCreate failed`, error);
     });
   }
 
@@ -237,10 +245,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       audio: true
     }).then((mediaStream: MediaStream) => {
       console.log('ngAfterViewInit getUserMedia', mediaStream);
+      if (globalThis.logLevel.isDebugEnabled) {
+        console.debug(`${this.constructor.name}|ngAfterViewInit getUserMedia`, mediaStream);
+      }
       this.doStoreAndBindLocalMediaStream(mediaStream);
       this.publish()
     }).catch((error) => {
-      console.error('ngAfterViewInit getUserMedia', error);
+      console.error(`${this.constructor.name}|ngAfterViewInit getUserMedia`, error);
     });
   }
 
