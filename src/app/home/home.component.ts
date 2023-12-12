@@ -269,17 +269,23 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         if (typeof track.getCapabilities === 'function') {
           this.audioTrackCapabilities = track.getCapabilities();
         } else {
-          console.log("getCapabilities not supported by browser")
+          if (globalThis.logLevel.isWarnEnabled) {
+            console.warn(`${this.constructor.name}|getCapabilities not supported by browser`)
+          }
         }
         if (typeof track.getConstraints === 'function') {
           this.audioTrackConstraints = track.getConstraints();
         } else {
-          console.log("getConstraints not supported by browser")
+          if (globalThis.logLevel.isWarnEnabled) {
+            console.warn(`${this.constructor.name}|getConstraints not supported by browser`)
+          }
         }
         if (typeof track.getSettings === 'function') {
           this.audioTrackSettings = track.getSettings();
         } else {
-          console.log("getSettings not supported by browser")
+          if (globalThis.logLevel.isWarnEnabled) {
+            console.warn(`${this.constructor.name}|getSettings not supported by browser`)
+          }
         }
         break;
       }
@@ -287,17 +293,23 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         if (typeof track.getCapabilities === 'function') {
           this.videoTrackCapabilities = track.getCapabilities();
         } else {
-          console.log("getCapabilities not supported by browser")
+          if (globalThis.logLevel.isWarnEnabled) {
+            console.warn(`${this.constructor.name}|getCapabilities not supported by browser`)
+          }
         }
         if (typeof track.getConstraints === 'function') {
           this.videoTrackConstraints = track.getConstraints();
         } else {
-          console.log("getConstraints not supported by browser")
+          if (globalThis.logLevel.isWarnEnabled) {
+            console.warn(`${this.constructor.name}|getConstraints not supported by browser`)
+          }
         }
         if (typeof track.getSettings === 'function') {
           this.videoTrackSettings = track.getSettings();
         } else {
-          console.log("getSettings not supported by browser")
+          if (globalThis.logLevel.isWarnEnabled) {
+            console.warn(`${this.constructor.name}|getSettings not supported by browser`)
+          }
         }
         break;
       }
@@ -329,10 +341,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   blur() {
     if (this.localStream && this.localMediaStream) {
       this.blurredMediaStream = this.localMediaStream;
-      this.localMediaStream = MediaStreamHelper.blur(this.localMediaStream)
+      this.localMediaStream = MediaStreamHelper.blur(this.localMediaStream);
       this.localStream.replaceMediaStream(this.localMediaStream);
     }
-
   }
 
   ngOnDestroy(): void {
@@ -344,7 +355,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.conversation.close()
         .then(() => {
           this.conversation = undefined;
-          console.log('Conversation closed');
+          if (globalThis.logLevel.isInfoEnabled) {
+            console.info(`${this.constructor.name}|Conversation closed`);
+          }
           this.doSignOut();
         })
         .catch((error: any) => { this.doSignOut(); });
@@ -355,9 +368,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
   private doSignOut() {
     firebase.auth().signOut().then(() => {
-      console.log('signed Out');
+      if (globalThis.logLevel.isInfoEnabled) {
+        console.info(`${this.constructor.name}|signed Out`);
+      }
       this.router.navigate(['/login']);
-    }).catch(error => { console.error('doSignOut', error) });
+    }).catch(error => {
+      console.error(`${this.constructor.name}|doSignOut`, error)
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -367,9 +384,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.conversation.close()
         .then(() => {
           this.conversation = undefined;
-          console.log('Conversation closed');
+          if (globalThis.logLevel.isInfoEnabled) {
+            console.info(`${this.constructor.name}|Conversation closed`);
+          }
         })
-        .catch((error: any) => { console.log('Conversation closing error', error) });
+        .catch((error: any) => {
+          console.error(`${this.constructor.name}|Conversation closing error`, error)
+        });
     }
   }
 
@@ -393,7 +414,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (this.localParticipant) {
       this.localParticipant.sendMessage(this.messageFc.value);
     } else {
-      console.error('Cannot sendMessage', this.localParticipant);
+      console.error(`${this.constructor.name}|Cannot sendMessage`, this.localParticipant);
     }
   }
 
@@ -405,7 +426,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       // Or
       //this.localParticipant.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
     } else {
-      console.error('Cannot publish', this.localMediaStream, this.localParticipant);
+      console.error(`${this.constructor.name}|Cannot publish`, this.localMediaStream, this.localParticipant);
     }
   }
 
@@ -434,25 +455,31 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {
     const deleted = this.mediaStreamsByParticipantAndStream.get(participant)?.delete(stream);
-    console.log('doRemoveMediaStream', participant, stream, deleted);
+    if (globalThis.logLevel.isDebugEnabled) {
+      console.debug(`${this.constructor.name}|doRemoveMediaStream`, participant, stream, deleted);
+    }
   }
 
   private doRemoveRemoteParticipant(participant: RemoteParticipant) {
     this.remoteParticipants.delete(participant);
     const deleted = this.mediaStreamsByParticipantAndStream.delete(participant);
-    console.log('doRemoveRemoteParticipant', participant, deleted, this.mediaStreamsByParticipantAndStream.size);
+    if (globalThis.logLevel.isDebugEnabled) {
+      console.debug(`${this.constructor.name}|doRemoveRemoteParticipant`, participant, deleted, this.mediaStreamsByParticipantAndStream.size);
+    }
   }
 
   shareScreen() {
     // @ts-ignore (https://github.com/microsoft/TypeScript/issues/33232)
     navigator.mediaDevices.getDisplayMedia().then((mediaStream: MediaStream) => {
       this.localDisplayMediaStream = mediaStream;
-      console.log('ngAfterViewInit getDisplayMedia', mediaStream)
+      if (globalThis.logLevel.isDebugEnabled) {
+        console.debug(`${this.constructor.name}|shareScreen getDisplayMedia`, mediaStream)
+      }
       if (this.localParticipant) {
         this.localParticipant.publish(mediaStream, { topic: 'screen' });
       }
     }).catch((error: any) => {
-      console.error("shareScreen", error);
+      console.error(`${this.constructor.name}|shareScreen`, error);
     });
   }
 
@@ -474,17 +501,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         }
       })
       .catch(error => {
-        console.error("goHd", error);
+        console.error(`${this.constructor.name}|goHd`, error);
       });
   }
 
-  doAppyAudioConstraint(constraintName: string, value: ConstrainULong | ConstrainDouble | ConstrainBoolean | ConstrainDOMString) {
+  doApplyAudioConstraint(constraintName: string, value: ConstrainULong | ConstrainDouble | ConstrainBoolean | ConstrainDOMString) {
     if (this.localMediaStream) {
       this.localMediaStream.getAudioTracks().forEach(track => {
         const settings: MediaTrackSettings = track.getSettings();
-        const constrainsts: any = settings;
-        constrainsts[constraintName] = value;
-        track.applyConstraints(constrainsts).then(() => {
+        const constraints: any = settings;
+        constraints[constraintName] = value;
+        track.applyConstraints(constraints).then(() => {
           this.doGatherCapConstSettings();
         });
       });
@@ -492,16 +519,18 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   goHDByApplyConstraints() {
-    //MediaStreamTrack shoud have method :
+    //MediaStreamTrack should have method :
     //Promise<undefined> applyConstraints(optional MediaTrackConstraints constraints = {});
     if (this.localMediaStream) {
       this.localMediaStream.getVideoTracks().forEach(track => {
         const constraints: MediaTrackConstraints = { width: { exact: 1280 }, height: { exact: 720 } }
         track.applyConstraints(constraints).then(() => {
-          console.log("applyConstraints done", this.localMediaStream, constraints);
+          if (globalThis.logLevel.isDebugEnabled) {
+            console.debug(`${this.constructor.name}|applyConstraints done`, this.localMediaStream, constraints);
+          }
           this.doGatherCapConstSettings();
         }).catch(error => {
-          console.error("applyConstraints error", error);
+          console.error(`${this.constructor.name}|track.applyConstraints error`, error);
         });
       });
     }
@@ -514,7 +543,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.localMediaStream.getVideoTracks().forEach(track => {
         const constraints: MediaTrackConstraints = { frameRate: 24 }
         track.applyConstraints(constraints).then(() => {
-          console.log("applyConstraints done", this.localMediaStream, constraints);
+          if (globalThis.logLevel.isDebugEnabled) {
+            console.debug(`${this.constructor.name}|applyConstraints done`, this.localMediaStream, constraints);
+          }
           this.doGatherCapConstSettings();
         }).catch(error => {
           console.error("applyConstraints error", error);
@@ -525,8 +556,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   getMediaStreamConstraints(remoteStream: RemoteStream) {
     remoteStream.getMediaStreamConstraints().
-      then((constraints: MediaStreamConstraints) => { console.log('getMediaStreamConstraints', constraints) })
-      .catch((error: any) => { console.error('getMediaStreamConstraints', error) });
+      then((constraints: MediaStreamConstraints) => {
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${this.constructor.name}|getMediaStreamConstraints done`, constraints);
+        }
+      })
+      .catch((error: any) => {
+        console.error(`${this.constructor.name}|getMediaStreamConstraints`, error)
+      });
   }
 
   applyMediaStreamConstraintsHD(remoteStream: RemoteStream) {
@@ -534,8 +571,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     //const constraints: MediaStreamConstraints = { video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ zoom: 4 }] } };
     //, advanced: [{ zoom: 2 }]
     remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ torch: true }] } })
-      .then(() => { console.log('applyMediaStreamConstraints done') })
-      .catch((error: any) => { console.error('applyMediaStreamConstraints', error) });
+      .then(() => {
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${this.constructor.name}|applyMediaStreamConstraints done`);
+        }
+      })
+      .catch((error: any) => {
+        console.error(`${this.constructor.name}|applyMediaStreamConstraints error`, error)
+      });
   }
 
   applyMediaStreamConstraintsVGA(remoteStream: RemoteStream) {
@@ -543,8 +586,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     //{ video: { zoom: 4 } }
     //{ video: { height: { exact: 480 }, width: { exact: 640 } } }
     remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 480 }, width: { exact: 640 }, advanced: [{ torch: false }] } })
-      .then(() => { console.log('applyMediaStreamConstraints done') })
-      .catch((error: any) => { console.error('applyMediaStreamConstraints', error) });
+      .then(() => {
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${this.constructor.name}|applyMediaStreamConstraints done`);
+        }
+      })
+      .catch((error: any) => {
+        console.error(`${this.constructor.name}|applyMediaStreamConstraints error`, error)
+      });
   }
 
   mediaRecorder: MediaRecorder | undefined;
@@ -553,10 +602,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   record(mediaStream: MediaStream) {
     this.mediaRecorder = new MediaRecorder(mediaStream);
     this.mediaRecorder.onstop = (event: any) => {
-      console.log('Recorder stopped: ', event);
+      if (globalThis.logLevel.isInfoEnabled) {
+        console.info(`${this.constructor.name}|Recorder stopped`, event);
+      }
     };
     this.mediaRecorder.ondataavailable = (event: any) => {
-      console.log('ondataavailable', event);
+      if (globalThis.logLevel.isDebugEnabled) {
+        console.debug(`${this.constructor.name}|ondataavailable`, event);
+      }
       if (event.data && event.data.size > 0) {
         this.recordedBlobs.push(event.data);
       }
