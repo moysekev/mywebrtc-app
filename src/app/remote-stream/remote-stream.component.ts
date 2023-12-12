@@ -59,19 +59,27 @@ export class RemoteStreamComponent implements OnInit {
     this._mediaStream = mediaStream;
     this.doUpdateStates()
     if (this._mediaStream) {
-      this._mediaStream.onaddtrack = (event: MediaStreamTrackEvent) => {
+      this._mediaStream.addEventListener('addtrack', (event: MediaStreamTrackEvent) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${RemoteStream.name}|MediaStream::onaddtrack`, event);
+          console.debug(`${this.constructor.name}|MediaStream::onaddtrack`, event);
         }
         this.doUpdateStates()
-      };
+      })
 
-      this._mediaStream.onremovetrack = (event: MediaStreamTrackEvent) => {
+      // this._mediaStream.onremovetrack = (event: MediaStreamTrackEvent) => {
+      //   if (globalThis.logLevel.isDebugEnabled) {
+      //     console.debug(`${this.constructor.name}|MediaStream::onremovetrack`, event);
+      //   }
+      //   this.doUpdateStates()
+      // };
+      // Best practice: (https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
+      // to be able to register more than one listener
+      this._mediaStream.addEventListener('removetrack', (event: MediaStreamTrackEvent) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${RemoteStream.name}|MediaStream::onremovetrack`, event);
+          console.debug(`${this.constructor.name}|MediaStream::onremovetrack`, event);
         }
         this.doUpdateStates()
-      };
+      })
     }
   }
 
@@ -96,7 +104,7 @@ export class RemoteStreamComponent implements OnInit {
       const stream = this._remoteStream;
       stream.snapshot().then((snapshot) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${RemoteStream.name}|took snapshot`, snapshot);
+          console.debug(`${this.constructor.name}|took snapshot`, snapshot);
           this.snapshotSrc = URL.createObjectURL(snapshot);
         }
       })
