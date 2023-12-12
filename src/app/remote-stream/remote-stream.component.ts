@@ -20,6 +20,8 @@ export class RemoteStreamComponent implements OnInit {
   audioEnabled = false;
   videoEnabled = false;
 
+  snapshotSrc?: string;
+
   _remoteStream: RemoteStream | undefined;
   @Input() set remoteStream(remoteStream: RemoteStream | undefined) {
     this._remoteStream = remoteStream;
@@ -87,6 +89,18 @@ export class RemoteStreamComponent implements OnInit {
 
   ngOnInit(): void {
 
+  }
+
+  snapshot() {
+    if (this._remoteStream) {
+      const stream = this._remoteStream;
+      stream.snapshot().then((snapshot) => {
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${RemoteStream.name}|took snapshot`, snapshot);
+          this.snapshotSrc = URL.createObjectURL(snapshot);
+        }
+      })
+    }
   }
 
   togglePublishAudio() {
