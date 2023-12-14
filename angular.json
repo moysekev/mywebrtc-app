@@ -69,10 +69,10 @@
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "configurations": {
                         "production": {
-                            "browserTarget": "mywebrtc-app:build:production"
+                          "buildTarget": "mywebrtc-app:build:production"
                         },
                         "development": {
-                            "browserTarget": "mywebrtc-app:build:development"
+                          "buildTarget": "mywebrtc-app:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
@@ -80,7 +80,7 @@
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                        "browserTarget": "mywebrtc-app:build"
+                      "buildTarget": "mywebrtc-app:build"
                     }
                 },
                 "test": {
