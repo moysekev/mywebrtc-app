@@ -47,15 +47,14 @@
 
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size>0">
         <!-- position-relative -->
-        <!-- col-xs-12 col-sm-6 col-md-8 col-lg-10 -->
-        <div class="position-relative">
+        <!-- col-12 col-sm-6 col-md-8 col-lg-10 -->
+        <div class="position-relative col">
             <!-- class="vw-100 vh-100" -->
             <!-- cols="1" -->
-            <mat-grid-list cols="1" rowHeight="1:1">
+            <mat-grid-list cols="1" rowHeight="100vh">
                 <!-- [colspan]="1" [rowspan]="1" -->
                 <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue">
-                    <!-- class="w-100 h-100" -->
-                    <mat-card appearance="outlined">
+                    <mat-card class="h-100 w-auto" appearance="outlined">
                         <mat-card-header>
                             <!-- <div mat-card-avatar class="example-header-image"></div> -->
                             <mat-card-title>{{kv.key.user.userData?.nickname}}</mat-card-title>
@@ -64,37 +63,34 @@
                                 <button (click)="eject(kv.key)">Eject</button>
                             </div>
                         </mat-card-header>
-                        <mat-card-content class="content">
-                            <div *ngFor="let kvj of kv.value | keyvalue" class="col">
-                                <!-- [mediaStream]="kvj.value.mediaStream" -->
-                                <app-remote-stream [remoteStream]="kvj.key" [fullscreen]="false"></app-remote-stream>
+                        <mat-card-content class="h-100 w-auto">
+                            <div *ngFor="let kvj of kv.value | keyvalue" class="h-100 w-auto">
+                                <!-- [fullscreen]="false" -->
+                                <app-remote-stream [remoteStream]="kvj.key"
+                                    (onSnapshot)="onSnapshot($event)"></app-remote-stream>
                                 <!-- <div>
-                                    <button (click)="getMediaStreamConstraints(kvj.key)">getConstraints</button>
-                                </div>
-                                <div>
-                                    <button (click)="applyMediaStreamConstraintsHD(kvj.key)">HD</button>
-                                    <button (click)="applyMediaStreamConstraintsVGA(kvj.key)">VGA</button>
-                                </div> -->
+                                <button (click)="getMediaStreamConstraints(kvj.key)">getConstraints</button>
+                            </div>
+                            <div>
+                                <button (click)="applyMediaStreamConstraintsHD(kvj.key)">HD</button>
+                                <button (click)="applyMediaStreamConstraintsVGA(kvj.key)">VGA</button>
+                            </div> -->
                                 <!-- <div *ngIf="moderator">
-                                    <button *ngIf="!mediaRecorder"
-                                        (click)="record(kvj.value.mediaStream)">Record</button>
-                                    <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
-                                </div> -->
+                                <button *ngIf="!mediaRecorder"
+                                    (click)="record(kvj.value.mediaStream)">Record</button>
+                                <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
+                            </div> -->
                             </div>
                         </mat-card-content>
-                        <!-- <mat-card-actions>
-                    <button mat-button>LIKE</button>
-                    <button mat-button>SHARE</button>
-                </mat-card-actions> -->
                     </mat-card>
                 </mat-grid-tile>
             </mat-grid-list>
         </div>
-        <div class="position-absolute top-0 start-0 col-xs-12 col-sm-6 col-md-4 col-lg-2">
+        <div class="position-absolute bottom-0 start-0 col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3 col-xxl-2">
             <!-- class="position-absolute top-0 start-0" -->
             <!-- (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()" -->
             <!-- [mediaStream]="localMediaStream" -->
-            <app-local-stream [localStream]="localStream">
+            <app-local-stream [localStream]="localStream" [videoStyle]="{opacity:0.84}">
             </app-local-stream>
         </div>
     </div>
@@ -114,6 +110,9 @@
             </p>
         </div>
     </div>
+
+    <img [src]="snapshotSrc" />
+
     <!-- 
 
     <div>

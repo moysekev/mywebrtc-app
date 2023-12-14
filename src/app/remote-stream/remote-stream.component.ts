@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 import { RemoteStream, PublishOptions, SubscribeOptions } from 'mywebrtc/dist';
 
@@ -16,8 +16,6 @@ export class RemoteStreamComponent implements OnInit {
 
   audioEnabled = false;
   videoEnabled = false;
-
-  snapshotSrc?: string;
 
   _remoteStream: RemoteStream | undefined;
   @Input() set remoteStream(remoteStream: RemoteStream | undefined) {
@@ -45,6 +43,23 @@ export class RemoteStreamComponent implements OnInit {
       }
     }
   }
+
+  _mirror = false;
+  @Input() set mirror(mirror: boolean) {
+    this._mirror = mirror;
+  }
+
+  // _fullscreen = false;
+  // @Input() set fullscreen(fullscreen: boolean) {
+  //   this._fullscreen = fullscreen;
+  // }
+
+  // _videoStyle: Object = {};
+  // @Input() set videoStyle(style: Object) {
+  //   this._videoStyle = style;
+  // }
+
+  @Output() onSnapshot = new EventEmitter<Blob>();
 
   private doUpdateStates() {
     this.audioEnabled = this._mediaStream ? MediaStreamHelper.isAudioEnabled(this._mediaStream) : false;
@@ -80,30 +95,15 @@ export class RemoteStreamComponent implements OnInit {
     }
   }
 
-  _mirror = false;
-  @Input() set mirror(mirror: boolean) {
-    this._mirror = mirror;
-  }
-
-  _fullscreen = false;
-  @Input() set fullscreen(fullscreen: boolean) {
-    this._fullscreen = fullscreen;
-  }
-
   constructor() { }
 
-  ngOnInit(): void {
-
-  }
+  ngOnInit(): void { }
 
   snapshot() {
     if (this._remoteStream) {
       const stream = this._remoteStream;
       stream.snapshot().then((snapshot) => {
-        if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|took snapshot`, snapshot);
-          this.snapshotSrc = URL.createObjectURL(snapshot);
-        }
+        this.onSnapshot.emit(snapshot);
       })
     }
   }

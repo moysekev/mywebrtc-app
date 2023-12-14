@@ -75,6 +75,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   isWaitingForAcceptance = false;
 
+  snapshotSrc?: string;
+
   @ViewChild("dwnld") aRef: ElementRef | undefined;
 
   // Note : beforeUnloadHandler alone does not work on android Chrome
@@ -256,6 +258,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }).catch((error) => {
       console.error(`${this.constructor.name}|ngAfterViewInit getUserMedia`, error);
     });
+  }
+
+  onSnapshot(snapshot: Blob) {
+    if (globalThis.logLevel.isDebugEnabled) {
+      console.debug(`${this.constructor.name}|took snapshot`, snapshot);
+      this.snapshotSrc = URL.createObjectURL(snapshot);
+    }
   }
 
   doStoreAndBindLocalMediaStream(mediaStream: MediaStream) {

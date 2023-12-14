@@ -33,6 +33,11 @@ export class LocalStreamComponent implements OnInit {
     }
   }
 
+  _videoStyle: { [klass: string]: any; } = {};
+  @Input() set videoStyle(style: { [klass: string]: any; }) {
+    this._videoStyle = { ...this._videoStyle, ...style };
+  }
+
   _mediaStream: MediaStream | undefined;
   // @Input() 
   set mediaStream(mediaStream: MediaStream | undefined) {

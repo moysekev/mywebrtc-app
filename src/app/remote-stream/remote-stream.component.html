@@ -1,6 +1,7 @@
-<div class="position-relative d-inline-flex">
-
-    <app-stream-video [mediaStream]="_mediaStream" [fullscreen]="_fullscreen" [mirror]="_mirror"></app-stream-video>
+<!-- class d-inline-flex -->
+<div class="position-relative h-100 w-auto">
+    <!-- [fullscreen]="_fullscreen" -->
+    <app-stream-video [mediaStream]="_mediaStream" [mirror]="_mirror"></app-stream-video>
     <div class="position-absolute top-0 mt-1 start-0 ms-1">
         <span>{{_publishOptions.topic}}</span>
     </div>
@@ -33,5 +34,4 @@
             <mat-icon>{{videoEnabled ? 'videocam':'videocam_off'}}</mat-icon>
         </button>
     </div>
-    <img [src]="snapshotSrc" />
 </div>

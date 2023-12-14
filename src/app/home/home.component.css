@@ -31,3 +31,7 @@
     left: 0;
     z-index: 2;
 } */
+
+mat-grid-tile {
+    background: lightblue;
+  }

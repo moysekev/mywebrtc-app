@@ -1,5 +1,8 @@
 import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
 
+export const VIDEO_ROUNDED_CORNERS = { borderRadius: '4px', overflow: 'hidden' };
+// const VIDEO_SIZING = { height: '100%', width: '100%' };
+
 @Component({
   selector: 'app-stream-video',
   templateUrl: './stream-video.component.html',
@@ -16,6 +19,15 @@ export class StreamVideoComponent implements AfterViewInit {
     }
     this._mediaStream = mediaStream;
     this.doAttach();
+  }
+
+  _videoStyle: { [klass: string]: any; } = {
+    height: '100%', width: 'auto',
+    'object-fit': 'contain',
+    ...VIDEO_ROUNDED_CORNERS
+  };//{ maxWidth: '100%' };
+  @Input() set videoStyle(style: { [klass: string]: any; }) {
+    this._videoStyle = { ...this._videoStyle, ...style };
   }
 
   _muted = false;

@@ -1,6 +1,6 @@
-<div class="position-relative d-inline-flex">
-    <!-- class="h-100" -->
-    <app-stream-video [mediaStream]="_mediaStream" [muted]="true"></app-stream-video>
+<!-- d-inline-flex -->
+<div class="position-relative d-flex h-100 w-auto">
+    <app-stream-video [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="true"></app-stream-video>
     <div class="position-absolute top-0 mt-1 end-0 me-1">
         <button mat-mini-fab color="primary" aria-label="publish-audio" title="publish audio"
             (click)="togglePublishAudio()">
