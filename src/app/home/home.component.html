@@ -24,8 +24,7 @@
             <p>MediaStream id : {{localMediaStream.id}}</p>
             <!-- (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()" -->
             <!-- [mediaStream]="localMediaStream" -->
-            <app-local-stream class="h-100" 
-            [localStream]="localStream"></app-local-stream>
+            <app-local-stream class="h-100" [localStream]="localStream"></app-local-stream>
         </div>
     </div>
 
@@ -48,11 +47,13 @@
 
     <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size>0">
         <!-- position-relative -->
-        <div class="col-xs-12 col-sm-6 col-md-8 col-lg-10">
+        <!-- col-xs-12 col-sm-6 col-md-8 col-lg-10 -->
+        <div class="position-relative">
             <!-- class="vw-100 vh-100" -->
-            <mat-grid-list cols="1">
-                <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" [colspan]="1"
-                    [rowspan]="1">
+            <!-- cols="1" -->
+            <mat-grid-list cols="1" rowHeight="1:1">
+                <!-- [colspan]="1" [rowspan]="1" -->
+                <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue">
                     <!-- class="w-100 h-100" -->
                     <mat-card appearance="outlined">
                         <mat-card-header>
@@ -67,24 +68,18 @@
                             <div *ngFor="let kvj of kv.value | keyvalue" class="col">
                                 <!-- [mediaStream]="kvj.value.mediaStream" -->
                                 <app-remote-stream [remoteStream]="kvj.key" [fullscreen]="false"></app-remote-stream>
-                                <div>
+                                <!-- <div>
                                     <button (click)="getMediaStreamConstraints(kvj.key)">getConstraints</button>
                                 </div>
                                 <div>
                                     <button (click)="applyMediaStreamConstraintsHD(kvj.key)">HD</button>
                                     <button (click)="applyMediaStreamConstraintsVGA(kvj.key)">VGA</button>
-                                </div>
+                                </div> -->
                                 <!-- <div *ngIf="moderator">
                                     <button *ngIf="!mediaRecorder"
                                         (click)="record(kvj.value.mediaStream)">Record</button>
                                     <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
                                 </div> -->
-                            </div>
-                            <div class="row" *ngIf="localMediaStream">
-                                <div class="col">
-                                    <!-- <p>LocalStream id : {{localStream?.id}}</p>
-                                <p>MediaStream id : {{localMediaStream?.id}}</p> -->
-                                </div>
                             </div>
                         </mat-card-content>
                         <!-- <mat-card-actions>
@@ -94,9 +89,8 @@
                     </mat-card>
                 </mat-grid-tile>
             </mat-grid-list>
-
         </div>
-        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
+        <div class="position-absolute top-0 start-0 col-xs-12 col-sm-6 col-md-4 col-lg-2">
             <!-- class="position-absolute top-0 start-0" -->
             <!-- (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()" -->
             <!-- [mediaStream]="localMediaStream" -->
@@ -120,6 +114,7 @@
             </p>
         </div>
     </div>
+    <!-- 
 
     <div>
         <p *ngFor="let pair of messages">{{pair[0].nickname}}:{{pair[1]}}</p>
@@ -129,7 +124,6 @@
         <mat-form-field appearance="fill">
             <mat-label>Message</mat-label>
             <input matInput #message maxlength="256" placeholder="Ex. I need help with..." formControlName="message">
-            <!-- <mat-hint align="start"><strong>Don't disclose personal info</strong> </mat-hint> -->
             <mat-hint align="end">{{message.value.length}} / 256</mat-hint>
         </mat-form-field>
         <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid"
@@ -189,15 +183,9 @@
         <button (click)="signOut()">signOut</button>
     </div>
 
-    <!-- <div class="row">
-        <div *ngFor="let kv of conversation?.peersById | keyvalue" class="col">
-            <p>{{kv.key}} : {{kv.value.id}}</p>
-        </div>
-    </div> -->
-
     <a #dwnld style="display:none;" href></a>
     <span>mediaStreamsByParticipantAndStream.size = {{mediaStreamsByParticipantAndStream.size}}</span>
 
-    <p><a routerLink="/bye">Bye</a></p>
+    <p><a routerLink="/bye">Bye</a></p> -->
 
 </div>

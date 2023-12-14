@@ -137,7 +137,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
       this.conversation = conversation;
 
-      //window.history.replaceState({}, '', `${baseUrl}/${conversation.id}`)
+      window.history.replaceState({}, '', `${baseUrl}/${conversation.id}`)
 
       // Listen to Conversation events
       //
@@ -220,6 +220,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         }
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
+
+        this.publish()
+
         this.localParticipant.getUser().onUserDataUpdate = (userData: UserData) => {
           if (globalThis.logLevel.isInfoEnabled) {
             console.log(`${this.constructor.name}|onUserDataUpdate`, this.localParticipant, userData);
@@ -436,7 +439,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.localStream = undefined;
     }
   }
-
 
   private doStoreMediaStreamByParticipantAndStream(participant: RemoteParticipant, stream: RemoteStream, topic: string) {
     if (!this.mediaStreamsByParticipantAndStream.has(participant)) {

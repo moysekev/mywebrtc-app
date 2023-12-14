@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-import { RemoteStream } from 'mywebrtc/dist';
+import { RemoteStream, PublishOptions, SubscribeOptions } from 'mywebrtc/dist';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
 
@@ -11,11 +11,8 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
 })
 export class RemoteStreamComponent implements OnInit {
 
-  publishAudio = false;
-  publishVideo = false;
-
-  subscribeAudio = false;
-  subscribeVideo = false;
+  _publishOptions: PublishOptions = { audio: false, video: false };
+  _subscribeOptions: SubscribeOptions = { audio: false, video: false };
 
   audioEnabled = false;
   videoEnabled = false;
@@ -27,19 +24,19 @@ export class RemoteStreamComponent implements OnInit {
     this._remoteStream = remoteStream;
     if (this._remoteStream) {
 
-      this.publishAudio = this._remoteStream.getPublishOptions().audio;
-      this.publishVideo = this._remoteStream.getPublishOptions().video;
       const l_stream = this._remoteStream;
+
+      this._publishOptions = l_stream.getPublishOptions();
       l_stream.onPublishOptionsUpdate = () => {
-        this.publishAudio = l_stream.getPublishOptions().audio;
-        this.publishVideo = l_stream.getPublishOptions().video;
+        this._publishOptions = l_stream.getPublishOptions();
       };
 
-      this.subscribeAudio = this._remoteStream.getSubscribeOptions().audio;
-      this.subscribeVideo = this._remoteStream.getSubscribeOptions().video;
+      this._subscribeOptions = l_stream.getSubscribeOptions();
+      l_stream.onSubscribeOptionsUpdate = () => {
+        this._subscribeOptions = l_stream.getSubscribeOptions();
+      };
 
       this.mediaStream = this._remoteStream.getMediaStream();
-
       this._remoteStream.onMediaStream = (mediaStream: MediaStream) => {
         if (globalThis.logLevel.isDebugEnabled) {
           console.debug(`${this.constructor.name}|onMediaStreamReady`, mediaStream);
@@ -115,9 +112,7 @@ export class RemoteStreamComponent implements OnInit {
     if (this._remoteStream) {
       const stream = this._remoteStream;
       stream.updatePublishOptions({ audio: !stream.getPublishOptions().audio })
-        .then(() => {
-          this.publishAudio = stream.getPublishOptions().audio;
-        })
+        .then(() => { })
     }
   }
 
@@ -125,23 +120,19 @@ export class RemoteStreamComponent implements OnInit {
     if (this._remoteStream) {
       const stream = this._remoteStream;
       stream.updatePublishOptions({ video: !stream.getPublishOptions().video })
-        .then(() => {
-          this.publishVideo = stream.getPublishOptions().video;
-        })
+        .then(() => { })
     }
   }
 
   toggleSubscribeAudio() {
     if (this._remoteStream) {
       this._remoteStream.updateSubscribeOptions({ audio: !this._remoteStream.getSubscribeOptions().audio })
-      this.subscribeAudio = this._remoteStream.getSubscribeOptions().audio;
     }
   }
 
   toggleSubscribeVideo() {
     if (this._remoteStream) {
       this._remoteStream.updateSubscribeOptions({ video: !this._remoteStream.getSubscribeOptions().video })
-      this.subscribeVideo = this._remoteStream.getSubscribeOptions().video;
     }
   }
 
