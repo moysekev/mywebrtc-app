@@ -8,8 +8,8 @@ describe('ByeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ByeComponent ]
-    })
+    imports: [ByeComponent]
+})
     .compileComponents();
   });
 

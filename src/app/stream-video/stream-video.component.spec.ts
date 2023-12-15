@@ -14,8 +14,8 @@ describe('StreamVideoComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [StreamVideoComponent]
-    })
+    imports: [StreamVideoComponent]
+})
       .compileComponents();
   });
 

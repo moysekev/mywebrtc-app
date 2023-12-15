@@ -8,8 +8,8 @@ describe('LocalStreamComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LocalStreamComponent ]
-    })
+    imports: [LocalStreamComponent]
+})
     .compileComponents();
   });
 

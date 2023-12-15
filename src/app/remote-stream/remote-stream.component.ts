@@ -1,13 +1,18 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
-import { RemoteStream, PublishOptions, SubscribeOptions } from 'mywebrtc/dist';
+import { PublishOptions, RemoteStream, SubscribeOptions } from 'mywebrtc/dist';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MediaStreamHelper } from '../MediaStreamHelper';
+import { StreamVideoComponent } from '../stream-video/stream-video.component';
 
 @Component({
-  selector: 'app-remote-stream',
-  templateUrl: './remote-stream.component.html',
-  styleUrls: ['./remote-stream.component.css']
+    selector: 'app-remote-stream',
+    templateUrl: './remote-stream.component.html',
+    styleUrls: ['./remote-stream.component.css'],
+    standalone: true,
+    imports: [StreamVideoComponent, MatButtonModule, MatIconModule]
 })
 export class RemoteStreamComponent implements OnInit {
 

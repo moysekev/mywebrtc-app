@@ -2,12 +2,17 @@ import { Component, Input, OnInit } from '@angular/core';
 
 import { LocalStream } from 'mywebrtc/dist';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MediaStreamHelper } from '../MediaStreamHelper';
+import { StreamVideoComponent } from '../stream-video/stream-video.component';
 
 @Component({
-  selector: 'app-local-stream',
-  templateUrl: './local-stream.component.html',
-  styleUrls: ['./local-stream.component.css']
+    selector: 'app-local-stream',
+    templateUrl: './local-stream.component.html',
+    styleUrls: ['./local-stream.component.css'],
+    standalone: true,
+    imports: [StreamVideoComponent, MatButtonModule, MatIconModule]
 })
 export class LocalStreamComponent implements OnInit {
 

@@ -2,6 +2,10 @@ import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, 
 import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from "@angular/router";
 
+import { KeyValuePipe, NgFor, NgIf } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatGridListModule } from '@angular/material/grid-list';
+
 import { AuthService } from '../auth.service';
 import { WINDOW } from '../windows-provider';
 
@@ -12,6 +16,8 @@ import 'firebase/database';
 import { Conversation, ConversationOptions, LocalParticipant, LocalStream, RemoteParticipant, RemoteStream, User } from 'mywebrtc/dist';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
+import { LocalStreamComponent } from '../local-stream/local-stream.component';
+import { RemoteStreamComponent } from '../remote-stream/remote-stream.component';
 
 interface UserData {
   nickname: string
@@ -25,12 +31,14 @@ interface Message {
 type RemoteStreamData = {
   topic: any,
   // mediaStream: MediaStream
-}
+};
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
+  standalone: true,
+  imports: [NgIf, LocalStreamComponent, MatGridListModule, NgFor, MatCardModule, RemoteStreamComponent, KeyValuePipe]
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
 

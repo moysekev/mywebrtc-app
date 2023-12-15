@@ -3,7 +3,8 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-bye',
   templateUrl: './bye.component.html',
-  styleUrls: ['./bye.component.css']
+  styleUrls: ['./bye.component.css'],
+  standalone: true
 })
 export class ByeComponent implements OnInit {
 

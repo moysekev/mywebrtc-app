@@ -8,8 +8,8 @@ describe('RemoteStreamComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ RemoteStreamComponent ]
-    })
+    imports: [RemoteStreamComponent]
+})
     .compileComponents();
   });
 
