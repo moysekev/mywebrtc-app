@@ -8,11 +8,11 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
 import { StreamVideoComponent } from '../stream-video/stream-video.component';
 
 @Component({
-    selector: 'app-local-stream',
-    templateUrl: './local-stream.component.html',
-    styleUrls: ['./local-stream.component.css'],
-    standalone: true,
-    imports: [StreamVideoComponent, MatButtonModule, MatIconModule]
+  selector: 'app-local-stream',
+  templateUrl: './local-stream.component.html',
+  styleUrls: ['./local-stream.component.css'],
+  standalone: true,
+  imports: [StreamVideoComponent, MatButtonModule, MatIconModule]
 })
 export class LocalStreamComponent implements OnInit {
 
@@ -23,7 +23,7 @@ export class LocalStreamComponent implements OnInit {
   videoEnabled = false;
 
   _localStream: LocalStream | undefined;
-  @Input() set localStream(localStream: LocalStream | undefined) {
+  @Input({ required: true }) set localStream(localStream: LocalStream) {
     this._localStream = localStream;
     if (this._localStream) {
       this.publishAudio = this._localStream.getPublishOptions().audio;

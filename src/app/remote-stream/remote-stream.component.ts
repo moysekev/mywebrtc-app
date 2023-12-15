@@ -8,11 +8,11 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
 import { StreamVideoComponent } from '../stream-video/stream-video.component';
 
 @Component({
-    selector: 'app-remote-stream',
-    templateUrl: './remote-stream.component.html',
-    styleUrls: ['./remote-stream.component.css'],
-    standalone: true,
-    imports: [StreamVideoComponent, MatButtonModule, MatIconModule]
+  selector: 'app-remote-stream',
+  templateUrl: './remote-stream.component.html',
+  styleUrls: ['./remote-stream.component.css'],
+  standalone: true,
+  imports: [StreamVideoComponent, MatButtonModule, MatIconModule]
 })
 export class RemoteStreamComponent implements OnInit {
 
@@ -23,7 +23,7 @@ export class RemoteStreamComponent implements OnInit {
   videoEnabled = false;
 
   _remoteStream: RemoteStream | undefined;
-  @Input() set remoteStream(remoteStream: RemoteStream | undefined) {
+  @Input({ required: true }) set remoteStream(remoteStream: RemoteStream) {
     this._remoteStream = remoteStream;
     if (this._remoteStream) {
 

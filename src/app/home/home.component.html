@@ -19,9 +19,9 @@
                 (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
         </mat-grid-tile>
     </mat-grid-list> -->
-    <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size===0">
+    <div class="row" *ngIf="localStream&&mediaStreamsByParticipantAndStream.size===0">
         <div class="col-6">
-            <p>MediaStream id : {{localMediaStream.id}}</p>
+            <p>localStream id : {{localStream.id}}</p>
             <!-- (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()" -->
             <!-- [mediaStream]="localMediaStream" -->
             <app-local-stream class="h-100" [localStream]="localStream"></app-local-stream>
@@ -86,7 +86,8 @@
                 </mat-grid-tile>
             </mat-grid-list>
         </div>
-        <div class="position-absolute bottom-0 start-0 col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3 col-xxl-2">
+        <div class="position-absolute bottom-0 start-0 col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3 col-xxl-2"
+            *ngIf="localStream">
             <!-- class="position-absolute top-0 start-0" -->
             <!-- (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()" -->
             <!-- [mediaStream]="localMediaStream" -->

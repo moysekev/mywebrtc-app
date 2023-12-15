@@ -5,11 +5,11 @@ export const VIDEO_ROUNDED_CORNERS = { borderRadius: '4px', overflow: 'hidden' }
 // const VIDEO_SIZING = { height: '100%', width: '100%' };
 
 @Component({
-    selector: 'app-stream-video',
-    templateUrl: './stream-video.component.html',
-    styleUrls: ['./stream-video.component.css'],
-    standalone: true,
-    imports: [NgStyle, NgClass]
+  selector: 'app-stream-video',
+  templateUrl: './stream-video.component.html',
+  styleUrls: ['./stream-video.component.css'],
+  standalone: true,
+  imports: [NgStyle, NgClass]
 })
 export class StreamVideoComponent implements AfterViewInit {
 
