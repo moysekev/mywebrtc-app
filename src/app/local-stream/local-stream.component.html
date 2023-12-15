@@ -1,21 +1,27 @@
-<!-- d-inline-flex -->
-<div class="position-relative d-flex h-100 w-auto">
-    <app-stream-video [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="true"></app-stream-video>
-    <div class="position-absolute top-0 mt-1 end-0 me-1">
-        <button mat-mini-fab color="primary" aria-label="publish-audio" title="publish audio"
-            (click)="togglePublishAudio()">
-            <mat-icon>{{publishAudio ? 'mic':'mic_off'}}</mat-icon>
-        </button>
-        <button mat-mini-fab color="primary" aria-label="publish-video" title="publish video"
-            (click)="togglePublishVideo()">
-            <mat-icon>{{publishVideo ? 'videocam':'videocam_off'}}
-            </mat-icon>
-        </button>
-        <button mat-mini-fab color="basic" aria-label="audio" (click)="toggleAudio()">
-            <mat-icon>{{audioEnabled ? 'mic':'mic_off'}}</mat-icon>
-        </button>
-        <button mat-mini-fab color="basic" aria-label="video" (click)="toggleVideo()">
-            <mat-icon>{{videoEnabled ? 'videocam':'videocam_off'}}</mat-icon>
-        </button>
+<app-controlled-stream [mediaStream]="_mediaStream">
+    <div controls>
+        <div>
+            <button mat-mini-fab color="primary" aria-label="publish-audio" title="publish audio"
+                (click)="togglePublishAudio()">
+                <mat-icon>{{publishAudio ? 'mic':'mic_off'}}</mat-icon>
+            </button>
+        </div>
+        <div class="mt-1">
+            <button mat-mini-fab color="primary" aria-label="publish-video" title="publish video"
+                (click)="togglePublishVideo()">
+                <mat-icon>{{publishVideo ? 'videocam':'videocam_off'}}
+                </mat-icon>
+            </button>
+        </div>
+        <div class="mt-1">
+            <button mat-mini-fab color="basic" aria-label="audio" (click)="toggleAudio()">
+                <mat-icon>{{audioEnabled ? 'mic':'mic_off'}}</mat-icon>
+            </button>
+        </div>
+        <div class="mt-1">
+            <button mat-mini-fab color="basic" aria-label="video" (click)="toggleVideo()">
+                <mat-icon>{{videoEnabled ? 'videocam':'videocam_off'}}</mat-icon>
+            </button>
+        </div>
     </div>
-</div>
+</app-controlled-stream>

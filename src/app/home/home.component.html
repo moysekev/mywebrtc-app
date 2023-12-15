@@ -1,5 +1,5 @@
 <div class="container-fluid">
-    <!-- <div *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue" class="row">
+    <!-- <div *ngFor="let kv of remoteStreamsByParticipant | keyvalue" class="row">
         <p>User {{kv.key.id}} </p>
         <span>kv.value.size = {{kv.value.size}}</span>
         <div *ngFor="let kvj of kv.value | keyvalue" class="col">
@@ -19,14 +19,11 @@
                 (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()"></app-local-stream>
         </mat-grid-tile>
     </mat-grid-list> -->
-    <div class="row" *ngIf="localStream&&mediaStreamsByParticipantAndStream.size===0">
+    <!-- <div class="row" *ngIf="localStream&&remoteStreamsByParticipant.size===0">
         <div class="col-6">
-            <p>localStream id : {{localStream.id}}</p>
-            <!-- (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()" -->
-            <!-- [mediaStream]="localMediaStream" -->
             <app-local-stream class="h-100" [localStream]="localStream"></app-local-stream>
         </div>
-    </div>
+    </div> -->
 
     <!-- <div class="row mt-5">
         <div class="col mt-5">
@@ -45,53 +42,36 @@
         </div>
     </div> -->
 
-    <div class="row" *ngIf="localMediaStream&&mediaStreamsByParticipantAndStream.size>0">
-        <!-- position-relative -->
-        <!-- col-12 col-sm-6 col-md-8 col-lg-10 -->
-        <div class="position-relative col">
-            <!-- class="vw-100 vh-100" -->
-            <!-- cols="1" -->
-            <mat-grid-list cols="1" rowHeight="100vh">
-                <!-- [colspan]="1" [rowspan]="1" -->
-                <mat-grid-tile *ngFor="let kv of mediaStreamsByParticipantAndStream | keyvalue">
-                    <mat-card class="h-100 w-auto" appearance="outlined">
-                        <mat-card-header>
-                            <!-- <div mat-card-avatar class="example-header-image"></div> -->
-                            <mat-card-title>{{kv.key.user.userData?.nickname}}</mat-card-title>
-                            <mat-card-subtitle>{{kv.key.user.id}}</mat-card-subtitle>
-                            <div *ngIf="moderator">
-                                <button (click)="eject(kv.key)">Eject</button>
-                            </div>
-                        </mat-card-header>
-                        <mat-card-content class="h-100 w-auto">
-                            <div *ngFor="let kvj of kv.value | keyvalue" class="h-100 w-auto">
-                                <!-- [fullscreen]="false" -->
-                                <app-remote-stream [remoteStream]="kvj.key"
-                                    (onSnapshot)="onSnapshot($event)"></app-remote-stream>
-                                <!-- <div>
-                                <button (click)="getMediaStreamConstraints(kvj.key)">getConstraints</button>
-                            </div>
-                            <div>
-                                <button (click)="applyMediaStreamConstraintsHD(kvj.key)">HD</button>
-                                <button (click)="applyMediaStreamConstraintsVGA(kvj.key)">VGA</button>
-                            </div> -->
-                                <!-- <div *ngIf="moderator">
-                                <button *ngIf="!mediaRecorder"
-                                    (click)="record(kvj.value.mediaStream)">Record</button>
-                                <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
-                            </div> -->
-                            </div>
-                        </mat-card-content>
-                    </mat-card>
-                </mat-grid-tile>
-            </mat-grid-list>
+    <div class="row position-relative vh-100">
+        <!-- class="vw-100 vh-100" -->
+        <!-- <mat-grid-list cols="1" rowHeight="100vh">
+            <mat-grid-tile *ngFor="let kv of remoteStreamsByParticipant | keyvalue">
+                <mat-card class="h-100 w-auto" appearance="outlined">
+                    <mat-card-header>
+                        <mat-card-title>{{kv.key.user.userData?.nickname}}</mat-card-title>
+                        <mat-card-subtitle>{{kv.key.user.id}}</mat-card-subtitle>
+                        <div *ngIf="moderator">
+                            <button (click)="eject(kv.key)">Eject</button>
+                        </div>
+                    </mat-card-header>
+                    <mat-card-content class="h-100 w-auto">
+                        <div *ngFor="let _stream of kv.value" class="h-100 w-auto">
+                            <app-remote-stream [remoteStream]="_stream"
+                                (onSnapshot)="onSnapshot($event)"></app-remote-stream>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </mat-grid-tile>
+        </mat-grid-list> -->
+        <div class="col vh-100" *ngFor="let kv of remoteStreamsByParticipant | keyvalue">
+            <app-remote-stream  *ngFor="let _stream of kv.value" [remoteStream]="_stream"
+                                (onSnapshot)="onSnapshot($event)"></app-remote-stream>
+
         </div>
-        <div class="position-absolute bottom-0 start-0 col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3 col-xxl-2"
-            *ngIf="localStream">
-            <!-- class="position-absolute top-0 start-0" -->
-            <!-- (onTracksStatusChanged)="localStream?.notifyTracksStatusChanged()" -->
-            <!-- [mediaStream]="localMediaStream" -->
+        <div *ngIf="localStream"
+            class="position-absolute bottom-0 mb-1 start-0 ms-1 col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3 col-xxl-2">
             <app-local-stream [localStream]="localStream" [videoStyle]="{opacity:0.84}">
+                <div>Foo</div>
             </app-local-stream>
         </div>
     </div>
@@ -113,6 +93,19 @@
     </div>
 
     <img [src]="snapshotSrc" />
+
+    <!-- <div>
+                                <button (click)="getMediaStreamConstraints(_stream)">getConstraints</button>
+                            </div>
+                            <div>
+                                <button (click)="applyMediaStreamConstraintsHD(_stream)">HD</button>
+                                <button (click)="applyMediaStreamConstraintsVGA(_stream)">VGA</button>
+                            </div> -->
+    <!-- <div *ngIf="moderator">
+                                <button *ngIf="!mediaRecorder"
+                                    (click)="record(kvj.value.mediaStream)">Record</button>
+                                <button *ngIf="mediaRecorder" (click)="stopRecording()">StopRecording</button>
+                            </div> -->
 
     <!-- 
 
@@ -184,7 +177,7 @@
     </div>
 
     <a #dwnld style="display:none;" href></a>
-    <span>mediaStreamsByParticipantAndStream.size = {{mediaStreamsByParticipantAndStream.size}}</span>
+    <span>remoteStreamsByParticipant.size = {{remoteStreamsByParticipant.size}}</span>
 
     <p><a routerLink="/bye">Bye</a></p> -->
 

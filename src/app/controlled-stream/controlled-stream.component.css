@@ -1,0 +1,11 @@
+:host {
+    display: inline-block;
+    position: relative;
+    min-height: var(--min-height);
+    min-width: var(--min-width);
+}
+
+/* app-stream-video {
+    height: 100%;
+    width: 100%;
+} */

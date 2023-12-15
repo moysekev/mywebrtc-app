@@ -5,16 +5,17 @@ import { PublishOptions, RemoteStream, SubscribeOptions } from 'mywebrtc/dist';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MediaStreamHelper } from '../MediaStreamHelper';
-import { StreamVideoComponent } from '../stream-video/stream-video.component';
+import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 
 @Component({
   selector: 'app-remote-stream',
   templateUrl: './remote-stream.component.html',
   styleUrls: ['./remote-stream.component.css'],
   standalone: true,
-  imports: [StreamVideoComponent, MatButtonModule, MatIconModule]
+  imports: [ControlledStreamComponent, MatButtonModule, MatIconModule]
 })
 export class RemoteStreamComponent implements OnInit {
+
 
   _publishOptions: PublishOptions = { audio: false, video: false };
   _subscribeOptions: SubscribeOptions = { audio: false, video: false };
@@ -57,11 +58,6 @@ export class RemoteStreamComponent implements OnInit {
   // _fullscreen = false;
   // @Input() set fullscreen(fullscreen: boolean) {
   //   this._fullscreen = fullscreen;
-  // }
-
-  // _videoStyle: Object = {};
-  // @Input() set videoStyle(style: Object) {
-  //   this._videoStyle = style;
   // }
 
   @Output() onSnapshot = new EventEmitter<Blob>();

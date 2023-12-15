@@ -25,10 +25,10 @@ export class StreamVideoComponent implements AfterViewInit {
   }
 
   _videoStyle: { [klass: string]: any; } = {
-    height: '100%', width: 'auto',
+    height: '100%', width: '100%',
     'object-fit': 'contain',
     ...VIDEO_ROUNDED_CORNERS
-  };//{ maxWidth: '100%' };
+  };
   @Input() set videoStyle(style: { [klass: string]: any; }) {
     this._videoStyle = { ...this._videoStyle, ...style };
   }

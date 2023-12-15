@@ -28,11 +28,6 @@ interface Message {
   text: string
 }
 
-type RemoteStreamData = {
-  topic: any,
-  // mediaStream: MediaStream
-};
-
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -79,7 +74,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   url: string | undefined;
 
-  mediaStreamsByParticipantAndStream: Map<RemoteParticipant, Map<RemoteStream, RemoteStreamData>> = new Map();
+  remoteStreamsByParticipant: Map<RemoteParticipant, Set<RemoteStream>> = new Map();
 
   isWaitingForAcceptance = false;
 
@@ -180,12 +175,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             console.log(`${this.constructor.name}|onUserDataUpdate`, participant, userData);
           }
         };
-        participant.onStreamPublished = (stream: RemoteStream, topic: any) => {
+        participant.onStreamPublished = (stream: RemoteStream) => {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${this.constructor.name}|onStreamPublished`, participant, stream, topic);
+            console.log(`${this.constructor.name}|onStreamPublished`, participant, stream);
           }
           // First, set listener(s)
-          this.doStoreMediaStreamByParticipantAndStream(participant, stream, topic);
+          this.doStoreRemoteStreamByParticipant(participant, stream);
           // And then, subscribe
           this.localParticipant?.subscribe(stream);
           // or 
@@ -457,23 +452,15 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private doStoreMediaStreamByParticipantAndStream(participant: RemoteParticipant, stream: RemoteStream, topic: string) {
-    if (!this.mediaStreamsByParticipantAndStream.has(participant)) {
-      this.mediaStreamsByParticipantAndStream.set(participant, new Map());
+  private doStoreRemoteStreamByParticipant(participant: RemoteParticipant, stream: RemoteStream) {
+    if (!this.remoteStreamsByParticipant.has(participant)) {
+      this.remoteStreamsByParticipant.set(participant, new Set());
     }
-    this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream, { topic: topic });
+    this.remoteStreamsByParticipant.get(participant)?.add(stream);
   }
 
-  // private doStoreMediaStreamByParticipantAndStream(participant: RemoteParticipant, stream: RemoteStream, topic: string, mediaStream: MediaStream) {
-  //   if (!this.mediaStreamsByParticipantAndStream.has(participant)) {
-  //     this.mediaStreamsByParticipantAndStream.set(participant, new Map());
-  //   }
-  //   this.mediaStreamsByParticipantAndStream.get(participant)?.set(stream,
-  //     { topic: topic, mediaStream: mediaStream });
-  // }
-
   private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {
-    const deleted = this.mediaStreamsByParticipantAndStream.get(participant)?.delete(stream);
+    const deleted = this.remoteStreamsByParticipant.get(participant)?.delete(stream);
     if (globalThis.logLevel.isDebugEnabled) {
       console.debug(`${this.constructor.name}|doRemoveMediaStream`, participant, stream, deleted);
     }
@@ -481,9 +468,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   private doRemoveRemoteParticipant(participant: RemoteParticipant) {
     this.remoteParticipants.delete(participant);
-    const deleted = this.mediaStreamsByParticipantAndStream.delete(participant);
+    const deleted = this.remoteStreamsByParticipant.delete(participant);
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|doRemoveRemoteParticipant`, participant, deleted, this.mediaStreamsByParticipantAndStream.size);
+      console.debug(`${this.constructor.name}|doRemoveRemoteParticipant`, participant, deleted, this.remoteStreamsByParticipant.size);
     }
   }
 

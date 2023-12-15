@@ -5,14 +5,14 @@ import { LocalStream } from 'mywebrtc/dist';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MediaStreamHelper } from '../MediaStreamHelper';
-import { StreamVideoComponent } from '../stream-video/stream-video.component';
+import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 
 @Component({
   selector: 'app-local-stream',
   templateUrl: './local-stream.component.html',
   styleUrls: ['./local-stream.component.css'],
   standalone: true,
-  imports: [StreamVideoComponent, MatButtonModule, MatIconModule]
+  imports: [ControlledStreamComponent, MatButtonModule, MatIconModule],
 })
 export class LocalStreamComponent implements OnInit {
 
@@ -44,7 +44,6 @@ export class LocalStreamComponent implements OnInit {
   }
 
   _mediaStream: MediaStream | undefined;
-  // @Input() 
   set mediaStream(mediaStream: MediaStream | undefined) {
     this._mediaStream = mediaStream;
     if (this._mediaStream) {
