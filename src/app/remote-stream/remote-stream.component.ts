@@ -16,7 +16,6 @@ import { ControlledStreamComponent } from '../controlled-stream/controlled-strea
 })
 export class RemoteStreamComponent implements OnInit {
 
-
   _publishOptions: PublishOptions = { audio: false, video: false };
   _subscribeOptions: SubscribeOptions = { audio: false, video: false };
 
@@ -137,26 +136,26 @@ export class RemoteStreamComponent implements OnInit {
     }
   }
 
-  toggleAudio() {
-    if (this._mediaStream) {
-      if (MediaStreamHelper.isAudioEnabled(this._mediaStream)) {
-        MediaStreamHelper.disableAudio(this._mediaStream);
-      } else {
-        MediaStreamHelper.enableAudio(this._mediaStream);
-      }
-      this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
-    }
-  }
+  // toggleAudio() {
+  //   if (this._mediaStream) {
+  //     if (MediaStreamHelper.isAudioEnabled(this._mediaStream)) {
+  //       MediaStreamHelper.disableAudio(this._mediaStream);
+  //     } else {
+  //       MediaStreamHelper.enableAudio(this._mediaStream);
+  //     }
+  //     this.audioEnabled = MediaStreamHelper.isAudioEnabled(this._mediaStream);
+  //   }
+  // }
 
-  toggleVideo() {
-    if (this._mediaStream) {
-      if (MediaStreamHelper.isVideoEnabled(this._mediaStream)) {
-        MediaStreamHelper.disableVideo(this._mediaStream);
-      } else {
-        MediaStreamHelper.enableVideo(this._mediaStream);
-      }
-      this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
-    }
-  }
+  // toggleVideo() {
+  //   if (this._mediaStream) {
+  //     if (MediaStreamHelper.isVideoEnabled(this._mediaStream)) {
+  //       MediaStreamHelper.disableVideo(this._mediaStream);
+  //     } else {
+  //       MediaStreamHelper.enableVideo(this._mediaStream);
+  //     }
+  //     this.videoEnabled = MediaStreamHelper.isVideoEnabled(this._mediaStream);
+  //   }
+  // }
 
 }

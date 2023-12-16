@@ -1,5 +1,5 @@
-<app-stream-video [mediaStream]="_mediaStream" [muted]="true"></app-stream-video>
-<div class="position-absolute top-0 mt-1 start-0 ms-1">
+<app-stream-video [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="_muted"></app-stream-video>
+<div class="position-absolute top-0 mt-1 start-0 ms-1" #label>
     <ng-content select="[label]"></ng-content>
 </div>
 <div class="position-absolute bottom-0 mb-1 end-0 me-1" #controls>

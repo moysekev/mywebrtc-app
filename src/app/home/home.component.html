@@ -64,15 +64,13 @@
             </mat-grid-tile>
         </mat-grid-list> -->
         <div class="col vh-100" *ngFor="let kv of remoteStreamsByParticipant | keyvalue">
-            <app-remote-stream  *ngFor="let _stream of kv.value" [remoteStream]="_stream"
-                                (onSnapshot)="onSnapshot($event)"></app-remote-stream>
+            <app-remote-stream *ngFor="let _stream of kv.value" [remoteStream]="_stream"
+                (onSnapshot)="onSnapshot($event)"></app-remote-stream>
 
         </div>
         <div *ngIf="localStream"
             class="position-absolute bottom-0 mb-1 start-0 ms-1 col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3 col-xxl-2">
-            <app-local-stream [localStream]="localStream" [videoStyle]="{opacity:0.84}">
-                <div>Foo</div>
-            </app-local-stream>
+            <app-local-stream [localStream]="localStream" [videoStyle]="{opacity:0.84}"> </app-local-stream>
         </div>
     </div>
 
