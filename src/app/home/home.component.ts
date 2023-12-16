@@ -263,10 +263,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  onSnapshot(snapshot: Blob) {
+  onSnapshot(dataUrl: string) {
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|took snapshot`, snapshot);
-      this.snapshotSrc = URL.createObjectURL(snapshot);
+      console.debug(`${this.constructor.name}|took snapshot`, dataUrl);
+      this.snapshotSrc = dataUrl;//URL.createObjectURL(snapshot);
     }
   }
 

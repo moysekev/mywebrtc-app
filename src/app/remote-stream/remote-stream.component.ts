@@ -59,7 +59,7 @@ export class RemoteStreamComponent implements OnInit {
   //   this._fullscreen = fullscreen;
   // }
 
-  @Output() onSnapshot = new EventEmitter<Blob>();
+  @Output() onSnapshot = new EventEmitter<string>();
 
   private doUpdateStates() {
     this.audioEnabled = this._mediaStream ? MediaStreamHelper.isAudioEnabled(this._mediaStream) : false;
@@ -102,8 +102,8 @@ export class RemoteStreamComponent implements OnInit {
   snapshot() {
     if (this._remoteStream) {
       const stream = this._remoteStream;
-      stream.snapshot().then((snapshot) => {
-        this.onSnapshot.emit(snapshot);
+      stream.snapshot().then((dataUrl) => {
+        this.onSnapshot.emit(dataUrl);
       })
     }
   }
