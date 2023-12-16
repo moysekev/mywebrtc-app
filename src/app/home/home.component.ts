@@ -1,20 +1,25 @@
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { KeyValuePipe, NgFor, NgIf } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from "@angular/router";
-
-import { KeyValuePipe, NgFor, NgIf } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { ActivatedRoute, Router } from "@angular/router";
 
 import { AuthService } from '../auth.service';
 import { WINDOW } from '../windows-provider';
 
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/database';
+// import firebase from 'firebase/app';
+// import 'firebase/auth';
+// import 'firebase/database';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/database';
 
 import { Conversation, ConversationOptions, LocalParticipant, LocalStream, RemoteParticipant, RemoteStream, User } from 'mywebrtc/dist';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MediaStreamHelper } from '../MediaStreamHelper';
 import { LocalStreamComponent } from '../local-stream/local-stream.component';
 import { RemoteStreamComponent } from '../remote-stream/remote-stream.component';
@@ -33,7 +38,12 @@ interface Message {
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
   standalone: true,
-  imports: [NgIf, LocalStreamComponent, MatGridListModule, NgFor, MatCardModule, RemoteStreamComponent, KeyValuePipe]
+  imports: [NgIf, NgFor,
+    ClipboardModule,
+    LocalStreamComponent, RemoteStreamComponent,
+    MatGridListModule,
+    MatCardModule, MatButtonModule, MatIconModule,
+    KeyValuePipe]
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
 

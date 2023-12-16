@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import firebase from 'firebase/app';
+// import firebase from 'firebase/app';
+import firebase from 'firebase/compat/app';
 
 import { initialize as initializeMyWebrtc } from 'mywebrtc/dist';
 

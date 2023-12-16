@@ -75,18 +75,23 @@
     </div>
 
     <div class="row">
-        <div class="col">
-            <p>Conversation id : {{conversation?.id}}</p>
+        <div class="col text-center">
+            <!-- <p>Conversation id : {{conversation?.id}}</p>
             <p>User id : {{localParticipant?.user?.id}}</p>
             <p>User nickname : {{localParticipantData?.nickname}}</p>
             <p>User moderator : {{moderator}}</p>
             <p>Others can join at url
                 <a href="{{url}}" target="_blank" rel="noopener">{{url}}</a>
-            </p>
+            </p> -->
+            <button *ngIf="url" mat-fab extended color="primary" [cdkCopyToClipboard]="url">
+                <mat-icon>link</mat-icon>
+                Copy link
+            </button>
+            <!-- 
             <p>Conversation moderated : {{moderated}}</p>
             <p>
                 <button (click)="toggleModeration()">toggleModeration</button>
-            </p>
+            </p> -->
         </div>
     </div>
 

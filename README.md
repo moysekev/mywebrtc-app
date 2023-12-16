@@ -34,3 +34,31 @@ git add docs/*
 git status
 git commit -a -m "deploy"
 git push origin main
+
+
+## BUILD SIZE
+kmoyse@kmoyse-XPS-15-9560:~/akgsworkspace/mywebrtc-app$ ng build
+✔ Browser application bundle generation complete.
+✔ Copying assets complete.
+⠋ Generating index html...2 rules skipped due to selector errors:
+  .form-floating>~label -> Did not expect successive traversals.
+  .form-floating>~label -> Did not expect successive traversals.
+✔ Index html generation complete.
+
+Initial Chunk Files           | Names         |  Raw Size | Estimated Transfer Size
+main.80a9f478a0c771f4.js      | main          |   1.02 MB |               228.66 kB
+styles.cd7cd892905e7e38.css   | styles        | 301.18 kB |                29.84 kB
+scripts.d1c00555d4694195.js   | scripts       |  58.26 kB |                14.42 kB
+polyfills.5dc05d4c180782f3.js | polyfills     |  32.99 kB |                10.69 kB
+runtime.39457fd9d69ed11d.js   | runtime       |   1.22 kB |               659 bytes
+
+                              | Initial Total |   1.40 MB |               284.26 kB
+
+Build at: 2023-12-16T18:09:15.496Z - Hash: 190a5765c2d56363 - Time: 20821ms
+
+Warning: /home/kmoyse/akgsworkspace/mywebrtc-app/src/main.ts depends on 'mywebrtc/dist'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: bundle initial exceeded maximum budget. Budget 1.00 MB was not met by 409.65 kB with a total of 1.40 MB.
+
+TODO : migrate webrtc lib and this project to modular firebase. and retry. also retry to package library for ESnext (browser rather than commonsj.)
