@@ -1,28 +1,22 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { KeyValuePipe, NgFor, NgIf } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Inject, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { AuthService } from '../auth.service';
-import { WINDOW } from '../windows-provider';
+import { getDatabase, push, ref } from "@firebase/database";
 
-// import firebase from 'firebase/app';
-// import 'firebase/auth';
-// import 'firebase/database';
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import 'firebase/compat/database';
+import { Conversation, ConversationOptions, LocalParticipant, LocalStream, RemoteParticipant, RemoteStream, User } from 'mywebrtc';
 
-import { Conversation, ConversationOptions, LocalParticipant, LocalStream, RemoteParticipant, RemoteStream, User } from 'mywebrtc/dist';
-
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MediaStreamHelper } from '../MediaStreamHelper';
+import { AuthService } from '../auth.service';
 import { LocalStreamComponent } from '../local-stream/local-stream.component';
 import { RemoteStreamComponent } from '../remote-stream/remote-stream.component';
+import { WINDOW } from '../windows-provider';
 
 interface UserData {
   nickname: string
@@ -114,7 +108,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
-    private fb: UntypedFormBuilder
+    private fb: UntypedFormBuilder,
+    private ngZone: NgZone
   ) {
   }
 
@@ -145,7 +140,43 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       moderated: this.moderated
     }
 
-    Conversation.getOrCreate(conversationId, firebase.database().ref('/').child("Conversations"), options).then((conversation: Conversation) => {
+    // const db = getDatabase();
+    // set(ref(db, 'Conversations/' + 'foo'), {
+    //   username: 'name',
+    //   email: 'email',
+    // });
+
+    // const l_ref = ref(getDatabase(), 'Conversations')
+    // console.log('l_ref', l_ref)
+    // const l_dbRef = push(l_ref, { moderated: 'test' });
+    // console.log('KEEEYYYYYYYYYYYYYYYYYYYyyy', l_dbRef.key)
+
+    // const newPostRef = push(child(ref(getDatabase()), `UN/DEUX/TROIS`), { un: 'deux' });
+    // const streamId = newPostRef.key;
+    // return
+
+
+    // firebase.database().ref('/').child("Conversations")
+    // ref(getDatabase(), '/Conversations')
+    // child(ref(getDatabase(firebaseApp)), 'Conversations')
+
+    const firebaseDatabaseReference = ref(getDatabase(), 'Conversations');
+    console.log('firebaseDatabaseReference_home', firebaseDatabaseReference)
+
+    const l_dbRef = push(firebaseDatabaseReference, { moderated: true });
+
+
+    // this.ngZone.runOutsideAngular(() => {
+    //   console.log(`${this.constructor.name}|runOutsideAngular`);
+    //   Conversation.getOrCreate(conversationId, firebaseDatabaseReference, options).then((conversation: Conversation) => {
+    //     if (globalThis.logLevel.isInfoEnabled) {
+    //       console.log(`${this.constructor.name}|conversation`, conversation);
+    //     }
+    //     this.conversation = conversation;
+    //   })
+    // });
+    // return
+    Conversation.getOrCreate(conversationId, ref(getDatabase(), 'Conversations'), options).then((conversation: Conversation) => {
       if (globalThis.logLevel.isInfoEnabled) {
         console.log(`${this.constructor.name}|conversation`, conversation);
       }
@@ -392,14 +423,15 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   }
   private doSignOut() {
-    firebase.auth().signOut().then(() => {
-      if (globalThis.logLevel.isInfoEnabled) {
-        console.info(`${this.constructor.name}|signed Out`);
-      }
-      this.router.navigate(['/login']);
-    }).catch(error => {
-      console.error(`${this.constructor.name}|doSignOut`, error)
-    });
+    // TODO: migrate !
+    // firebase.auth().signOut().then(() => {
+    //   if (globalThis.logLevel.isInfoEnabled) {
+    //     console.info(`${this.constructor.name}|signed Out`);
+    //   }
+    //   this.router.navigate(['/login']);
+    // }).catch(error => {
+    //   console.error(`${this.constructor.name}|doSignOut`, error)
+    // });
   }
 
   // --------------------------------------------------------------------------

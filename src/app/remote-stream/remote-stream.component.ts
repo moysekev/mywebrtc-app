@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-
-import { PublishOptions, RemoteStream, SubscribeOptions } from 'mywebrtc/dist';
-
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+
+import { PublishOptions, RemoteStream, SubscribeOptions } from 'mywebrtc';
+
 import { MediaStreamHelper } from '../MediaStreamHelper';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 

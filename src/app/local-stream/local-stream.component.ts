@@ -1,9 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
-
-import { LocalStream, PublishOptions } from 'mywebrtc/dist';
-
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+
+import { LocalStream, PublishOptions } from 'mywebrtc';
+
 import { MediaStreamHelper } from '../MediaStreamHelper';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 
@@ -18,8 +18,8 @@ export class LocalStreamComponent implements OnInit {
 
   _publishOptions: PublishOptions = { audio: false, video: false };
 
-  audioEnabled = false;
-  videoEnabled = false;
+  // audioEnabled = false;
+  // videoEnabled = false;
 
   _localStream: LocalStream | undefined;
   @Input({ required: true }) set localStream(localStream: LocalStream) {
