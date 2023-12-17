@@ -1,14 +1,14 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { KeyValuePipe, NgFor, NgIf } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, HostListener, Inject, NgZone, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute } from "@angular/router";
 
-import { getDatabase, push, ref } from "@firebase/database";
+import { getDatabase, ref } from "@firebase/database";
 
 import { Conversation, ConversationOptions, LocalParticipant, LocalStream, RemoteParticipant, RemoteStream, User } from 'mywebrtc';
 
@@ -92,7 +92,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   //
   @HostListener('window:unload', ['$event'])
   unloadHandler(event: any) {
-    console.log("unloadHandler", event);
+    // console.log("unloadHandler", event);
     this.doCleanUp();
   }
 
@@ -100,18 +100,15 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   // This is useful if user closes the tab, or refreshes the page
   @HostListener('window:beforeunload', ['$event'])
   beforeUnloadHandler(event: any) {
-    console.log("beforeUnloadHandler", event);
+    // console.log("beforeUnloadHandler", event);
     this.doCleanUp();
   }
 
   constructor(@Inject(WINDOW) public window: Window,
     private activatedRoute: ActivatedRoute,
-    private router: Router,
     private authService: AuthService,
     private fb: UntypedFormBuilder,
-    private ngZone: NgZone
-  ) {
-  }
+  ) { }
 
   ngOnInit(): void {
 
@@ -140,45 +137,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       moderated: this.moderated
     }
 
-    // const db = getDatabase();
-    // set(ref(db, 'Conversations/' + 'foo'), {
-    //   username: 'name',
-    //   email: 'email',
-    // });
-
-    // const l_ref = ref(getDatabase(), 'Conversations')
-    // console.log('l_ref', l_ref)
-    // const l_dbRef = push(l_ref, { moderated: 'test' });
-    // console.log('KEEEYYYYYYYYYYYYYYYYYYYyyy', l_dbRef.key)
-
-    // const newPostRef = push(child(ref(getDatabase()), `UN/DEUX/TROIS`), { un: 'deux' });
-    // const streamId = newPostRef.key;
-    // return
-
-
-    // firebase.database().ref('/').child("Conversations")
-    // ref(getDatabase(), '/Conversations')
-    // child(ref(getDatabase(firebaseApp)), 'Conversations')
-
-    const firebaseDatabaseReference = ref(getDatabase(), 'Conversations');
-    console.log('firebaseDatabaseReference_home', firebaseDatabaseReference)
-
-    const l_dbRef = push(firebaseDatabaseReference, { moderated: true });
-
-
-    // this.ngZone.runOutsideAngular(() => {
-    //   console.log(`${this.constructor.name}|runOutsideAngular`);
-    //   Conversation.getOrCreate(conversationId, firebaseDatabaseReference, options).then((conversation: Conversation) => {
-    //     if (globalThis.logLevel.isInfoEnabled) {
-    //       console.log(`${this.constructor.name}|conversation`, conversation);
-    //     }
-    //     this.conversation = conversation;
-    //   })
-    // });
-    // return
     Conversation.getOrCreate(conversationId, ref(getDatabase(), 'Conversations'), options).then((conversation: Conversation) => {
       if (globalThis.logLevel.isInfoEnabled) {
-        console.log(`${this.constructor.name}|conversation`, conversation);
+        console.log(`${this.constructor.name}|Conversation`, conversation);
       }
 
       this.conversation = conversation;
