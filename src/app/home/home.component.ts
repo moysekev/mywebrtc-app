@@ -1,7 +1,7 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { KeyValuePipe, NgFor, NgIf } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
+import { FormsModule, UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -17,6 +17,8 @@ import { AuthService } from '../auth.service';
 import { LocalStreamComponent } from '../local-stream/local-stream.component';
 import { RemoteStreamComponent } from '../remote-stream/remote-stream.component';
 import { WINDOW } from '../windows-provider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 interface UserData {
   nickname: string
@@ -35,8 +37,10 @@ interface Message {
   imports: [NgIf, NgFor,
     ClipboardModule,
     LocalStreamComponent, RemoteStreamComponent,
-    MatGridListModule,
-    MatCardModule, MatButtonModule, MatIconModule,
+    // MatGridListModule,
+    // MatCardModule,
+    MatButtonModule, MatIconModule,
+    FormsModule, MatFormFieldModule, MatInputModule,
     KeyValuePipe]
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
@@ -54,6 +58,16 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   });
   get messageFc(): UntypedFormControl {
     return this.messageFormGroup.get('message') as UntypedFormControl;
+  }
+
+  // _nickname = '';
+  get nickname() {
+    return this.localParticipant?.getUser().getUserData().nickname;
+  }
+  set nickname(value: string) {
+    console.log('set nickname', value)
+    // this._nickname = value;
+    this.localParticipant?.getUser().setUserData({ ...this.localParticipant?.getUser().getUserData(), nickname: value })
   }
 
   // readonly year: number = new Date().getFullYear();
@@ -137,7 +151,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       moderated: this.moderated
     }
 
-    Conversation.getOrCreate(conversationId, ref(getDatabase(), 'Conversations'), options).then((conversation: Conversation) => {
+    // ref(getDatabase(), 'Conversations')
+    Conversation.getOrCreate(conversationId, ref(getDatabase()), options).then((conversation: Conversation) => {
       if (globalThis.logLevel.isInfoEnabled) {
         console.log(`${this.constructor.name}|Conversation`, conversation);
       }
@@ -172,12 +187,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
         this.remoteParticipants.add(participant);
 
-        participant.getUser().onUserDataUpdate = (userData: UserData) => {
+        participant.getUser().onUserDataUpdate((userData: UserData) => {
           if (globalThis.logLevel.isInfoEnabled) {
             console.log(`${this.constructor.name}|onUserDataUpdate`, participant, userData);
           }
-        };
-        participant.onStreamPublished = (stream: RemoteStream) => {
+        })
+        participant.onStreamPublished((stream: RemoteStream) => {
           if (globalThis.logLevel.isInfoEnabled) {
             console.log(`${this.constructor.name}|onStreamPublished`, participant, stream);
           }
@@ -187,13 +202,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           this.localParticipant?.subscribe(stream);
           // or 
           //this.localParticipant?.subscribe(stream, { audio: true, video: false });
-        };
-        participant.onStreamUnpublished = (stream: RemoteStream) => {
+        })
+        participant.onStreamUnpublished((stream: RemoteStream) => {
           if (globalThis.logLevel.isInfoEnabled) {
             console.log(`${this.constructor.name}|onStreamUnpublished`, participant, stream);
           }
           this.doRemoveMediaStream(participant, stream);
-        };
+        })
       };
       conversation.onParticipantRemoved = (participant: RemoteParticipant | LocalParticipant) => {
         if (globalThis.logLevel.isInfoEnabled) {
@@ -209,9 +224,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         }
       };
 
-      conversation.onMessage = (participant: User, message: Message) => {
+      conversation.onMessage((participant: User, message: Message) => {
         this.messages.push([participant.userData as UserData, message]);
-      }
+      })
 
       // Join the conversation
       const userData: UserData = {
@@ -230,12 +245,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
         this.publish()
 
-        this.localParticipant.getUser().onUserDataUpdate = (userData: UserData) => {
+        this.localParticipant.getUser().onUserDataUpdate((userData: UserData) => {
           if (globalThis.logLevel.isInfoEnabled) {
             console.log(`${this.constructor.name}|onUserDataUpdate`, this.localParticipant, userData);
           }
           this.localParticipantData = userData;
-        };
+        })
       }).catch((error: any) => {
         if (globalThis.logLevel.isWarnEnabled) {
           console.warn(`${this.constructor.name}|addParticipant failed`, error);

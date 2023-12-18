@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -14,7 +14,7 @@ import { ControlledStreamComponent } from '../controlled-stream/controlled-strea
   standalone: true,
   imports: [ControlledStreamComponent, MatButtonModule, MatIconModule]
 })
-export class RemoteStreamComponent implements OnInit {
+export class RemoteStreamComponent implements OnInit, OnDestroy {
 
   _publishOptions: PublishOptions = { audio: false, video: false };
   _subscribeOptions: SubscribeOptions = { audio: false, video: false };
@@ -22,31 +22,36 @@ export class RemoteStreamComponent implements OnInit {
   audioEnabled = false;
   videoEnabled = false;
 
+  _nickname = '';
+  on_userDataUpdate = (userData: any) => {
+    this._nickname = userData.nickname;
+  };
+
   _remoteStream: RemoteStream | undefined;
   @Input({ required: true }) set remoteStream(remoteStream: RemoteStream) {
+
     this._remoteStream = remoteStream;
-    if (this._remoteStream) {
+    this._remoteStream.getParticipant().getUser().onUserDataUpdate(this.on_userDataUpdate);
 
-      const l_stream = this._remoteStream;
+    const l_stream = this._remoteStream;
 
+    this._publishOptions = l_stream.getPublishOptions();
+    l_stream.onPublishOptionsUpdate = () => {
       this._publishOptions = l_stream.getPublishOptions();
-      l_stream.onPublishOptionsUpdate = () => {
-        this._publishOptions = l_stream.getPublishOptions();
-      };
+    };
 
+    this._subscribeOptions = l_stream.getSubscribeOptions();
+    l_stream.onSubscribeOptionsUpdate = () => {
       this._subscribeOptions = l_stream.getSubscribeOptions();
-      l_stream.onSubscribeOptionsUpdate = () => {
-        this._subscribeOptions = l_stream.getSubscribeOptions();
-      };
+    };
 
-      this.mediaStream = this._remoteStream.getMediaStream();
-      this._remoteStream.onMediaStream = (mediaStream: MediaStream) => {
-        if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|onMediaStreamReady`, mediaStream);
-        }
-        this.mediaStream = mediaStream;
+    this.mediaStream = this._remoteStream.getMediaStream();
+    this._remoteStream.onMediaStream((mediaStream: MediaStream) => {
+      if (globalThis.logLevel.isDebugEnabled) {
+        console.debug(`${this.constructor.name}|onMediaStreamReady`, mediaStream);
       }
-    }
+      this.mediaStream = mediaStream;
+    })
   }
 
   _mirror = false;
@@ -98,6 +103,12 @@ export class RemoteStreamComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void { }
+
+  ngOnDestroy(): void {
+    if (this._remoteStream) {
+      this._remoteStream.getParticipant().getUser().offUserDataUpdate(this.on_userDataUpdate);
+    }
+  }
 
   snapshot() {
     if (this._remoteStream) {

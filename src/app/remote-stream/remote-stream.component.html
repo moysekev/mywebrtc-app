@@ -1,5 +1,5 @@
 <app-controlled-stream [mediaStream]="_mediaStream">
-    <span label>{{_publishOptions.topic}}</span>
+    <span label>{{_nickname}}-{{_publishOptions.topic}}</span>
     <div controls>
         <div>
             <button mat-mini-fab color="primary" aria-label="snapshot" title="snapshot" (click)="snapshot()">

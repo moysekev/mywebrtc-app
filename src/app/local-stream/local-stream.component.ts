@@ -27,9 +27,9 @@ export class LocalStreamComponent implements OnInit {
     if (this._localStream) {
       this._publishOptions = this._localStream.getPublishOptions();
       const l_stream = this._localStream;
-      l_stream.onPublishOptionsUpdate = () => {
+      l_stream.onPublishOptionsUpdate(() => {
         this._publishOptions = l_stream.getPublishOptions();
-      };
+      })
 
       this.mediaStream = this._localStream.getMediaStream();
     }
