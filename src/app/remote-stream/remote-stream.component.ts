@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ElementRef } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -100,7 +100,9 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor() { }
+  dataChannel?: RTCDataChannel;
+
+  constructor(private el: ElementRef) { }
 
   ngOnInit(): void { }
 
@@ -109,6 +111,58 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       this._remoteStream.getParticipant().getUser().offUserDataUpdate(this.on_userDataUpdate);
     }
   }
+
+  onPointerEnter(event: PointerEvent) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
+    if (globalThis.logLevel.isDebugEnabled) {
+      console.log('onPointerEnter', event)
+    }
+
+    if (this._remoteStream) {
+      const dataChannel = this._remoteStream.getOrCreateDataChannel()
+      dataChannel.onopen = () => {
+        this.dataChannel = dataChannel;
+      };
+    }
+  }
+
+  onPointerMove(event: PointerEvent) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
+
+    if (this.dataChannel) {
+      const x = event.clientX - (this.el.nativeElement.offsetLeft ?? 0);
+      const y = event.clientY - (this.el.nativeElement.offsetTop ?? 0);
+      const left = `${Math.round(x * 100 / (this.el.nativeElement.clientWidth || 100))}%`;
+      const top = `${Math.round(y * 100 / (this.el.nativeElement.clientHeight || 100))}%`;
+      // if (globalThis.logLevel.isDebugEnabled) {
+      //   console.log('onPointerMove', event,
+      //     this.el.nativeElement.offsetLeft, this.el.nativeElement.offsetTop,
+      //     this.el.nativeElement.clientWidth, this.el.nativeElement.clientHeight,
+      //     left, top)
+      // }
+      this.dataChannel.send(JSON.stringify({ left, top }))
+    }
+
+  }
+
+  onPointerLeave(event: PointerEvent) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
+    if (globalThis.logLevel.isDebugEnabled) {
+      console.log('onPointerLeave', event)
+    }
+    if (this.dataChannel) {
+      this.dataChannel.close()
+      this.dataChannel = undefined;
+    }
+  }
+
+  // onPointerDown(event: PointerEvent) {
+  //   // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
+  //   if (globalThis.logLevel.isDebugEnabled) {
+  //     console.log('onPointerDown', event)
+  //   }
+  //   this._remoteStream?.sendData({ x: event.clientX, y: event.clientY })
+  // }
 
   snapshot() {
     if (this._remoteStream) {

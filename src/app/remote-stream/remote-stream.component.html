@@ -1,4 +1,5 @@
-<app-controlled-stream [mediaStream]="_mediaStream">
+<app-controlled-stream [mediaStream]="_mediaStream" (pointerenter)="onPointerEnter($event)"
+    (pointermove)="onPointerMove($event)" (pointerleave)="onPointerLeave($event)">
     <span label>{{_nickname}}-{{_publishOptions.topic}}</span>
     <div controls>
         <div>

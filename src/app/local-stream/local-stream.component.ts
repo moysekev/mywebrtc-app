@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -16,6 +16,8 @@ import { ControlledStreamComponent } from '../controlled-stream/controlled-strea
 })
 export class LocalStreamComponent implements OnInit {
 
+  @ViewChild('pointer') pointer: ElementRef | undefined;
+
   _publishOptions: PublishOptions = { audio: false, video: false };
 
   // audioEnabled = false;
@@ -32,6 +34,19 @@ export class LocalStreamComponent implements OnInit {
       })
 
       this.mediaStream = this._localStream.getMediaStream();
+
+      this._localStream.onDataChannel((dataChannel: RTCDataChannel) => {
+        // TODO create a pointer for this datachannel only
+        // TODO how do we know this is for a pointer ?
+        // TODO how do we know who is doing it ?
+        dataChannel.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (this.pointer) {
+            this.pointer.nativeElement.style.left = data.left;//`${data.x}px`;
+            this.pointer.nativeElement.style.top = data.top;// `${data.y}px`;
+          }
+        };
+      })
     }
   }
 
