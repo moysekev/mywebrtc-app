@@ -54,6 +54,11 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     })
   }
 
+  _videoStyle: { [klass: string]: any; } = {};
+  @Input() set videoStyle(style: { [klass: string]: any; }) {
+    this._videoStyle = { ...this._videoStyle, ...style };
+  }
+
   _mirror = false;
   @Input() set mirror(mirror: boolean) {
     this._mirror = mirror;
@@ -130,10 +135,16 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
 
     if (this.dataChannel) {
-      const x = event.clientX - (this.el.nativeElement.offsetLeft ?? 0);
-      const y = event.clientY - (this.el.nativeElement.offsetTop ?? 0);
+      // const x = event.clientX - (this.el.nativeElement.offsetLeft ?? 0);
+      // const y = event.clientY - (this.el.nativeElement.offsetTop ?? 0);
+      const rect = this.el.nativeElement.getBoundingClientRect();
+      const x = event.clientX - rect.left; //x position within the element.
+      const y = event.clientY - rect.top;  //y position within the element.
       const left = `${Math.round(x * 100 / (this.el.nativeElement.clientWidth || 100))}%`;
       const top = `${Math.round(y * 100 / (this.el.nativeElement.clientHeight || 100))}%`;
+
+      
+
       // if (globalThis.logLevel.isDebugEnabled) {
       //   console.log('onPointerMove', event,
       //     this.el.nativeElement.offsetLeft, this.el.nativeElement.offsetTop,

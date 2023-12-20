@@ -1,4 +1,4 @@
-<app-controlled-stream [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="true">
+<app-controlled-stream class="h-100 w-100" [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="true">
     <span label>{{_publishOptions.topic}}</span>
     <div controls>
         <div>
@@ -27,6 +27,6 @@
     </div>
 </app-controlled-stream>
 <!-- [style.top]="sharedPointer.y" [style.left]="sharedPointer.x" -->
-<div class="position-absolute"  #pointer>
+<div class="position-absolute" #pointer>
     <mat-icon>search</mat-icon>
 </div>

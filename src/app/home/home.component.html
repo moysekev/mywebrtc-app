@@ -42,7 +42,7 @@
         </div>
     </div> -->
 
-    <div class="row position-relative vh-100">
+    <div class="row position-relative vh-100 vw-100">
         <!-- class="vw-100 vh-100" -->
         <!-- <mat-grid-list cols="1" rowHeight="100vh">
             <mat-grid-tile *ngFor="let kv of remoteStreamsByParticipant | keyvalue">
@@ -63,10 +63,14 @@
                 </mat-card>
             </mat-grid-tile>
         </mat-grid-list> -->
-        <div class="col vh-100" *ngFor="let kv of remoteStreamsByParticipant | keyvalue">
-            <app-remote-stream *ngFor="let _stream of kv.value" [remoteStream]="_stream"
-                (onSnapshot)="onSnapshot($event)"></app-remote-stream>
-
+        <!-- <div class="col h-100">
+            <app-local-stream class="h-100 w-100" *ngIf="localStream" [localStream]="localStream"
+                [videoStyle]="{objectFit:'cover'}">
+            </app-local-stream>
+        </div> -->
+        <div class="col h-100" *ngFor="let kv of remoteStreamsByParticipant | keyvalue">
+            <app-remote-stream *ngFor="let _stream of kv.value" class="h-100 w-100" [remoteStream]="_stream"
+                [videoStyle]="{objectFit:'cover'}" (onSnapshot)="onSnapshot($event)"></app-remote-stream>
         </div>
         <div *ngIf="localStream"
             class="position-absolute bottom-0 mb-1 start-0 ms-1 col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3 col-xxl-2">

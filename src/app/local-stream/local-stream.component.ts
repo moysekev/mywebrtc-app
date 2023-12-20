@@ -67,6 +67,10 @@ export class LocalStreamComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    if (this.pointer) {
+      this.pointer.nativeElement.style.left = '25%';
+      this.pointer.nativeElement.style.top = '25%';
+    }
   }
 
   togglePublishAudio() {
