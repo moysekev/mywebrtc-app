@@ -1,5 +1,5 @@
 :host {
-    display: inline-block;
+    display: block;
     position: relative;
     min-height: var(--min-height);
     min-width: var(--min-width);

@@ -6,9 +6,9 @@
     -moz-transform: rotateY(180deg);
 }
 
-:host {
+/* :host {
     display: flex;
-}
+} */
 
 /* video {
     align-self: flex-end;

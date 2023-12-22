@@ -25,7 +25,8 @@ export class StreamVideoComponent implements AfterViewInit {
   }
 
   _videoStyle: { [klass: string]: any; } = {
-    height: '100%', width: '100%',
+    // minHeight: '100%', minWidth: '100%',
+    width: '99vw', maxWidth: '133.34vh', height: '75vw', maxHeight: '100vh',
     'object-fit': 'contain',
     ...VIDEO_ROUNDED_CORNERS
   };
