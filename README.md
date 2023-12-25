@@ -115,3 +115,9 @@ runtime.745df2968b9879d0.js   | runtime       |   1.05 kB |               600 by
 Build at: 2023-12-17T12:28:52.429Z - Hash: 774765bf3d3f4398 - Time: 6856ms
 
 Warning: bundle initial exceeded maximum budget. Budget 1.00 MB was not met by 159.74 kB with a total of 1.16 MB.
+
+
+
+to look bundle size : 
+ng build --source-map=true --named-chunks=true
+npx source-map-explorer dist/mywebrtc-app/**/*.js

@@ -35,8 +35,6 @@ interface Message {
   imports: [NgIf, NgFor,
     ClipboardModule,
     LocalStreamComponent, RemoteStreamComponent,
-    // MatGridListModule,
-    // MatCardModule,
     MatButtonModule, MatIconModule,
     FormsModule, MatFormFieldModule, MatInputModule,
     KeyValuePipe]

@@ -1,7 +1,6 @@
 import { enableProdMode, importProvidersFrom } from '@angular/core';
 
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { initializeApp } from "@firebase/app";
 
@@ -51,6 +50,6 @@ bootstrapApplication(AppComponent, {
   providers: [
     importProvidersFrom(AppRoutingModule),
     WINDOW_PROVIDERS, AuthGuard,
-    provideAnimations()
+    // provideAnimations() removed to reduce bundle size
   ]
 }).catch(err => console.error(err));
