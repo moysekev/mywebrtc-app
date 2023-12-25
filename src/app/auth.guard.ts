@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard  {
+export class AuthGuard {
 
   constructor(private router: Router,
     private authService: AuthService) {
@@ -17,25 +17,30 @@ export class AuthGuard  {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     if (this.authService.user === undefined) {
-      console.log('AuthGuard::canActivate => Promise');
       return new Promise((resolve) => {
         this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
         this.authService.user$.subscribe({
           next(user) {
             if (user) {
-              console.log('AuthGuard::canActivate => resolve(true)');
+              if (globalThis.logLevel.isDebugEnabled) {
+                console.debug(`${this.constructor.name}|canActivate => resolve(true)`, user)
+              }
               resolve(true);
             } else { resolve(false) }
           }
         })
-      });
+      })
     }
     else if (this.authService.user !== null) {
-      console.log('AuthGuard::canActivate => return true');
+      if (globalThis.logLevel.isDebugEnabled) {
+        console.debug(`${this.constructor.name}|canActivate => return true`, this.authService.user)
+      }
       return true;
     }
     else {
-      console.log('AuthGuard::canActivate => return false');
+      if (globalThis.logLevel.isDebugEnabled) {
+        console.debug(`${this.constructor.name}|canActivate => return false`)
+      }
       //this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
       return false;
     }

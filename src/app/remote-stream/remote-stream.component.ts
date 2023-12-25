@@ -1,18 +1,21 @@
-import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ElementRef } from '@angular/core';
+import { NgFor } from '@angular/common';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { PublishOptions, RemoteStream, SubscribeOptions } from 'mywebrtc';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
+import { AuthService } from '../auth.service';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
+
 
 @Component({
   selector: 'app-remote-stream',
   templateUrl: './remote-stream.component.html',
   styleUrls: ['./remote-stream.component.css'],
   standalone: true,
-  imports: [ControlledStreamComponent, MatButtonModule, MatIconModule]
+  imports: [NgFor, ControlledStreamComponent, MatButtonModule, MatIconModule]
 })
 export class RemoteStreamComponent implements OnInit, OnDestroy {
 
@@ -107,7 +110,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
 
   dataChannel?: RTCDataChannel;
 
-  constructor(private el: ElementRef) { }
+  constructor(private el: ElementRef, private authService: AuthService) { }
 
   ngOnInit(): void { }
 
@@ -120,12 +123,16 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
   onPointerEnter(event: PointerEvent) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
     if (globalThis.logLevel.isDebugEnabled) {
-      console.log('onPointerEnter', event)
+      console.debug(`${this.constructor.name}|onPointerEnter`, event)
     }
 
     if (this._remoteStream) {
-      const dataChannel = this._remoteStream.getOrCreateDataChannel()
+      const dataChannel = this._remoteStream.getOrCreateDataChannel();
       dataChannel.onopen = () => {
+        // send first message indicating the pointer location that will be sent next
+        // comes from the current user
+        dataChannel.send(JSON.stringify({ nickname: this.authService.user?.isAnonymous ? "anonymous" : this.authService.user?.displayName }))
+
         this.dataChannel = dataChannel;
       };
     }
@@ -140,10 +147,14 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       const rect = this.el.nativeElement.getBoundingClientRect();
       const x = event.clientX - rect.left; //x position within the element.
       const y = event.clientY - rect.top;  //y position within the element.
-      const left = `${Math.round(x * 100 / (this.el.nativeElement.clientWidth || 100))}%`;
-      const top = `${Math.round(y * 100 / (this.el.nativeElement.clientHeight || 100))}%`;
+      // const left = `${Math.round(x * 100 / (this.el.nativeElement.clientWidth || 100))}%`;
+      // const top = `${Math.round(y * 100 / (this.el.nativeElement.clientHeight || 100))}%`;
 
-      
+      // Round with 2 decimal to reduce amount of data sent on the datachannel, still keeping enough accuracy
+      // Math.round((num + Number.EPSILON) * 100) / 100
+      // console.log('onPointerMove', x, this.el.nativeElement.clientWidth)
+      const left = Math.round((x * 100 / (this.el.nativeElement.clientWidth || 100) + Number.EPSILON) * 100) / 100;
+      const top = Math.round((y * 100 / (this.el.nativeElement.clientHeight || 100) + Number.EPSILON) * 100) / 100;
 
       // if (globalThis.logLevel.isDebugEnabled) {
       //   console.log('onPointerMove', event,
@@ -159,7 +170,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
   onPointerLeave(event: PointerEvent) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
     if (globalThis.logLevel.isDebugEnabled) {
-      console.log('onPointerLeave', event)
+      console.log('onPointerLeave', event, this.dataChannel)
     }
     if (this.dataChannel) {
       this.dataChannel.close()

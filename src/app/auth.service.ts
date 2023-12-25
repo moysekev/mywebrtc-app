@@ -2,14 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { Observable, Subject } from 'rxjs';
 
-// import firebase from 'firebase/app';
-// import 'firebase/auth';
-// import firebase from 'firebase/compat/app';
-// import 'firebase/compat/auth';
-
 import { User, getAuth, onAuthStateChanged } from "@firebase/auth";
-// import { firebaseApp } from 'mywebrtc';
-// import { firebaseApp } from './app.component';
 
 @Injectable({
   providedIn: 'root'
@@ -36,21 +29,26 @@ export class AuthService {
     //   }
     // });
 
-    console.log('AuthService:firebaseApp',)
+    if (globalThis.logLevel.isDebugEnabled) {
+      console.debug(`${this.constructor.name}|constructor`)
+    }
     const auth = getAuth();
     onAuthStateChanged(auth, user => {
       if (user) {
         // User is signed in.
-        console.log('onAuthStateChanged', user);
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${this.constructor.name}|onAuthStateChanged`, user)
+        }
         this.user = user;
         this.userSubject.next(user);
       } else {
         // No user is signed in.
-        console.log('onAuthStateChanged : No user is signed in');
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${this.constructor.name}|onAuthStateChanged : No user is signed in`)
+        }
         this.user = null;
         this.userSubject.next(null);
       }
     });
-    console.log('AuthService:done')
   }
 }

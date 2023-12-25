@@ -1,3 +1,4 @@
+import { KeyValuePipe, NgFor } from '@angular/common';
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,19 +7,24 @@ import { LocalStream, PublishOptions } from 'mywebrtc';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
+import { PointerComponent } from '../pointer/pointer.component';
 
 @Component({
   selector: 'app-local-stream',
   templateUrl: './local-stream.component.html',
   styleUrls: ['./local-stream.component.css'],
   standalone: true,
-  imports: [ControlledStreamComponent, MatButtonModule, MatIconModule],
+  imports: [NgFor, KeyValuePipe,
+    ControlledStreamComponent, PointerComponent, MatButtonModule, MatIconModule],
 })
 export class LocalStreamComponent implements OnInit {
 
   @ViewChild('pointer') pointer: ElementRef | undefined;
 
   _publishOptions: PublishOptions = { audio: false, video: false };
+
+  // store pointers dataChannels with corresponding nickname
+  pointerChannels: Map<RTCDataChannel, string> = new Map();
 
   // audioEnabled = false;
   // videoEnabled = false;
@@ -36,16 +42,22 @@ export class LocalStreamComponent implements OnInit {
       this.mediaStream = this._localStream.getMediaStream();
 
       this._localStream.onDataChannel((dataChannel: RTCDataChannel) => {
-        // TODO create a pointer for this datachannel only
+        // DONE create a pointer each datachannel
         // TODO how do we know this is for a pointer ?
-        // TODO how do we know who is doing it ?
+        // DONE: how do we know who is sending his pointer ? => first message contains nickname, next ones will be {top, left}
+
+        // Wait for first message with nickname info before adding in the Map
+        // This will trigger Pointer component creation that will override
+        // the onmessage, listening on pointer location update only.
         dataChannel.onmessage = (event) => {
           const data = JSON.parse(event.data);
-          if (this.pointer) {
-            this.pointer.nativeElement.style.left = data.left;//`${data.x}px`;
-            this.pointer.nativeElement.style.top = data.top;// `${data.y}px`;
+          if (data.nickname) {
+            this.pointerChannels.set(dataChannel, data.nickname);
           }
         };
+        dataChannel.addEventListener('close', () => {
+          this.pointerChannels.delete(dataChannel);
+        })
       })
     }
   }
