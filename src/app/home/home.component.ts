@@ -105,15 +105,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   @HostListener('window:unload', ['$event'])
   unloadHandler(event: any) {
     // console.log("unloadHandler", event);
+    event.preventDefault();
     this.doCleanUp();
   }
 
   // Use BEFORE unload to hangup (works for Firefox at least)
   // This is useful if user closes the tab, or refreshes the page
   @HostListener('window:beforeunload', ['$event'])
-  beforeUnloadHandler(event: any) {
-    // console.log("beforeUnloadHandler", event);
+  beforeUnloadHandler(event: BeforeUnloadEvent) {
+    event.preventDefault();
     this.doCleanUp();
+    event.returnValue = true;
   }
 
   constructor(@Inject(WINDOW) public window: Window,
