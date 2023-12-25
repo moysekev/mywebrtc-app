@@ -1,5 +1,5 @@
 import { KeyValuePipe, NgFor } from '@angular/common';
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -18,8 +18,6 @@ import { PointerComponent } from '../pointer/pointer.component';
     ControlledStreamComponent, PointerComponent, MatButtonModule, MatIconModule],
 })
 export class LocalStreamComponent implements OnInit {
-
-  @ViewChild('pointer') pointer: ElementRef | undefined;
 
   _publishOptions: PublishOptions = { audio: false, video: false };
 
@@ -51,7 +49,7 @@ export class LocalStreamComponent implements OnInit {
         // the onmessage, listening on pointer location update only.
         dataChannel.onmessage = (event) => {
           const data = JSON.parse(event.data);
-          if (data.nickname) {
+          if (data.nickname !== undefined) {
             this.pointerChannels.set(dataChannel, data.nickname);
           }
         };
@@ -78,12 +76,7 @@ export class LocalStreamComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit(): void {
-    if (this.pointer) {
-      this.pointer.nativeElement.style.left = '25%';
-      this.pointer.nativeElement.style.top = '25%';
-    }
-  }
+  ngOnInit(): void { }
 
   togglePublishAudio() {
     if (this._localStream) {

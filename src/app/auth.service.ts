@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-
-import { Observable, Subject } from 'rxjs';
-
 import { User, getAuth, onAuthStateChanged } from "@firebase/auth";
+import { Observable } from 'rxjs/internal/Observable';
+import { Subject } from 'rxjs/internal/Subject';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +9,6 @@ import { User, getAuth, onAuthStateChanged } from "@firebase/auth";
 export class AuthService {
 
   user: User | null | undefined;
-
   private userSubject = new Subject<User | null>();
   user$: Observable<User | null> = this.userSubject.asObservable();
 

@@ -17,6 +17,7 @@ import { AuthService } from '../auth.service';
 import { LocalStreamComponent } from '../local-stream/local-stream.component';
 import { RemoteStreamComponent } from '../remote-stream/remote-stream.component';
 import { WINDOW } from '../windows-provider';
+import { ContextService } from '../context.service';
 
 interface UserData {
   nickname: string
@@ -64,6 +65,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     console.log('set nickname', value)
     // this._nickname = value;
     this.localParticipant?.getUser().setUserData({ ...this.localParticipant?.getUser().getUserData(), nickname: value })
+    this.contextService.setNickname(value)
   }
 
   // readonly year: number = new Date().getFullYear();
@@ -119,6 +121,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   constructor(@Inject(WINDOW) public window: Window,
     private activatedRoute: ActivatedRoute,
     private authService: AuthService,
+    private contextService: ContextService,
     private fb: UntypedFormBuilder,
   ) { }
 

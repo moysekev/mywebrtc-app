@@ -1,6 +1,7 @@
 import { enableProdMode, importProvidersFrom } from '@angular/core';
 
 import { bootstrapApplication } from '@angular/platform-browser';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { initializeApp } from "@firebase/app";
 
@@ -51,5 +52,6 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(AppRoutingModule),
     WINDOW_PROVIDERS, AuthGuard,
     // provideAnimations() removed to reduce bundle size
+    provideNoopAnimations()
   ]
 }).catch(err => console.error(err));

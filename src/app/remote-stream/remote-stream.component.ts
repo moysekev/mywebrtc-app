@@ -6,9 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { PublishOptions, RemoteStream, SubscribeOptions } from 'mywebrtc';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
-import { AuthService } from '../auth.service';
+import { ContextService } from '../context.service';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
-
 
 @Component({
   selector: 'app-remote-stream',
@@ -110,7 +109,10 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
 
   dataChannel?: RTCDataChannel;
 
-  constructor(private el: ElementRef, private authService: AuthService) { }
+  constructor(private el: ElementRef,
+    // private authService: AuthService,
+    private contextService: ContextService
+  ) { }
 
   ngOnInit(): void { }
 
@@ -131,7 +133,8 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       dataChannel.onopen = () => {
         // send first message indicating the pointer location that will be sent next
         // comes from the current user
-        dataChannel.send(JSON.stringify({ nickname: this.authService.user?.isAnonymous ? "anonymous" : this.authService.user?.displayName }))
+        // dataChannel.send(JSON.stringify({ nickname: this.authService.user?.isAnonymous ? "anonymous" : this.authService.user?.displayName }))
+        dataChannel.send(JSON.stringify({ nickname: this.contextService.nickname }))
 
         this.dataChannel = dataChannel;
       };
@@ -153,8 +156,11 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       // Round with 2 decimal to reduce amount of data sent on the datachannel, still keeping enough accuracy
       // Math.round((num + Number.EPSILON) * 100) / 100
       // console.log('onPointerMove', x, this.el.nativeElement.clientWidth)
-      const left = Math.round((x * 100 / (this.el.nativeElement.clientWidth || 100) + Number.EPSILON) * 100) / 100;
-      const top = Math.round((y * 100 / (this.el.nativeElement.clientHeight || 100) + Number.EPSILON) * 100) / 100;
+      function round2(num: number) {
+        return Math.round((num + Number.EPSILON) * 100) / 100
+      }
+      const left = round2(x * 100 / (this.el.nativeElement.clientWidth || 100));
+      const top = round2(y * 100 / (this.el.nativeElement.clientHeight || 100));
 
       // if (globalThis.logLevel.isDebugEnabled) {
       //   console.log('onPointerMove', event,
