@@ -1,5 +1,4 @@
-<!-- class="h-100 w-100" -->
-<app-controlled-stream [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="true">
+<app-controlled-stream [stream]="_localStream" [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="true">
     <span label>{{_publishOptions.topic}}</span>
     <div controls>
         <div>
@@ -26,8 +25,8 @@
             </button>
         </div> -->
     </div>
-    <div pointers>
+    <!-- <div pointers>
         <app-pointer *ngFor="let kv of pointerChannels | keyvalue" [nickname]="kv.value"
             [dataChannel]="kv.key"></app-pointer>
-    </div>
+    </div> -->
 </app-controlled-stream>

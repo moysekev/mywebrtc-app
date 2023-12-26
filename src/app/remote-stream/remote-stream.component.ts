@@ -1,4 +1,3 @@
-import { NgFor } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,7 +13,7 @@ import { ControlledStreamComponent } from '../controlled-stream/controlled-strea
   templateUrl: './remote-stream.component.html',
   styleUrls: ['./remote-stream.component.css'],
   standalone: true,
-  imports: [NgFor, ControlledStreamComponent, MatButtonModule, MatIconModule]
+  imports: [ControlledStreamComponent, MatButtonModule, MatIconModule]
 })
 export class RemoteStreamComponent implements OnInit, OnDestroy {
 
@@ -29,7 +28,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     this._nickname = userData.nickname;
   };
 
-  _remoteStream: RemoteStream | undefined;
+  _remoteStream: RemoteStream;
   @Input({ required: true }) set remoteStream(remoteStream: RemoteStream) {
 
     this._remoteStream = remoteStream;
@@ -107,7 +106,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     }
   }
 
-  dataChannel?: RTCDataChannel;
+  dataChannels: Set<RTCDataChannel> = new Set();
 
   constructor(private el: ElementRef,
     // private authService: AuthService,
@@ -128,23 +127,24 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       console.debug(`${this.constructor.name}|onPointerEnter`, event)
     }
 
-    if (this._remoteStream) {
-      const dataChannel = this._remoteStream.getOrCreateDataChannel();
+    this._remoteStream?.broadcast((dataChannel) => {
       dataChannel.onopen = () => {
         // send first message indicating the pointer location that will be sent next
         // comes from the current user
-        // dataChannel.send(JSON.stringify({ nickname: this.authService.user?.isAnonymous ? "anonymous" : this.authService.user?.displayName }))
         dataChannel.send(JSON.stringify({ nickname: this.contextService.nickname }))
-
-        this.dataChannel = dataChannel;
+        this.dataChannels.add(dataChannel)
       };
-    }
+      dataChannel.onclose = () => {
+        this.dataChannels.delete(dataChannel)
+      }
+    })
   }
 
   onPointerMove(event: PointerEvent) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
 
-    if (this.dataChannel) {
+    // if (this.dataChannel) {
+    this.dataChannels.forEach((dataChannel) => {
       // const x = event.clientX - (this.el.nativeElement.offsetLeft ?? 0);
       // const y = event.clientY - (this.el.nativeElement.offsetTop ?? 0);
       const rect = this.el.nativeElement.getBoundingClientRect();
@@ -168,20 +168,21 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       //     this.el.nativeElement.clientWidth, this.el.nativeElement.clientHeight,
       //     left, top)
       // }
-      this.dataChannel.send(JSON.stringify({ left, top }))
-    }
+      // console.log('SENDING', { left, top })
+      dataChannel.send(JSON.stringify({ left, top }))
+    })
 
   }
 
   onPointerLeave(event: PointerEvent) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
     if (globalThis.logLevel.isDebugEnabled) {
-      console.log('onPointerLeave', event, this.dataChannel)
+      console.log('onPointerLeave', event)
     }
-    if (this.dataChannel) {
-      this.dataChannel.close()
-      this.dataChannel = undefined;
-    }
+    this.dataChannels.forEach((dataChannel) => {
+      dataChannel.close()
+    })
+    this.dataChannels.clear()
   }
 
   // onPointerDown(event: PointerEvent) {
@@ -193,40 +194,30 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
   // }
 
   snapshot() {
-    if (this._remoteStream) {
-      const stream = this._remoteStream;
-      stream.snapshot().then((dataUrl) => {
-        this.onSnapshot.emit(dataUrl);
-      })
-    }
+    this._remoteStream?.snapshot().then((dataUrl) => {
+      this.onSnapshot.emit(dataUrl);
+    })
   }
 
   togglePublishAudio() {
-    if (this._remoteStream) {
-      const stream = this._remoteStream;
-      stream.updatePublishOptions({ audio: !stream.getPublishOptions().audio })
-        .then(() => { })
-    }
+    // if (this._remoteStream) {
+    //   const stream = this._remoteStream;
+    this._remoteStream?.updatePublishOptions({ audio: !this._remoteStream.getPublishOptions().audio })
+      .then(() => { })
+    // }
   }
 
   togglePublishVideo() {
-    if (this._remoteStream) {
-      const stream = this._remoteStream;
-      stream.updatePublishOptions({ video: !stream.getPublishOptions().video })
-        .then(() => { })
-    }
+    this._remoteStream?.updatePublishOptions({ video: !this._remoteStream.getPublishOptions().video })
+      .then(() => { })
   }
 
   toggleSubscribeAudio() {
-    if (this._remoteStream) {
-      this._remoteStream.updateSubscribeOptions({ audio: !this._remoteStream.getSubscribeOptions().audio })
-    }
+    this._remoteStream?.updateSubscribeOptions({ audio: !this._remoteStream.getSubscribeOptions().audio })
   }
 
   toggleSubscribeVideo() {
-    if (this._remoteStream) {
-      this._remoteStream.updateSubscribeOptions({ video: !this._remoteStream.getSubscribeOptions().video })
-    }
+    this._remoteStream?.updateSubscribeOptions({ video: !this._remoteStream.getSubscribeOptions().video })
   }
 
   // toggleAudio() {

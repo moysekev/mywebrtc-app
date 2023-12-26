@@ -35,6 +35,12 @@ git status
 git commit -a -m "deploy"
 git push origin main
 
+## Roadmap
+
+- DONE(2023/12/26) broadcast ability in mywebrtc library to support data streaming to all peers having subscribed to one stream
+- multiple colors pointers
+
+
 
 ## BUILD SIZE
 kmoyse@kmoyse-XPS-15-9560:~/akgsworkspace/mywebrtc-app$ ng build

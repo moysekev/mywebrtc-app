@@ -1,14 +1,44 @@
+import { KeyValuePipe, NgFor } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostBinding, Input, OnDestroy, ViewChild } from '@angular/core';
+import { Stream } from 'mywebrtc/dist/Stream';
+import { PointerComponent } from '../pointer/pointer.component';
 import { StreamVideoComponent } from '../stream-video/stream-video.component';
 
 @Component({
   selector: 'app-controlled-stream',
   standalone: true,
-  imports: [StreamVideoComponent],
+  imports: [NgFor, KeyValuePipe, StreamVideoComponent, PointerComponent],
   templateUrl: './controlled-stream.component.html',
   styleUrl: './controlled-stream.component.css'
 })
 export class ControlledStreamComponent implements AfterViewInit, OnDestroy {
+
+  // store pointers dataChannels with corresponding nickname
+  pointerChannels: Map<RTCDataChannel, string> = new Map();
+
+  _stream: Stream;
+  @Input({ required: true }) set stream(stream: Stream) {
+    this._stream = stream;
+
+    this._stream.onDataChannel((dataChannel: RTCDataChannel) => {
+      // DONE create a pointer each datachannel
+      // TODO how do we know this is for a pointer ?
+      // DONE: how do we know who is sending his pointer ? => first message contains nickname, next ones will be {top, left}
+
+      // Wait for first message with nickname info before adding in the Map
+      // This will trigger Pointer component creation that will override
+      // the onmessage, listening on pointer location update only.
+      dataChannel.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.nickname !== undefined) {
+          this.pointerChannels.set(dataChannel, data.nickname);
+        }
+      };
+      dataChannel.addEventListener('close', () => {
+        this.pointerChannels.delete(dataChannel);
+      })
+    })
+  }
 
   _mediaStream: MediaStream | undefined;
   @Input() set mediaStream(mediaStream: MediaStream | undefined) {
