@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { User, getAuth, onAuthStateChanged } from "@firebase/auth";
-import { Observable } from 'rxjs/internal/Observable';
-import { Subject } from 'rxjs/internal/Subject';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
