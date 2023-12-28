@@ -1,11 +1,10 @@
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { PublishOptions, RemoteStream, SubscribeOptions } from 'mywebrtc';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
-import { ContextService } from '../context.service';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 
 @Component({
@@ -32,7 +31,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
   @Input({ required: true }) set remoteStream(remoteStream: RemoteStream) {
 
     this._remoteStream = remoteStream;
-    this._remoteStream.getParticipant().getUser().onUserDataUpdate(this.on_userDataUpdate);
+    this._remoteStream.getParticipant().user.onUserDataUpdate(this.on_userDataUpdate);
 
     const l_stream = this._remoteStream;
 
@@ -106,83 +105,12 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     }
   }
 
-  dataChannels: Set<RTCDataChannel> = new Set();
-
-  constructor(private el: ElementRef,
-    // private authService: AuthService,
-    private contextService: ContextService
-  ) { }
-
   ngOnInit(): void { }
 
   ngOnDestroy(): void {
     if (this._remoteStream) {
-      this._remoteStream.getParticipant().getUser().offUserDataUpdate(this.on_userDataUpdate);
+      this._remoteStream.getParticipant().user.offUserDataUpdate(this.on_userDataUpdate);
     }
-  }
-
-  onPointerEnter(event: PointerEvent) {
-    // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
-    if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|onPointerEnter`, event)
-    }
-
-    this._remoteStream?.broadcast((dataChannel) => {
-      dataChannel.onopen = () => {
-        // send first message indicating the pointer location that will be sent next
-        // comes from the current user
-        dataChannel.send(JSON.stringify({ nickname: this.contextService.nickname }))
-        this.dataChannels.add(dataChannel)
-      };
-      dataChannel.onclose = () => {
-        this.dataChannels.delete(dataChannel)
-      }
-    })
-  }
-
-  onPointerMove(event: PointerEvent) {
-    // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
-
-    // if (this.dataChannel) {
-    this.dataChannels.forEach((dataChannel) => {
-      // const x = event.clientX - (this.el.nativeElement.offsetLeft ?? 0);
-      // const y = event.clientY - (this.el.nativeElement.offsetTop ?? 0);
-      const rect = this.el.nativeElement.getBoundingClientRect();
-      const x = event.clientX - rect.left; //x position within the element.
-      const y = event.clientY - rect.top;  //y position within the element.
-      // const left = `${Math.round(x * 100 / (this.el.nativeElement.clientWidth || 100))}%`;
-      // const top = `${Math.round(y * 100 / (this.el.nativeElement.clientHeight || 100))}%`;
-
-      // Round with 2 decimal to reduce amount of data sent on the datachannel, still keeping enough accuracy
-      // Math.round((num + Number.EPSILON) * 100) / 100
-      // console.log('onPointerMove', x, this.el.nativeElement.clientWidth)
-      function round2(num: number) {
-        return Math.round((num + Number.EPSILON) * 100) / 100
-      }
-      const left = round2(x * 100 / (this.el.nativeElement.clientWidth || 100));
-      const top = round2(y * 100 / (this.el.nativeElement.clientHeight || 100));
-
-      // if (globalThis.logLevel.isDebugEnabled) {
-      //   console.log('onPointerMove', event,
-      //     this.el.nativeElement.offsetLeft, this.el.nativeElement.offsetTop,
-      //     this.el.nativeElement.clientWidth, this.el.nativeElement.clientHeight,
-      //     left, top)
-      // }
-      // console.log('SENDING', { left, top })
-      dataChannel.send(JSON.stringify({ left, top }))
-    })
-
-  }
-
-  onPointerLeave(event: PointerEvent) {
-    // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
-    if (globalThis.logLevel.isDebugEnabled) {
-      console.log('onPointerLeave', event)
-    }
-    this.dataChannels.forEach((dataChannel) => {
-      dataChannel.close()
-    })
-    this.dataChannels.clear()
   }
 
   // onPointerDown(event: PointerEvent) {

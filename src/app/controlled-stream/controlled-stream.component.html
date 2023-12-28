@@ -1,5 +1,6 @@
-<app-stream-video class="d-flex" [mediaStream]="_mediaStream" [videoStyle]="_videoStyle"
-    [muted]="_muted"></app-stream-video>
+<app-stream-video class="d-flex" [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="_muted"
+    (pointerenter)="onPointerEnter($event)" (pointermove)="onPointerMove($event)"
+    (pointerleave)="onPointerLeave($event)"></app-stream-video>
 <div class="position-absolute top-0 mt-1 start-0 ms-1" #label>
     <ng-content select="[label]"></ng-content>
 </div>

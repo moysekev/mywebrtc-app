@@ -14,7 +14,9 @@ import { WINDOW_PROVIDERS } from './app/windows-provider';
 import { environment } from './environments/environment';
 import { setLogLevel } from './logLevel';
 
-setLogLevel('debug')
+const logLevel = 'info';
+
+setLogLevel(logLevel)
 setMyWebRtcLogLevel('debug')
 
 // akigrafsoft's https://console.firebase.google.com/project/fir-rtc-59994/database/fir-rtc-59994-default-rtdb/data
@@ -40,7 +42,9 @@ const firebaseConfig = {
 //   measurementId: "G-01GRGSWHFE"
 // };
 
-console.log('main:firebase:initializeApp', firebaseConfig);
+if (globalThis.logLevel.isInfoEnabled) {
+  console.log('firebase:initializeApp', firebaseConfig);
+}
 export const firebaseApp = initializeApp(firebaseConfig);
 
 if (environment.production) {

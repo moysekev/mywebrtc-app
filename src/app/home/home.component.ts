@@ -59,16 +59,19 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   // _nickname = '';
   get nickname() {
-    return this.localParticipant?.getUser().getUserData().nickname;
+    return this.localParticipant?.user.getUserData().nickname;
   }
   set nickname(value: string) {
     console.log('set nickname', value)
     // this._nickname = value;
-    this.localParticipant?.getUser().setUserData({ ...this.localParticipant?.getUser().getUserData(), nickname: value })
+    this.localParticipant?.user.setUserData({ ...this.localParticipant?.user.getUserData(), nickname: value })
     this.contextService.setNickname(value)
   }
 
   // readonly year: number = new Date().getFullYear();
+
+  localParticipant: LocalParticipant | undefined;
+  localParticipantData: UserData | undefined;
 
   localStream: LocalStream | undefined;
   localMediaStream: MediaStream | undefined;
@@ -81,9 +84,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   videoTrackSettings: MediaTrackSettings | undefined;
 
   localDisplayMediaStream: MediaStream | undefined;
-
-  localParticipant: LocalParticipant | undefined;
-  localParticipantData: UserData | undefined;
 
   moderated: boolean = false;
   moderator: boolean = false;
@@ -188,7 +188,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
         this.remoteParticipants.add(participant);
 
-        participant.getUser().onUserDataUpdate((userData: UserData) => {
+        participant.user.onUserDataUpdate((userData: UserData) => {
           if (globalThis.logLevel.isInfoEnabled) {
             console.log(`${this.constructor.name}|onUserDataUpdate`, participant, userData);
           }
@@ -246,7 +246,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
         this.publish()
 
-        this.localParticipant.getUser().onUserDataUpdate((userData: UserData) => {
+        this.localParticipant.user.onUserDataUpdate((userData: UserData) => {
           if (globalThis.logLevel.isInfoEnabled) {
             console.log(`${this.constructor.name}|onUserDataUpdate`, this.localParticipant, userData);
           }
@@ -385,20 +385,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   public signOut() {
     if (this.conversation) {
-      this.conversation.close()
-        .then(() => {
-          this.conversation = undefined;
-          if (globalThis.logLevel.isInfoEnabled) {
-            console.info(`${this.constructor.name}|Conversation closed`);
-          }
-          this.doSignOut();
-        })
-        .catch((error: any) => { this.doSignOut(); });
+      this.conversation.close().then(() => {
+        this.conversation = undefined;
+        if (globalThis.logLevel.isInfoEnabled) {
+          console.info(`${this.constructor.name}|Conversation closed`);
+        }
+      }).catch((error: any) => {
+        console.error(`${this.constructor.name}|Conversation closing error`, error)
+      }).finally(() => {
+        this.doSignOut();
+      });
     } else {
       this.doSignOut();
     }
-
   }
+
   private doSignOut() {
     // TODO: migrate !
     // firebase.auth().signOut().then(() => {
@@ -415,16 +416,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   private doCleanUp() {
     if (this.conversation) {
-      this.conversation.close()
-        .then(() => {
-          this.conversation = undefined;
-          if (globalThis.logLevel.isInfoEnabled) {
-            console.info(`${this.constructor.name}|Conversation closed`);
-          }
-        })
-        .catch((error: any) => {
-          console.error(`${this.constructor.name}|Conversation closing error`, error)
-        });
+      this.conversation.close().then(() => {
+        this.conversation = undefined;
+        if (globalThis.logLevel.isInfoEnabled) {
+          console.info(`${this.constructor.name}|Conversation closed`);
+        }
+      }).catch((error: any) => {
+        console.error(`${this.constructor.name}|Conversation closing error`, error)
+      });
     }
   }
 
@@ -577,18 +576,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         });
       });
     }
-  }
-
-  getMediaStreamConstraints(remoteStream: RemoteStream) {
-    remoteStream.getMediaStreamConstraints().
-      then((constraints: MediaStreamConstraints) => {
-        if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|getMediaStreamConstraints done`, constraints);
-        }
-      })
-      .catch((error: any) => {
-        console.error(`${this.constructor.name}|getMediaStreamConstraints`, error)
-      });
   }
 
   applyMediaStreamConstraintsHD(remoteStream: RemoteStream) {
