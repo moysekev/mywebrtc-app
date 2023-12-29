@@ -3,21 +3,25 @@ import { KeyValuePipe, NgFor, NgIf } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule, UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from "@angular/router";
+
 
 import { getDatabase, ref } from "@firebase/database";
 
+
 import { Conversation, ConversationOptions, LocalParticipant, LocalStream, RemoteParticipant, RemoteStream, User } from 'mywebrtc';
 
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { saveAs } from 'file-saver';
+
 import { MediaStreamHelper } from '../MediaStreamHelper';
 import { AuthService } from '../auth.service';
+import { ContextService } from '../context.service';
 import { LocalStreamComponent } from '../local-stream/local-stream.component';
 import { RemoteStreamComponent } from '../remote-stream/remote-stream.component';
 import { WINDOW } from '../windows-provider';
-import { ContextService } from '../context.service';
 
 interface UserData {
   nickname: string
@@ -57,7 +61,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     return this.messageFormGroup.get('message') as UntypedFormControl;
   }
 
-  // _nickname = '';
   get nickname() {
     return this.localParticipant?.user.getUserData().nickname;
   }
@@ -94,7 +97,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   isWaitingForAcceptance = false;
 
-  snapshotSrc?: string;
+  // snapshotSrc?: string;
 
   @ViewChild("dwnld") aRef: ElementRef | undefined;
 
@@ -270,7 +273,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       video: true,
       audio: true
     }).then((mediaStream: MediaStream) => {
-      console.log('ngAfterViewInit getUserMedia', mediaStream);
       if (globalThis.logLevel.isDebugEnabled) {
         console.debug(`${this.constructor.name}|ngAfterViewInit getUserMedia`, mediaStream);
       }
@@ -284,7 +286,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   onSnapshot(dataUrl: string) {
     if (globalThis.logLevel.isDebugEnabled) {
       console.debug(`${this.constructor.name}|took snapshot`, dataUrl);
-      this.snapshotSrc = dataUrl;//URL.createObjectURL(snapshot);
+      //this.snapshotSrc = dataUrl;//URL.createObjectURL(snapshot);
+      //data:image/png;base64,
+      const type = dataUrl.split(';')[0].split('/')[1];
+      saveAs(dataUrl, `snapshot_${(new Date().toJSON().slice(0,10))}.${type}`)
     }
   }
 

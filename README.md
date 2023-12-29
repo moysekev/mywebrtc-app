@@ -39,7 +39,18 @@ git push origin main
 
 - DONE(2023/12/26) broadcast ability in mywebrtc library to support data streaming to all peers having subscribed to one stream
 - multiple colors pointers
+- try ServiceWorker onbeforeunload to cleanup firebase database https://stackoverflow.com/questions/36379155/wait-for-promises-in-onbeforeunload
 
+- read https://www.webrtc-experiment.com/webrtcpedia/
+ Vp8 codec minimum bandwidth is 100kbits/s
+Vp8 codec maximum bandwidth is 2000+ kbits/s
+
+    720p at 30 FPS causes 1.0-to-2.0 Mbps bandwidth usage
+    360p at 30 FPS causes 0.5-to-1.0 Mbps bandwidth usage
+    180p at 30 FPS causes 0.1-to-0.5 Mbps bandwidth usage
+
+- https://webrtc.github.io/samples/src/content/peerconnection/bandwidth/
+  https://github.com/webrtc/samples/blob/gh-pages/src/content/peerconnection/bandwidth/js/main.js
 
 
 ## BUILD SIZE

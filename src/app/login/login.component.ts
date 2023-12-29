@@ -1,6 +1,8 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { getAuth, signInAnonymously } from "@firebase/auth";
 
 import { USERS } from '../consts';
@@ -9,7 +11,8 @@ import { USERS } from '../consts';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
-  standalone: true
+  standalone: true,
+  imports: [MatProgressSpinnerModule],
 })
 export class LoginComponent implements AfterViewInit, OnInit {
 
@@ -20,12 +23,11 @@ export class LoginComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'];
-  }
-
-  ngAfterViewInit() {
     // For tests sake !
     this.anonymousSignIn()
   }
+
+  ngAfterViewInit() { }
 
   anonymousSignIn() {
     // firebase.auth().signInAnonymously()

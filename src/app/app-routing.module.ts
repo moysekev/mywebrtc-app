@@ -6,6 +6,7 @@ import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 
 import { AuthGuard } from './auth.guard';
+import { APP_BASE_HREF } from '@angular/common';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
@@ -16,8 +17,11 @@ const routes: Routes = [
   { path: ':id', redirectTo: '/home/:id', pathMatch: 'full' }
 ];
 
+// https://angular.io/guide/router#base-href
+//https://angular.io/api/common/APP_BASE_HREF
 @NgModule({
-  imports: [RouterModule.forRoot(routes, {})],
+  providers: [{ provide: APP_BASE_HREF, useValue: '/mywebrtc-app/' }],
+  imports: [RouterModule.forRoot(routes, { useHash: true })], //useHash: true
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
