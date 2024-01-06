@@ -289,7 +289,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       //this.snapshotSrc = dataUrl;//URL.createObjectURL(snapshot);
       //data:image/png;base64,
       const type = dataUrl.split(';')[0].split('/')[1];
-      saveAs(dataUrl, `snapshot_${(new Date().toJSON().slice(0,10))}.${type}`)
+      saveAs(dataUrl, `snapshot_${(new Date().toJSON().slice(0, 10))}.${type}`)
     }
   }
 
@@ -461,6 +461,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   publish() {
     if (this.localMediaStream && this.localParticipant) {
       this.localStream = this.localParticipant.publish(this.localMediaStream, { topic: 'webcam', audio: true });
+
+      const localStream = this.localStream;
+      localStream.onSubscribed((peerId: string) => {
+        localStream.setBandwidth(peerId, 256)
+      })
+
       // Or
       //this.localParticipant.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
     } else {
