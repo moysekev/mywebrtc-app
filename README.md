@@ -12,6 +12,10 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Build
 
+To import last local version of mywebrtc :
+mywebrtc-app$ `ng cache clean`
+mywebrtc-app$ `npm install ../mywebrtc/mywebrtc-1.0.0.tgz`
+
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
 ## Running unit tests
@@ -30,7 +34,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ng build --configuration production --output-path docs --base-href /mywebrtc-app/
 cp docs/index.html docs/404.html
-git add docs/*
+git add docs/\*
 git status
 git commit -a -m "deploy"
 git push origin main
@@ -42,32 +46,32 @@ git push origin main
 - try ServiceWorker onbeforeunload to cleanup firebase database https://stackoverflow.com/questions/36379155/wait-for-promises-in-onbeforeunload
 
 - read https://www.webrtc-experiment.com/webrtcpedia/
- Vp8 codec minimum bandwidth is 100kbits/s
-Vp8 codec maximum bandwidth is 2000+ kbits/s
+  Vp8 codec minimum bandwidth is 100kbits/s
+  Vp8 codec maximum bandwidth is 2000+ kbits/s
 
-    720p at 30 FPS causes 1.0-to-2.0 Mbps bandwidth usage
-    360p at 30 FPS causes 0.5-to-1.0 Mbps bandwidth usage
-    180p at 30 FPS causes 0.1-to-0.5 Mbps bandwidth usage
+      720p at 30 FPS causes 1.0-to-2.0 Mbps bandwidth usage
+      360p at 30 FPS causes 0.5-to-1.0 Mbps bandwidth usage
+      180p at 30 FPS causes 0.1-to-0.5 Mbps bandwidth usage
 
 - https://webrtc.github.io/samples/src/content/peerconnection/bandwidth/
   https://github.com/webrtc/samples/blob/gh-pages/src/content/peerconnection/bandwidth/js/main.js
 
-
 ## BUILD SIZE
+
 kmoyse@kmoyse-XPS-15-9560:~/akgsworkspace/mywebrtc-app$ ng build
 ✔ Browser application bundle generation complete.
 ✔ Copying assets complete.
 ⠋ Generating index html...2 rules skipped due to selector errors:
-  .form-floating>~label -> Did not expect successive traversals.
-  .form-floating>~label -> Did not expect successive traversals.
+.form-floating>~label -> Did not expect successive traversals.
+.form-floating>~label -> Did not expect successive traversals.
 ✔ Index html generation complete.
 
-Initial Chunk Files           | Names         |  Raw Size | Estimated Transfer Size
-main.80a9f478a0c771f4.js      | main          |   1.02 MB |               228.66 kB
-styles.cd7cd892905e7e38.css   | styles        | 301.18 kB |                29.84 kB
-scripts.d1c00555d4694195.js   | scripts       |  58.26 kB |                14.42 kB
-polyfills.5dc05d4c180782f3.js | polyfills     |  32.99 kB |                10.69 kB
-runtime.39457fd9d69ed11d.js   | runtime       |   1.22 kB |               659 bytes
+Initial Chunk Files | Names | Raw Size | Estimated Transfer Size
+main.80a9f478a0c771f4.js | main | 1.02 MB | 228.66 kB
+styles.cd7cd892905e7e38.css | styles | 301.18 kB | 29.84 kB
+scripts.d1c00555d4694195.js | scripts | 58.26 kB | 14.42 kB
+polyfills.5dc05d4c180782f3.js | polyfills | 32.99 kB | 10.69 kB
+runtime.39457fd9d69ed11d.js | runtime | 1.22 kB | 659 bytes
 
                               | Initial Total |   1.40 MB |               284.26 kB
 
@@ -80,23 +84,22 @@ Warning: bundle initial exceeded maximum budget. Budget 1.00 MB was not met by 4
 
 TODO : migrate webrtc lib and this project to modular firebase. and retry. also retry to package library for ESnext (browser rather than commonsj.)
 
-
 AFTER :
 
 kmoyse@kmoyse-XPS-15-9560:~/akgsworkspace/mywebrtc-app$ ng build
 ✔ Browser application bundle generation complete.
 ✔ Copying assets complete.
 ⠋ Generating index html...2 rules skipped due to selector errors:
-  .form-floating>~label -> Did not expect successive traversals.
-  .form-floating>~label -> Did not expect successive traversals.
+.form-floating>~label -> Did not expect successive traversals.
+.form-floating>~label -> Did not expect successive traversals.
 ✔ Index html generation complete.
 
-Initial Chunk Files           | Names         |  Raw Size | Estimated Transfer Size
-main.98e5386632033649.js      | main          | 842.60 kB |               181.00 kB
-styles.cd7cd892905e7e38.css   | styles        | 301.18 kB |                29.84 kB
-scripts.d1c00555d4694195.js   | scripts       |  58.26 kB |                14.42 kB
-polyfills.5dc05d4c180782f3.js | polyfills     |  32.99 kB |                10.69 kB
-runtime.05d80cee4b07f5ff.js   | runtime       |   1.06 kB |               602 bytes
+Initial Chunk Files | Names | Raw Size | Estimated Transfer Size
+main.98e5386632033649.js | main | 842.60 kB | 181.00 kB
+styles.cd7cd892905e7e38.css | styles | 301.18 kB | 29.84 kB
+scripts.d1c00555d4694195.js | scripts | 58.26 kB | 14.42 kB
+polyfills.5dc05d4c180782f3.js | polyfills | 32.99 kB | 10.69 kB
+runtime.05d80cee4b07f5ff.js | runtime | 1.06 kB | 602 bytes
 
                               | Initial Total |   1.21 MB |               236.54 kB
 
@@ -116,16 +119,16 @@ kmoyse@kmoyse-XPS-15-9560:~/akgsworkspace/mywebrtc-app$ ng build
 ✔ Browser application bundle generation complete.
 ✔ Copying assets complete.
 ⠋ Generating index html...2 rules skipped due to selector errors:
-  .form-floating>~label -> Did not expect successive traversals.
-  .form-floating>~label -> Did not expect successive traversals.
+.form-floating>~label -> Did not expect successive traversals.
+.form-floating>~label -> Did not expect successive traversals.
 ✔ Index html generation complete.
 
-Initial Chunk Files           | Names         |  Raw Size | Estimated Transfer Size
-main.9174ba15566c644b.js      | main          | 790.25 kB |               164.49 kB
-styles.cd7cd892905e7e38.css   | styles        | 301.18 kB |                29.84 kB
-scripts.d1c00555d4694195.js   | scripts       |  58.26 kB |                14.42 kB
-polyfills.5dc05d4c180782f3.js | polyfills     |  32.99 kB |                10.69 kB
-runtime.745df2968b9879d0.js   | runtime       |   1.05 kB |               600 bytes
+Initial Chunk Files | Names | Raw Size | Estimated Transfer Size
+main.9174ba15566c644b.js | main | 790.25 kB | 164.49 kB
+styles.cd7cd892905e7e38.css | styles | 301.18 kB | 29.84 kB
+scripts.d1c00555d4694195.js | scripts | 58.26 kB | 14.42 kB
+polyfills.5dc05d4c180782f3.js | polyfills | 32.99 kB | 10.69 kB
+runtime.745df2968b9879d0.js | runtime | 1.05 kB | 600 bytes
 
                               | Initial Total |   1.16 MB |               220.03 kB
 
@@ -133,8 +136,6 @@ Build at: 2023-12-17T12:28:52.429Z - Hash: 774765bf3d3f4398 - Time: 6856ms
 
 Warning: bundle initial exceeded maximum budget. Budget 1.00 MB was not met by 159.74 kB with a total of 1.16 MB.
 
-
-
-to look bundle size : 
+to look bundle size :
 ng build --source-map=true --named-chunks=true
-npx source-map-explorer dist/mywebrtc-app/**/*.js
+npx source-map-explorer dist/mywebrtc-app/\*_/_.js

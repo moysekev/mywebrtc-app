@@ -2,10 +2,10 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-import { PublishOptions, RemoteStream, SubscribeOptions } from 'mywebrtc';
+import { PublishOptions, RemoteStream, SubscribeOptions, receiveByChunks } from 'mywebrtc';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
-import { DATACHANNEL_SNAPSHOT_END, DATACHANNEL_SNAPSHOT_PATH } from '../constants';
+import { DATACHANNEL_SNAPSHOT_PATH } from '../constants';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 
 const CNAME = 'RemoteStream';
@@ -125,31 +125,17 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
   // }
 
   snapshot() {
-    // this._remoteStream?.snapshot().then((dataUrl) => {
-    //   this.onSnapshot.emit(dataUrl);
-    // })
     this._remoteStream?.singlecast(DATACHANNEL_SNAPSHOT_PATH, (dataChannel) => {
-      dataChannel.onopen = (event) => {
-        if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${CNAME}|snapshot dataChannel.onopen`, this, event);
-        }
-      };
-
-      // receive data by chunks, rebuilding dataUrl string
-      let dataUrl = '';
-      dataChannel.onmessage = (event: MessageEvent) => {
-        if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${CNAME}|snapshot dataChannel.onmessage`, this, event);
-        }
-        if (event.data === DATACHANNEL_SNAPSHOT_END) {
-          // resolve(dataUrl);
-          this.onSnapshot.emit(dataUrl);
-          dataChannel.close();
-        } else {
-          dataUrl += event.data;
-        }
-      };
-
+      // dataChannel.onopen = (event) => {
+      //   if (globalThis.logLevel.isDebugEnabled) {
+      //     console.debug(`${CNAME}|snapshot dataChannel.onopen`, this, event);
+      //   }
+      // };
+      receiveByChunks(dataChannel).then((dataUrl) => {
+        this.onSnapshot.emit(dataUrl)
+      }).finally(() => {
+        dataChannel.close()
+      })
     })
   }
 

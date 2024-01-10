@@ -2,10 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-import { LocalStream, PublishOptions } from 'mywebrtc';
+import { LocalStream, PublishOptions, sendByChunks } from 'mywebrtc';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
-import { DATACHANNEL_SNAPSHOT_CHUNK_SIZE, DATACHANNEL_SNAPSHOT_END, DATACHANNEL_SNAPSHOT_PATH } from '../constants';
+import { DATACHANNEL_SNAPSHOT_PATH } from '../constants';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 
 const CNAME = 'LocalStream';
@@ -42,16 +42,17 @@ export class LocalStreamComponent implements OnInit {
           // Error with:
           // dataChannel.send(dataUrl) // TypeError: RTCDataChannel.send: Message size (534010) exceeds maxMessageSize
           // Divide dataUrl in chunks and send them one by one.
-          let start = 0;
-          while (start < dataUrl.length) {
-            const end = Math.min(dataUrl.length, start + DATACHANNEL_SNAPSHOT_CHUNK_SIZE);
-            dataChannel.send(dataUrl.slice(start, end))
-            start = end;
-          }
+          // let start = 0;
+          // while (start < dataUrl.length) {
+          //   const end = Math.min(dataUrl.length, start + DATACHANNEL_SNAPSHOT_CHUNK_SIZE);
+          //   dataChannel.send(dataUrl.slice(start, end))
+          //   start = end;
+          // }
+          // dataChannel.send(DATACHANNEL_SNAPSHOT_END)
+          sendByChunks(dataChannel, dataUrl)
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${CNAME}|send snapshot`)
+            console.debug(`${CNAME}|sent snapshot`)
           }
-          dataChannel.send(DATACHANNEL_SNAPSHOT_END)
         })
       })
     }

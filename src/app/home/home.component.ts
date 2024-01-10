@@ -464,9 +464,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.localStream = this.localParticipant.publish(this.localMediaStream, { topic: 'webcam', audio: true });
 
       const localStream = this.localStream;
-      localStream.onSubscribed((peerId: string) => {
-        localStream.setBandwidth(peerId, 256)
-      })
+      // localStream.onSubscribed((peerId: string) => {
+      //   // localStream.setBandwidth(peerId, 256)
+      // })
 
       // Or
       //this.localParticipant.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
