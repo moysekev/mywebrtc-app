@@ -5,8 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { PublishOptions, RemoteStream, SubscribeOptions } from 'mywebrtc';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
+import { DATACHANNEL_SNAPSHOT_END, DATACHANNEL_SNAPSHOT_PATH } from '../constants';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
-import { DATACHANNEL_SNAPSHOT, DATACHANNEL_SNAPSHOT_END } from '../consts';
 
 const COMPONENT_NAME = 'RemoteStream';
 @Component({
@@ -127,7 +127,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     // this._remoteStream?.snapshot().then((dataUrl) => {
     //   this.onSnapshot.emit(dataUrl);
     // })
-    this._remoteStream?.singlecast(DATACHANNEL_SNAPSHOT, (dataChannel) => {
+    this._remoteStream?.singlecast(DATACHANNEL_SNAPSHOT_PATH, (dataChannel) => {
       dataChannel.onopen = (event) => {
         if (globalThis.logLevel.isDebugEnabled) {
           console.debug(`${COMPONENT_NAME}|snapshot dataChannel.onopen`, this, event);

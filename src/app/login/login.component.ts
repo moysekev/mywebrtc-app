@@ -5,7 +5,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { getAuth, signInAnonymously } from "@firebase/auth";
 
-import { USERS } from '../consts';
+import { USERS } from '../constants';
 
 @Component({
   selector: 'app-login',

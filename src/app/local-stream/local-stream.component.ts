@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { LocalStream, PublishOptions } from 'mywebrtc';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
+import { DATACHANNEL_SNAPSHOT_CHUNK_SIZE, DATACHANNEL_SNAPSHOT_END, DATACHANNEL_SNAPSHOT_PATH } from '../constants';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 
 @Component({
@@ -32,6 +33,22 @@ export class LocalStreamComponent implements OnInit {
       })
 
       this.mediaStream = this._localStream.getMediaStream();
+
+      this._localStream.onDataChannel(DATACHANNEL_SNAPSHOT_PATH, (dataChannel: RTCDataChannel) => {
+        this._localStream.snapshot().then((dataUrl: string) => {
+          // https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Using_data_channels
+          // Error with:
+          // dataChannel.send(dataUrl) // TypeError: RTCDataChannel.send: Message size (534010) exceeds maxMessageSize
+          // Divide dataUrl in chunks and send them one by one.
+          let start = 0;
+          while (start < dataUrl.length) {
+            const end = Math.min(dataUrl.length, start + DATACHANNEL_SNAPSHOT_CHUNK_SIZE);
+            dataChannel.send(dataUrl.slice(start, end))
+            start = end;
+          }
+          dataChannel.send(DATACHANNEL_SNAPSHOT_END)
+        })
+      })
     }
   }
 

@@ -1,10 +1,12 @@
 import { KeyValuePipe, NgFor } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostBinding, Input, OnDestroy, ViewChild } from '@angular/core';
-import { LocalStream, Stream } from 'mywebrtc/dist/Stream';
+
+import { Stream } from 'mywebrtc';
+
+import { DATACHANNEL_POINTER_PATH } from '../constants';
+import { ContextService } from '../context.service';
 import { PointerComponent } from '../pointer/pointer.component';
 import { StreamVideoComponent } from '../stream-video/stream-video.component';
-import { ContextService } from '../context.service';
-import { DATACHANNEL_CHUNK_SIZE, DATACHANNEL_SNAPSHOT, DATACHANNEL_SNAPSHOT_END } from '../consts';
 
 @Component({
   selector: 'app-controlled-stream',
@@ -23,7 +25,7 @@ export class ControlledStreamComponent implements AfterViewInit, OnDestroy {
   @Input({ required: true }) set stream(stream: Stream) {
     this._stream = stream;
 
-    this._stream.onDataChannel((path: string, dataChannel: RTCDataChannel) => {
+    this._stream.onDataChannel(DATACHANNEL_POINTER_PATH, (dataChannel: RTCDataChannel) => {
       // DONE create a pointer each datachannel
       // DONE: how do we know this is for a pointer ? => path indicates the purpose
       // DONE: how do we know who is sending his pointer ? => first message contains nickname, next ones will be {top, left}
@@ -31,23 +33,6 @@ export class ControlledStreamComponent implements AfterViewInit, OnDestroy {
       // Wait for first message with nickname info before adding in the Map
       // This will trigger Pointer component creation that will override
       // the onmessage, listening on pointer location update only.
-
-      if (path === DATACHANNEL_SNAPSHOT) {
-        (this._stream as LocalStream).snapshot().then((dataUrl: string) => {
-          // https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Using_data_channels
-          // Error with:
-          // dataChannel.send(dataUrl) // TypeError: RTCDataChannel.send: Message size (534010) exceeds maxMessageSize
-          // Divide dataUrl in chunks and send them one by one.
-          let start = 0;
-          while (start < dataUrl.length) {
-            const end = Math.min(dataUrl.length, start + DATACHANNEL_CHUNK_SIZE);
-            dataChannel.send(dataUrl.slice(start, end))
-            start = end;
-          }
-          dataChannel.send(DATACHANNEL_SNAPSHOT_END)
-        })
-        return
-      }
 
       this.inBoundDataChannels.add(dataChannel);
 
@@ -139,7 +124,7 @@ export class ControlledStreamComponent implements AfterViewInit, OnDestroy {
       console.debug(`${this.constructor.name}|onPointerEnter`, event)
     }
 
-    this._stream?.broadcast('pointer', (dataChannel) => {
+    this._stream?.broadcast(DATACHANNEL_POINTER_PATH, (dataChannel) => {
       const added = this.outboundDataChannels.add(dataChannel);
       if (globalThis.logLevel.isDebugEnabled) {
         console.debug(`${this.constructor.name}|onPointerEnter stored outbound DataChannel`, dataChannel, this.outboundDataChannels.size, added)
