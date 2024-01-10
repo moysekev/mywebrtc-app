@@ -8,6 +8,8 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
 import { DATACHANNEL_SNAPSHOT_CHUNK_SIZE, DATACHANNEL_SNAPSHOT_END, DATACHANNEL_SNAPSHOT_PATH } from '../constants';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 
+const CNAME = 'LocalStream';
+
 @Component({
   selector: 'app-local-stream',
   templateUrl: './local-stream.component.html',
@@ -45,6 +47,9 @@ export class LocalStreamComponent implements OnInit {
             const end = Math.min(dataUrl.length, start + DATACHANNEL_SNAPSHOT_CHUNK_SIZE);
             dataChannel.send(dataUrl.slice(start, end))
             start = end;
+          }
+          if (globalThis.logLevel.isDebugEnabled) {
+            console.debug(`${CNAME}|send snapshot`)
           }
           dataChannel.send(DATACHANNEL_SNAPSHOT_END)
         })

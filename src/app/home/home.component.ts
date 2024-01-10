@@ -32,6 +32,8 @@ interface Message {
   text: string
 }
 
+const CNAME = 'Home';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -65,7 +67,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     return this.localParticipant?.user.getUserData().nickname;
   }
   set nickname(value: string) {
-    console.log('set nickname', value)
     // this._nickname = value;
     this.localParticipant?.user.setUserData({ ...this.localParticipant?.user.getUserData(), nickname: value })
     this.contextService.setNickname(value)
@@ -148,7 +149,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
 
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|ngOnInit baseUrl conversationId`, baseUrl, conversationId);
+      console.debug(`${CNAME}|ngOnInit baseUrl conversationId`, baseUrl, conversationId);
     }
 
     const options: ConversationOptions = {
@@ -158,7 +159,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     // ref(getDatabase(), 'Conversations')
     Conversation.getOrCreate(conversationId, ref(getDatabase()), options).then((conversation: Conversation) => {
       if (globalThis.logLevel.isInfoEnabled) {
-        console.log(`${this.constructor.name}|Conversation`, conversation);
+        console.log(`${CNAME}|Conversation`, conversation);
       }
 
       this.conversation = conversation;
@@ -172,33 +173,33 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       }
       conversation.onCandidateAdded = (candidate: User) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|onCandidateAdded`, candidate);
+          console.debug(`${CNAME}|onCandidateAdded`, candidate);
         }
         // Maintain local list of pending Candidates
         this.remoteCandidates.add(candidate);
       };
       conversation.onCandidateRemoved = (candidate: User) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|onCandidateRemoved`, candidate);
+          console.debug(`${CNAME}|onCandidateRemoved`, candidate);
         }
         // Maintain local list of pending Candidates
         this.remoteCandidates.delete(candidate);
       };
       conversation.onParticipantAdded = (participant: RemoteParticipant) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|onParticipantAdded`, participant);
+          console.debug(`${CNAME}|onParticipantAdded`, participant);
         }
 
         this.remoteParticipants.add(participant);
 
         participant.user.onUserDataUpdate((userData: UserData) => {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${this.constructor.name}|onUserDataUpdate`, participant, userData);
+            console.log(`${CNAME}|onUserDataUpdate`, participant, userData);
           }
         })
         participant.onStreamPublished((stream: RemoteStream) => {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${this.constructor.name}|onStreamPublished`, participant, stream);
+            console.log(`${CNAME}|onStreamPublished`, participant, stream);
           }
           // First, set listener(s)
           this.doStoreRemoteStreamByParticipant(participant, stream);
@@ -209,21 +210,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         })
         participant.onStreamUnpublished((stream: RemoteStream) => {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${this.constructor.name}|onStreamUnpublished`, participant, stream);
+            console.log(`${CNAME}|onStreamUnpublished`, participant, stream);
           }
           this.doRemoveMediaStream(participant, stream);
         })
       };
       conversation.onParticipantRemoved = (participant: RemoteParticipant | LocalParticipant) => {
         if (globalThis.logLevel.isInfoEnabled) {
-          console.log(`${this.constructor.name}|onParticipantRemoved`, participant);
+          console.log(`${CNAME}|onParticipantRemoved`, participant);
         }
         if (participant instanceof RemoteParticipant) {
           this.doRemoveRemoteParticipant(participant);
         }
         else if (participant instanceof LocalParticipant) {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${this.constructor.name}|local user removed ?!`, participant);
+            console.log(`${CNAME}|local user removed ?!`, participant);
           }
         }
       };
@@ -242,7 +243,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.isWaitingForAcceptance = true;
       conversation.addParticipant(userData, { moderator: this.moderator }).then((participant: LocalParticipant) => {
         if (globalThis.logLevel.isInfoEnabled) {
-          console.log(`${this.constructor.name}|addParticipant succeed`, participant);
+          console.log(`${CNAME}|addParticipant succeed`, participant);
         }
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
@@ -251,20 +252,20 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
         this.localParticipant.user.onUserDataUpdate((userData: UserData) => {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${this.constructor.name}|onUserDataUpdate`, this.localParticipant, userData);
+            console.log(`${CNAME}|onUserDataUpdate`, this.localParticipant, userData);
           }
           this.localParticipantData = userData;
         })
       }).catch((error: any) => {
         if (globalThis.logLevel.isWarnEnabled) {
-          console.warn(`${this.constructor.name}|addParticipant failed`, error);
+          console.warn(`${CNAME}|addParticipant failed`, error);
         }
         this.isWaitingForAcceptance = false;
       });
 
       this.url = `${baseUrl}/${conversation.id}`;
     }).catch((error: any) => {
-      console.error(`${this.constructor.name}|getOrCreate failed`, error);
+      console.error(`${CNAME}|getOrCreate failed`, error);
     });
   }
 
@@ -274,18 +275,18 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       audio: true
     }).then((mediaStream: MediaStream) => {
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${this.constructor.name}|ngAfterViewInit getUserMedia`, mediaStream);
+        console.debug(`${CNAME}|ngAfterViewInit getUserMedia`, mediaStream);
       }
       this.doStoreAndBindLocalMediaStream(mediaStream);
       this.publish()
     }).catch((error) => {
-      console.error(`${this.constructor.name}|ngAfterViewInit getUserMedia`, error);
+      console.error(`${CNAME}|ngAfterViewInit getUserMedia`, error);
     });
   }
 
   onSnapshot(dataUrl: string) {
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|took snapshot`, dataUrl);
+      console.debug(`${CNAME}|took snapshot`, dataUrl);
       //this.snapshotSrc = dataUrl;//URL.createObjectURL(snapshot);
       //data:image/png;base64,
       const type = dataUrl.split(';')[0].split('/')[1];
@@ -308,21 +309,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           this.audioTrackCapabilities = track.getCapabilities();
         } else {
           if (globalThis.logLevel.isWarnEnabled) {
-            console.warn(`${this.constructor.name}|getCapabilities not supported by browser`)
+            console.warn(`${CNAME}|getCapabilities not supported by browser`)
           }
         }
         if (typeof track.getConstraints === 'function') {
           this.audioTrackConstraints = track.getConstraints();
         } else {
           if (globalThis.logLevel.isWarnEnabled) {
-            console.warn(`${this.constructor.name}|getConstraints not supported by browser`)
+            console.warn(`${CNAME}|getConstraints not supported by browser`)
           }
         }
         if (typeof track.getSettings === 'function') {
           this.audioTrackSettings = track.getSettings();
         } else {
           if (globalThis.logLevel.isWarnEnabled) {
-            console.warn(`${this.constructor.name}|getSettings not supported by browser`)
+            console.warn(`${CNAME}|getSettings not supported by browser`)
           }
         }
         break;
@@ -332,21 +333,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           this.videoTrackCapabilities = track.getCapabilities();
         } else {
           if (globalThis.logLevel.isWarnEnabled) {
-            console.warn(`${this.constructor.name}|getCapabilities not supported by browser`)
+            console.warn(`${CNAME}|getCapabilities not supported by browser`)
           }
         }
         if (typeof track.getConstraints === 'function') {
           this.videoTrackConstraints = track.getConstraints();
         } else {
           if (globalThis.logLevel.isWarnEnabled) {
-            console.warn(`${this.constructor.name}|getConstraints not supported by browser`)
+            console.warn(`${CNAME}|getConstraints not supported by browser`)
           }
         }
         if (typeof track.getSettings === 'function') {
           this.videoTrackSettings = track.getSettings();
         } else {
           if (globalThis.logLevel.isWarnEnabled) {
-            console.warn(`${this.constructor.name}|getSettings not supported by browser`)
+            console.warn(`${CNAME}|getSettings not supported by browser`)
           }
         }
         break;
@@ -393,10 +394,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.conversation.close().then(() => {
         this.conversation = undefined;
         if (globalThis.logLevel.isInfoEnabled) {
-          console.info(`${this.constructor.name}|Conversation closed`);
+          console.info(`${CNAME}|Conversation closed`);
         }
       }).catch((error: any) => {
-        console.error(`${this.constructor.name}|Conversation closing error`, error)
+        console.error(`${CNAME}|Conversation closing error`, error)
       }).finally(() => {
         this.doSignOut();
       });
@@ -409,11 +410,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     // TODO: migrate !
     // firebase.auth().signOut().then(() => {
     //   if (globalThis.logLevel.isInfoEnabled) {
-    //     console.info(`${this.constructor.name}|signed Out`);
+    //     console.info(`${CNAME}|signed Out`);
     //   }
     //   this.router.navigate(['/login']);
     // }).catch(error => {
-    //   console.error(`${this.constructor.name}|doSignOut`, error)
+    //   console.error(`${CNAME}|doSignOut`, error)
     // });
   }
 
@@ -424,10 +425,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.conversation.close().then(() => {
         this.conversation = undefined;
         if (globalThis.logLevel.isInfoEnabled) {
-          console.info(`${this.constructor.name}|Conversation closed`);
+          console.info(`${CNAME}|Conversation closed`);
         }
       }).catch((error: any) => {
-        console.error(`${this.constructor.name}|Conversation closing error`, error)
+        console.error(`${CNAME}|Conversation closing error`, error)
       });
     }
   }
@@ -452,7 +453,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (this.localParticipant) {
       this.localParticipant.sendMessage(this.messageFc.value);
     } else {
-      console.error(`${this.constructor.name}|Cannot sendMessage`, this.localParticipant);
+      console.error(`${CNAME}|Cannot sendMessage`, this.localParticipant);
     }
   }
 
@@ -470,7 +471,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       // Or
       //this.localParticipant.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
     } else {
-      console.error(`${this.constructor.name}|Cannot publish`, this.localMediaStream, this.localParticipant);
+      console.error(`${CNAME}|Cannot publish`, this.localMediaStream, this.localParticipant);
     }
   }
 
@@ -491,7 +492,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   private doRemoveMediaStream(participant: RemoteParticipant, stream: RemoteStream) {
     const deleted = this.remoteStreamsByParticipant.get(participant)?.delete(stream);
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|doRemoveMediaStream`, participant, stream, deleted);
+      console.debug(`${CNAME}|doRemoveMediaStream`, participant, stream, deleted);
     }
   }
 
@@ -499,7 +500,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.remoteParticipants.delete(participant);
     const deleted = this.remoteStreamsByParticipant.delete(participant);
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|doRemoveRemoteParticipant`, participant, deleted, this.remoteStreamsByParticipant.size);
+      console.debug(`${CNAME}|doRemoveRemoteParticipant`, participant, deleted, this.remoteStreamsByParticipant.size);
     }
   }
 
@@ -508,13 +509,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     navigator.mediaDevices.getDisplayMedia().then((mediaStream: MediaStream) => {
       this.localDisplayMediaStream = mediaStream;
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${this.constructor.name}|shareScreen getDisplayMedia`, mediaStream)
+        console.debug(`${CNAME}|shareScreen getDisplayMedia`, mediaStream)
       }
       if (this.localParticipant) {
         this.localParticipant.publish(mediaStream, { topic: 'screen' });
       }
     }).catch((error: any) => {
-      console.error(`${this.constructor.name}|shareScreen`, error);
+      console.error(`${CNAME}|shareScreen`, error);
     });
   }
 
@@ -536,7 +537,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         }
       })
       .catch(error => {
-        console.error(`${this.constructor.name}|goHd`, error);
+        console.error(`${CNAME}|goHd`, error);
       });
   }
 
@@ -561,11 +562,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         const constraints: MediaTrackConstraints = { width: { exact: 1280 }, height: { exact: 720 } }
         track.applyConstraints(constraints).then(() => {
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${this.constructor.name}|applyConstraints done`, this.localMediaStream, constraints);
+            console.debug(`${CNAME}|applyConstraints done`, this.localMediaStream, constraints);
           }
           this.doGatherCapConstSettings();
         }).catch(error => {
-          console.error(`${this.constructor.name}|track.applyConstraints error`, error);
+          console.error(`${CNAME}|track.applyConstraints error`, error);
         });
       });
     }
@@ -579,7 +580,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         const constraints: MediaTrackConstraints = { frameRate: 24 }
         track.applyConstraints(constraints).then(() => {
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${this.constructor.name}|applyConstraints done`, this.localMediaStream, constraints);
+            console.debug(`${CNAME}|applyConstraints done`, this.localMediaStream, constraints);
           }
           this.doGatherCapConstSettings();
         }).catch(error => {
@@ -596,11 +597,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ torch: true }] } })
       .then(() => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|applyMediaStreamConstraints done`);
+          console.debug(`${CNAME}|applyMediaStreamConstraints done`);
         }
       })
       .catch((error: any) => {
-        console.error(`${this.constructor.name}|applyMediaStreamConstraints error`, error)
+        console.error(`${CNAME}|applyMediaStreamConstraints error`, error)
       });
   }
 
@@ -611,11 +612,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 480 }, width: { exact: 640 }, advanced: [{ torch: false }] } })
       .then(() => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|applyMediaStreamConstraints done`);
+          console.debug(`${CNAME}|applyMediaStreamConstraints done`);
         }
       })
       .catch((error: any) => {
-        console.error(`${this.constructor.name}|applyMediaStreamConstraints error`, error)
+        console.error(`${CNAME}|applyMediaStreamConstraints error`, error)
       });
   }
 
@@ -626,12 +627,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.mediaRecorder = new MediaRecorder(mediaStream);
     this.mediaRecorder.onstop = (event: any) => {
       if (globalThis.logLevel.isInfoEnabled) {
-        console.info(`${this.constructor.name}|Recorder stopped`, event);
+        console.info(`${CNAME}|Recorder stopped`, event);
       }
     };
     this.mediaRecorder.ondataavailable = (event: any) => {
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${this.constructor.name}|ondataavailable`, event);
+        console.debug(`${CNAME}|ondataavailable`, event);
       }
       if (event.data && event.data.size > 0) {
         this.recordedBlobs.push(event.data);

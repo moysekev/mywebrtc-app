@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { User, getAuth, onAuthStateChanged } from "@firebase/auth";
 import { Observable, Subject } from 'rxjs';
 
+const CNAME = 'AuthService';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -27,21 +29,21 @@ export class AuthService {
     // });
 
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|constructor`)
+      console.debug(`${CNAME}|constructor`)
     }
     const auth = getAuth();
     onAuthStateChanged(auth, user => {
       if (user) {
         // User is signed in.
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|onAuthStateChanged`, user)
+          console.debug(`${CNAME}|onAuthStateChanged`, user)
         }
         this.user = user;
         this.userSubject.next(user);
       } else {
         // No user is signed in.
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|onAuthStateChanged : No user is signed in`)
+          console.debug(`${CNAME}|onAuthStateChanged : No user is signed in`)
         }
         this.user = null;
         this.userSubject.next(null);

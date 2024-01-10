@@ -4,6 +4,8 @@ import { NgStyle, NgClass } from '@angular/common';
 export const VIDEO_ROUNDED_CORNERS = { borderRadius: '4px', overflow: 'hidden' };
 // const VIDEO_SIZING = { height: '100%', width: '100%' };
 
+const CNAME = 'StreamVideo';
+
 @Component({
   selector: 'app-stream-video',
   templateUrl: './stream-video.component.html',
@@ -18,7 +20,7 @@ export class StreamVideoComponent implements AfterViewInit {
   _mediaStream: MediaStream | undefined;
   @Input() set mediaStream(mediaStream: MediaStream | undefined) {
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|set mediaStream`, mediaStream, mediaStream?.getTracks().length);
+      console.debug(`${CNAME}|mediaStream`, mediaStream, mediaStream?.getTracks().length);
     }
     this._mediaStream = mediaStream;
     this.doAttach();
@@ -51,7 +53,7 @@ export class StreamVideoComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|ngAfterViewInit`, this.videoRef);
+      console.debug(`${CNAME}|ngAfterViewInit`, this.videoRef);
     }
     // remote stream is attached to DOM during ngAfterViewInit because @ViewChild is not bound before this stage
     this.doAttach();

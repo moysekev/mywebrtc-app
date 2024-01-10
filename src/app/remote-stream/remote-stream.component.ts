@@ -8,7 +8,8 @@ import { MediaStreamHelper } from '../MediaStreamHelper';
 import { DATACHANNEL_SNAPSHOT_END, DATACHANNEL_SNAPSHOT_PATH } from '../constants';
 import { ControlledStreamComponent } from '../controlled-stream/controlled-stream.component';
 
-const COMPONENT_NAME = 'RemoteStream';
+const CNAME = 'RemoteStream';
+
 @Component({
   selector: 'app-remote-stream',
   templateUrl: './remote-stream.component.html',
@@ -50,7 +51,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     this.mediaStream = this._remoteStream.getMediaStream();
     this._remoteStream.onMediaStream((mediaStream: MediaStream) => {
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${COMPONENT_NAME}|onMediaStreamReady`, mediaStream);
+        console.debug(`${CNAME}|onMediaStreamReady`, mediaStream);
       }
       this.mediaStream = mediaStream;
     })
@@ -85,7 +86,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     if (this._mediaStream) {
       this._mediaStream.addEventListener('addtrack', (event: MediaStreamTrackEvent) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${COMPONENT_NAME}|MediaStream::onaddtrack`, event);
+          console.debug(`${CNAME}|MediaStream::onaddtrack`, event);
         }
         this.doUpdateStates()
       })
@@ -100,7 +101,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       // to be able to register more than one listener
       this._mediaStream.addEventListener('removetrack', (event: MediaStreamTrackEvent) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${COMPONENT_NAME}|MediaStream::onremovetrack`, event);
+          console.debug(`${CNAME}|MediaStream::onremovetrack`, event);
         }
         this.doUpdateStates()
       })
@@ -130,7 +131,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     this._remoteStream?.singlecast(DATACHANNEL_SNAPSHOT_PATH, (dataChannel) => {
       dataChannel.onopen = (event) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${COMPONENT_NAME}|snapshot dataChannel.onopen`, this, event);
+          console.debug(`${CNAME}|snapshot dataChannel.onopen`, this, event);
         }
       };
 
@@ -138,7 +139,7 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       let dataUrl = '';
       dataChannel.onmessage = (event: MessageEvent) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${COMPONENT_NAME}|snapshot dataChannel.onmessage`, this, event);
+          console.debug(`${CNAME}|snapshot dataChannel.onmessage`, this, event);
         }
         if (event.data === DATACHANNEL_SNAPSHOT_END) {
           // resolve(dataUrl);

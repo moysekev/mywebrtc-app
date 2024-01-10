@@ -8,6 +8,8 @@ import { ContextService } from '../context.service';
 import { PointerComponent } from '../pointer/pointer.component';
 import { StreamVideoComponent } from '../stream-video/stream-video.component';
 
+const CNAME = 'ControlledStream';
+
 @Component({
   selector: 'app-controlled-stream',
   standalone: true,
@@ -40,21 +42,21 @@ export class ControlledStreamComponent implements AfterViewInit, OnDestroy {
         const data = JSON.parse(event.data);
         if (data.nickname !== undefined) {
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${this.constructor.name}|dataChannel.onmessage received nickname`, data.nickname)
+            console.debug(`${CNAME}|dataChannel.onmessage received nickname`, data.nickname)
           }
           this.pointerChannels.set(dataChannel, data.nickname);
         } else {
-          console.warn(`${this.constructor.name}|dataChannel.onmessage received`, data)
+          console.warn(`${CNAME}|dataChannel.onmessage received`, data)
         }
       };
       dataChannel.addEventListener('error', (error) => {
-        console.error(`${this.constructor.name}|dataChannel.onerror`, error)
+        console.error(`${CNAME}|dataChannel.onerror`, error)
         this.inBoundDataChannels.delete(dataChannel);
         this.pointerChannels.delete(dataChannel);
       })
       dataChannel.addEventListener('close', () => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|dataChannel.onclose`)
+          console.debug(`${CNAME}|dataChannel.onclose`)
         }
         this.inBoundDataChannels.delete(dataChannel);
         this.pointerChannels.delete(dataChannel);
@@ -121,34 +123,34 @@ export class ControlledStreamComponent implements AfterViewInit, OnDestroy {
   onPointerEnter(event: PointerEvent) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${this.constructor.name}|onPointerEnter`, event)
+      console.debug(`${CNAME}|onPointerEnter`, event)
     }
 
     this._stream?.broadcast(DATACHANNEL_POINTER_PATH, (dataChannel) => {
       const added = this.outboundDataChannels.add(dataChannel);
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${this.constructor.name}|onPointerEnter stored outbound DataChannel`, dataChannel, this.outboundDataChannels.size, added)
+        console.debug(`${CNAME}|onPointerEnter stored outbound DataChannel`, dataChannel, this.outboundDataChannels.size, added)
       }
 
       dataChannel.onopen = () => {
         // send first message indicating the pointer location that will be sent next
         // comes from the current user
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|broadcast dataChannel.onopen, sending nickname`, dataChannel.label, this.contextService.nickname)
+          console.debug(`${CNAME}|broadcast dataChannel.onopen, sending nickname`, dataChannel.label, this.contextService.nickname)
         }
         dataChannel.send(JSON.stringify({ nickname: this.contextService.nickname }))
         this.openDataChannels.add(dataChannel);
       };
       dataChannel.onclose = () => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${this.constructor.name}|broadcast dataChannel.onclose`)
+          console.debug(`${CNAME}|broadcast dataChannel.onclose`)
         }
         this.outboundDataChannels.delete(dataChannel)
         this.openDataChannels.delete(dataChannel)
       }
       dataChannel.onerror = (error) => {
         if (globalThis.logLevel.isWarnEnabled) {
-          console.warn(`${this.constructor.name}|broadcast dataChannel.onerror`, error)
+          console.warn(`${CNAME}|broadcast dataChannel.onerror`, error)
         }
         this.outboundDataChannels.delete(dataChannel)
         this.openDataChannels.delete(dataChannel)
@@ -193,7 +195,7 @@ export class ControlledStreamComponent implements AfterViewInit, OnDestroy {
   onPointerLeave(event: PointerEvent) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
     if (globalThis.logLevel.isDebugEnabled) {
-      console.log('onPointerLeave', event)
+      console.log(`${CNAME}|onPointerLeave`, event)
     }
     this.openDataChannels.forEach((dataChannel) => {
       dataChannel.close()

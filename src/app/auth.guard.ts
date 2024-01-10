@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 
 import { AuthService } from './auth.service';
 
+const CNAME = 'AuthGuard';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,7 +25,7 @@ export class AuthGuard {
           next(user) {
             if (user) {
               if (globalThis.logLevel.isDebugEnabled) {
-                console.debug(`${this.constructor.name}|canActivate => resolve(true)`, user)
+                console.debug(`${CNAME}|canActivate => resolve(true)`, user)
               }
               resolve(true);
             } else { resolve(false) }
@@ -33,13 +35,13 @@ export class AuthGuard {
     }
     else if (this.authService.user !== null) {
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${this.constructor.name}|canActivate => return true`, this.authService.user)
+        console.debug(`${CNAME}|canActivate => return true`, this.authService.user)
       }
       return true;
     }
     else {
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${this.constructor.name}|canActivate => return false`)
+        console.debug(`${CNAME}|canActivate => return false`)
       }
       //this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
       return false;
