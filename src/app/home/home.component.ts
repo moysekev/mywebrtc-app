@@ -241,7 +241,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.localParticipantData = userData;
 
       this.isWaitingForAcceptance = true;
-      conversation.addParticipant(userData, { moderator: this.moderator }).then((participant: LocalParticipant) => {
+      conversation.getOrCreateParticipant(userData, { moderator: this.moderator }).then((participant: LocalParticipant) => {
         if (globalThis.logLevel.isInfoEnabled) {
           console.log(`${CNAME}|addParticipant succeed`, participant);
         }
