@@ -1,13 +1,4 @@
-/* :host { */
-/* display: fixed; */
-/* position: relative; */
-/* width: 100%;
-    max-width: 133.34%;
-    height: 75%;
-    max-height: 100%; */
-/* } */
-
 :host {
     display: block;
-    /* position: relative; */
+    height: 100%;
 }

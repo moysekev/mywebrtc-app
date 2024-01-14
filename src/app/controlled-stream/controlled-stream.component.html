@@ -1,11 +1,10 @@
-<app-stream-video class="d-flex" [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="_muted"
+<app-stream-video class="" [mediaStream]="_mediaStream" [videoStyle]="_videoStyle" [muted]="_muted"
     (pointerenter)="onPointerEnter($event)" (pointermove)="onPointerMove($event)"
     (pointerleave)="onPointerLeave($event)"></app-stream-video>
-<div class="position-absolute top-0 mt-1 start-0 ms-1" #label>
+<div class="pos-abs top-left" #label>
     <ng-content select="[label]"></ng-content>
 </div>
-<div class="position-absolute bottom-0 mb-1 end-0 me-1" #controls>
+<div class="pos-abs bottom-right" #controls>
     <ng-content select="[controls]"></ng-content>
 </div>
-<!-- <ng-content select="[pointers]"></ng-content> -->
 <app-pointer *ngFor="let kv of pointerChannels | keyvalue" [nickname]="kv.value" [dataChannel]="kv.key"></app-pointer>

@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="">
     <!-- <div *ngFor="let kv of remoteStreamsByParticipant | keyvalue" class="row">
         <p>User {{kv.key.id}} </p>
         <span>kv.value.size = {{kv.value.size}}</span>
@@ -42,7 +42,15 @@
         </div>
     </div> -->
 
-    <div class="row position-relative vh-100">
+    <!-- <mat-grid-list cols="2" rowHeight="2:1">
+        <mat-grid-tile>1</mat-grid-tile>
+        <mat-grid-tile>2</mat-grid-tile>
+        <mat-grid-tile>3</mat-grid-tile>
+        <mat-grid-tile>4</mat-grid-tile>
+    </mat-grid-list> -->
+
+
+    <div class="pos-relative vh-100">
         <!-- class="vw-100 vh-100" -->
         <!-- <mat-grid-list cols="1" rowHeight="100vh">
             <mat-grid-tile *ngFor="let kv of remoteStreamsByParticipant | keyvalue">
@@ -68,10 +76,18 @@
                 [videoStyle]="{objectFit:'cover'}">
             </app-local-stream>
         </div> -->
-        <div class="col d-flex justify-content-center" *ngFor="let kv of remoteStreamsByParticipant | keyvalue">
-            <app-remote-stream *ngFor="let _stream of kv.value" [remoteStream]="_stream"
-                [videoStyle]="{objectFit:'cover'}" (onSnapshot)="onSnapshot($event)"></app-remote-stream>
+        <div class="d-flex justify-content-center h-100">
+            <div *ngFor="let kv of remoteStreamsByParticipant | keyvalue" class="h-100" [ngStyle]="{width:_width}">
+                <app-remote-stream *ngFor="let _stream of kv.value" [remoteStream]="_stream"
+                    [videoStyle]="{'height': '100%', width:'100%', objectFit:'cover'}"
+                    (onSnapshot)="onSnapshot($event)"></app-remote-stream>
+            </div>
         </div>
+        <!-- <div *ngIf="localStream" class="d-flex justify-content-center h-100">
+            <app-local-stream [localStream]="localStream"
+                [videoStyle]="{'height': '100%', width:'100%', objectFit:'cover'}">
+            </app-local-stream>
+        </div> -->
         <!-- 
         https://stackoverflow.com/questions/20590239/maintain-aspect-ratio-of-div-but-fill-screen-width-and-height-in-css
         16:9
@@ -90,19 +106,17 @@
         <app-local-stream [localStream]="localStream" [videoStyle]="{}">
         </app-local-stream>
     </div> -->
-        <!-- bottom-0 mb-1 start-0 ms-1 -->
-        <div *ngIf="localStream"
-            class="position-absolute bottom-0 mb-1 start-0 ms-1 col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3 col-xxl-2">
-            <!-- <div class="d-flex flex-column-reverse "> -->
-            <!-- <div class="row "> -->
+        <!-- bottom-0 mb-1 start-0 ms-1 col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3 col-xxl-2 -->
+        <!-- <div class="d-flex flex-column-reverse "> -->
+        <!-- <div class="row "> -->
+        <div *ngIf="localStream" class="pos-abs bottom-left" [ngStyle]="{height:'34%'}">
             <app-local-stream [localStream]="localStream" [videoStyle]="{opacity:0.84, height:'100%', width:'auto'}">
             </app-local-stream>
-            <!-- </div> -->
         </div>
     </div>
 
-    <div class="row">
-        <div class="col text-center">
+    <div class="d-flex justify-content-center">
+        <div>
             <!-- <p>Conversation id : {{conversation?.id}}</p>
             <p>User id : {{localParticipant?.user?.id}}</p>
             <p>User nickname : {{localParticipantData?.nickname}}</p>
@@ -129,6 +143,15 @@
                 <button (click)="toggleModeration()">toggleModeration</button>
             </p> -->
         </div>
+    </div>
+    <div>
+        {{audioTrackCapabilities|json}}
+    </div>
+    <div>
+        {{audioTrackConstraints|json}}
+    </div>
+    <div>
+        {{audioTrackSettings|json}}
     </div>
     <!-- <div class="row">
         <div class="col">

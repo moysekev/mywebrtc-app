@@ -1,3 +1,8 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
 .mirror {
     transform: rotateY(180deg);
     /* Safari and Chrome */
@@ -5,15 +10,3 @@
     /* Firefox */
     -moz-transform: rotateY(180deg);
 }
-
-/* :host {
-    display: flex;
-} */
-
-/* video {
-    align-self: flex-end;
-} */
-
-/* .fullscreen {
-    width: 100vw;
-} */

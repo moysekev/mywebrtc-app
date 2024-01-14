@@ -2,7 +2,6 @@ import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular
 import { NgStyle, NgClass } from '@angular/common';
 
 export const VIDEO_ROUNDED_CORNERS = { borderRadius: '4px', overflow: 'hidden' };
-// const VIDEO_SIZING = { height: '100%', width: '100%' };
 
 const CNAME = 'StreamVideo';
 
@@ -28,7 +27,8 @@ export class StreamVideoComponent implements AfterViewInit {
 
   _videoStyle: { [klass: string]: any; } = {
     // minHeight: '100%', minWidth: '100%',
-    width: '99vw', maxWidth: '133.34vh', height: '75vw', maxHeight: '100vh',
+    // width: '99vw', height: '75vw',
+    //  maxWidth: '133.34vh', maxHeight: '100vh',
     'object-fit': 'contain',
     ...VIDEO_ROUNDED_CORNERS
   };

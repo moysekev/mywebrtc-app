@@ -1,5 +1,5 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { KeyValuePipe, NgFor, NgIf } from '@angular/common';
+import { JsonPipe, KeyValuePipe, NgFor, NgIf, NgStyle } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule, UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -39,7 +39,7 @@ const CNAME = 'Home';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
   standalone: true,
-  imports: [NgIf, NgFor,
+  imports: [NgIf, NgFor, NgStyle, JsonPipe,
     ClipboardModule,
     LocalStreamComponent, RemoteStreamComponent,
     MatButtonModule, MatIconModule,
@@ -77,8 +77,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   localParticipant: LocalParticipant | undefined;
   localParticipantData: UserData | undefined;
 
-  localStream: LocalStream | undefined;
   localMediaStream: MediaStream | undefined;
+  localStream: LocalStream | undefined;
 
   audioTrackCapabilities: MediaTrackCapabilities | undefined;
   audioTrackConstraints: MediaTrackConstraints | undefined;
@@ -95,6 +95,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   url: string | undefined;
 
   remoteStreamsByParticipant: Map<RemoteParticipant, Set<RemoteStream>> = new Map();
+
+  get _width() {
+    return `${Math.floor(100 / this.remoteStreamsByParticipant.size)}%`
+  }
 
   isWaitingForAcceptance = false;
 
@@ -271,8 +275,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true
+      }, video: true
     }).then((mediaStream: MediaStream) => {
       if (globalThis.logLevel.isDebugEnabled) {
         console.debug(`${CNAME}|ngAfterViewInit getUserMedia`, mediaStream);
@@ -287,10 +293,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   onSnapshot(dataUrl: string) {
     if (globalThis.logLevel.isDebugEnabled) {
       console.debug(`${CNAME}|took snapshot`, dataUrl);
-      //this.snapshotSrc = dataUrl;//URL.createObjectURL(snapshot);
-      //data:image/png;base64,
+      // dataUrl = data:image/png;base64,...
       const type = dataUrl.split(';')[0].split('/')[1];
-      saveAs(dataUrl, `snapshot_${(new Date().toJSON().slice(0, 10))}.${type}`)
+      const str = new Date().toJSON();
+      // str = 2024-01-14T15:04:04.494Z
+      saveAs(dataUrl, `snapshot_${str.slice(0, 10)}_${str.slice(11, 19).replace(/:/g, '-')}.${type}`)
     }
   }
 
@@ -463,7 +470,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (this.localMediaStream && this.localParticipant) {
       this.localStream = this.localParticipant.publish(this.localMediaStream, { topic: 'webcam', audio: true });
 
-      const localStream = this.localStream;
+      // const localStream = this.localStream;
       // localStream.onSubscribed((peerId: string) => {
       //   // localStream.setBandwidth(peerId, 256)
       // })

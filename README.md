@@ -138,4 +138,15 @@ Warning: bundle initial exceeded maximum budget. Budget 1.00 MB was not met by 1
 
 to look bundle size :
 ng build --source-map=true --named-chunks=true
-npx source-map-explorer dist/mywebrtc-app/\*_/_.js
+npx source-map-explorer dist/mywebrtc-app/*.js
+
+
+angular.json
+"styles": [
+                            "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+                            "node_modules/bootstrap/dist/css/bootstrap.min.css",
+                            "src/styles.css"
+                        ],
+                        "scripts": [
+                            "node_modules/bootstrap/dist/js/bootstrap.min.js"
+                        ]
