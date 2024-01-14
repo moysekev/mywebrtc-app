@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { NgStyle, NgClass } from '@angular/common';
+import { NgClass, NgStyle } from '@angular/common';
+import { Component, Input } from '@angular/core';
 
 export const VIDEO_ROUNDED_CORNERS = { borderRadius: '4px', overflow: 'hidden' };
 
@@ -12,9 +12,9 @@ const CNAME = 'StreamVideo';
   standalone: true,
   imports: [NgStyle, NgClass]
 })
-export class StreamVideoComponent implements AfterViewInit {
+export class StreamVideoComponent { //implements AfterViewInit, OnDestroy
 
-  @ViewChild("video") videoRef: ElementRef | undefined;
+  // @ViewChild("video") videoRef: ElementRef | undefined;
 
   _mediaStream: MediaStream | undefined;
   @Input() set mediaStream(mediaStream: MediaStream | undefined) {
@@ -22,7 +22,9 @@ export class StreamVideoComponent implements AfterViewInit {
       console.debug(`${CNAME}|mediaStream`, mediaStream, mediaStream?.getTracks().length);
     }
     this._mediaStream = mediaStream;
-    this.doAttach();
+    // if (this.videoRef) {
+    //   this.videoRef.nativeElement.srcObject = mediaStream;
+    // }
   }
 
   _videoStyle: { [klass: string]: any; } = {
@@ -39,6 +41,9 @@ export class StreamVideoComponent implements AfterViewInit {
   _muted = false;
   @Input() set muted(muted: boolean) {
     this._muted = muted;
+    // if (this.videoRef) {
+    //   this.videoRef.nativeElement.muted = this._muted;
+    // }
   }
 
   _mirror = false;
@@ -51,22 +56,28 @@ export class StreamVideoComponent implements AfterViewInit {
     this._fullscreen = fullscreen;
   }
 
-  ngAfterViewInit() {
-    if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${CNAME}|ngAfterViewInit`, this.videoRef);
-    }
-    // remote stream is attached to DOM during ngAfterViewInit because @ViewChild is not bound before this stage
-    this.doAttach();
-  }
+  // ngAfterViewInit() {
+  //   if (globalThis.logLevel.isDebugEnabled) {
+  //     console.debug(`${CNAME}|ngAfterViewInit`, this.videoRef);
+  //   }
+  //   // remote stream is attached to DOM during ngAfterViewInit because @ViewChild is not bound before this stage
+  //   // this.doAttach();
+  // }
 
-  doAttach() {
-    if (this.videoRef) {
-      this.videoRef.nativeElement.srcObject = this._mediaStream;
-      this.videoRef.nativeElement.muted = this._muted;
-      // this.videoRef.nativeElement.height = '150';
-      // this.videoRef.nativeElement.width = '200';
-    }
-  }
+  // ngOnDestroy(): void {
+  //   if (globalThis.logLevel.isDebugEnabled) {
+  //     console.debug(`${CNAME}|ngOnDestroy`, this.videoRef);
+  //   }
+  //   // throw new Error('Method not implemented.');
+  //   if (this.videoRef) {
+  //     this.videoRef.nativeElement.srcObject = undefined;
+  //   }
+  // }
 
-
+  // doAttach() {
+  //   if (this.videoRef) {
+  //     const video = this.videoRef.nativeElement;
+  //     video.srcObject = this._mediaStream;
+  //   }
+  // }
 }
