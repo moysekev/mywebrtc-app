@@ -90,7 +90,7 @@ Apache-2.0
 @mediapipe/selfie_segmentation
 Apache-2.0
 
-file-saver
+file-saver-es
 MIT
 The MIT License
 
