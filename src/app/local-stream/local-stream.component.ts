@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-import { LocalStream, PublishOptions, sendByChunks } from 'mywebrtc';
+import { LocalStream, PublishOptions, sendByChunks, sendByChunksWithDelay, sendByChunksWithDelayPromise } from 'mywebrtc';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
 import { DATACHANNEL_SNAPSHOT_PATH } from '../constants';
@@ -21,6 +21,8 @@ export class LocalStreamComponent implements OnInit {
 
   _publishOptions: PublishOptions = { audio: false, video: false };
 
+  // private snapshotDataChannels = new Set<RTCDataChannel>;
+
   // audioEnabled = false;
   // videoEnabled = false;
 
@@ -37,6 +39,15 @@ export class LocalStreamComponent implements OnInit {
       this.mediaStream = this._localStream.getMediaStream();
 
       this._localStream.onDataChannel(DATACHANNEL_SNAPSHOT_PATH, (dataChannel: RTCDataChannel) => {
+
+        // Store to keep a reference, otherwise the instance might be garbage collected
+        // I had some weird issues with snapshots not always working, I suspected garbage collection.
+        // I tried to store references in a set, and it seems to fix the issue. Let's see if the problem
+        // is really fixed.
+        // Actually it was, but by encapsulating the recursive sendByChunksWithDelay in a Promise the problem
+        // is also fixed and there is no need for a Set to keep references.
+        //this.snapshotDataChannels.add(dataChannel)
+
         dataChannel.onopen = () => {
           if (globalThis.logLevel.isDebugEnabled) {
             console.debug(`${CNAME}|snapshot datachannel opened, making snapshot`)
@@ -56,13 +67,23 @@ export class LocalStreamComponent implements OnInit {
             if (globalThis.logLevel.isDebugEnabled) {
               console.debug(`${CNAME}|snapshot datachannel sending`, dataUrl)
             }
-            sendByChunks(dataChannel, dataUrl)
+
+            // sendByChunks(dataChannel, dataUrl) // works
+            // sendByChunksWithDelay(dataChannel, dataUrl) // recursive function that triggers dataChannel garbage collection issues 
+            // Promise version is the most reliable
+            sendByChunksWithDelayPromise(dataChannel, dataUrl).then(() => {
+              if (globalThis.logLevel.isDebugEnabled) {
+                console.debug(`${CNAME}|snapshot datachannel sent`)
+              }
+            })
+
           })
         }
         dataChannel.onclose = () => {
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${CNAME}|snapshot datachannel clsed`)
+            console.debug(`${CNAME}|snapshot datachannel closed`)
           }
+          //this.snapshotDataChannels.delete(dataChannel)
         }
       })
     }

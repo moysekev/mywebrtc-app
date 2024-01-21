@@ -8,13 +8,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from "@angular/router";
 
-
 import { getDatabase, ref } from "@firebase/database";
-
 
 import { Conversation, ConversationOptions, LocalParticipant, LocalStream, RemoteParticipant, RemoteStream, User } from 'mywebrtc';
 
-import { saveAs } from 'file-saver';
+import { saveAs } from 'file-saver-es';
 
 import { MediaStreamHelper } from '../MediaStreamHelper';
 import { AuthService } from '../auth.service';

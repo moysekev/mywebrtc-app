@@ -22,6 +22,8 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
   _publishOptions: PublishOptions = { audio: false, video: false };
   _subscribeOptions: SubscribeOptions = { audio: false, video: false };
 
+  // private snapshotDataChannels = new Set<RTCDataChannel>;
+
   audioEnabled = false;
   videoEnabled = false;
 
@@ -131,11 +133,20 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       //     console.debug(`${CNAME}|snapshot dataChannel.onopen`, this, event);
       //   }
       // };
+      // Store to keep a reference, otherwise the instance might be garbage collected
+      // I had some weird issues with snapshots not always working, I suspected garbage collection.
+      // I tried to store references in a set, and it seems to fix the issue. Let's see if the problem
+      // is really fixed. 
+      //this.snapshotDataChannels.add(dataChannel)
 
-      receiveByChunks(dataChannel, (dataUrl) => {
+      receiveByChunks(dataChannel).then((dataUrl) => {
         this.onSnapshot.emit(dataUrl)
         dataChannel.close()
       })
+
+      // dataChannel.onclose = () => {
+      //   this.snapshotDataChannels.delete(dataChannel)
+      // }
     })
   }
 
