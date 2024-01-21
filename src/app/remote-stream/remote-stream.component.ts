@@ -131,9 +131,9 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
       //     console.debug(`${CNAME}|snapshot dataChannel.onopen`, this, event);
       //   }
       // };
-      receiveByChunks(dataChannel).then((dataUrl) => {
+
+      receiveByChunks(dataChannel, (dataUrl) => {
         this.onSnapshot.emit(dataUrl)
-      }).finally(() => {
         dataChannel.close()
       })
     })

@@ -37,23 +37,33 @@ export class LocalStreamComponent implements OnInit {
       this.mediaStream = this._localStream.getMediaStream();
 
       this._localStream.onDataChannel(DATACHANNEL_SNAPSHOT_PATH, (dataChannel: RTCDataChannel) => {
-        this._localStream.snapshot().then((dataUrl: string) => {
-          // https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Using_data_channels
-          // Error with:
-          // dataChannel.send(dataUrl) // TypeError: RTCDataChannel.send: Message size (534010) exceeds maxMessageSize
-          // Divide dataUrl in chunks and send them one by one.
-          // let start = 0;
-          // while (start < dataUrl.length) {
-          //   const end = Math.min(dataUrl.length, start + DATACHANNEL_SNAPSHOT_CHUNK_SIZE);
-          //   dataChannel.send(dataUrl.slice(start, end))
-          //   start = end;
-          // }
-          // dataChannel.send(DATACHANNEL_SNAPSHOT_END)
-          sendByChunks(dataChannel, dataUrl)
+        dataChannel.onopen = () => {
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${CNAME}|sent snapshot`)
+            console.debug(`${CNAME}|snapshot datachannel opened, making snapshot`)
           }
-        })
+          this._localStream.snapshot().then((dataUrl: string) => {
+            // https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Using_data_channels
+            // Error with:
+            // dataChannel.send(dataUrl) // TypeError: RTCDataChannel.send: Message size (534010) exceeds maxMessageSize
+            // Divide dataUrl in chunks and send them one by one.
+            // let start = 0;
+            // while (start < dataUrl.length) {
+            //   const end = Math.min(dataUrl.length, start + DATACHANNEL_SNAPSHOT_CHUNK_SIZE);
+            //   dataChannel.send(dataUrl.slice(start, end))
+            //   start = end;
+            // }
+            // dataChannel.send(DATACHANNEL_SNAPSHOT_END)
+            if (globalThis.logLevel.isDebugEnabled) {
+              console.debug(`${CNAME}|snapshot datachannel sending`, dataUrl)
+            }
+            sendByChunks(dataChannel, dataUrl)
+          })
+        }
+        dataChannel.onclose = () => {
+          if (globalThis.logLevel.isDebugEnabled) {
+            console.debug(`${CNAME}|snapshot datachannel clsed`)
+          }
+        }
       })
     }
   }
