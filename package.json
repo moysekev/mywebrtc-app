@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "gh-pages -d dist/mywebrtc-app"
+    "deploy": "cp dist/mywebrtc-app/index.html dist/mywebrtc-app/404.html;gh-pages -d dist/mywebrtc-app"
   },
   "private": true,
   "dependencies": {
