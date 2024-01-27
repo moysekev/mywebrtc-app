@@ -16,7 +16,11 @@ To import last local version of mywebrtc :
 mywebrtc-app$ `ng cache clean`
 mywebrtc-app$ `npm install ../mywebrtc/mywebrtc-1.0.0.tgz`
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Then `npm run build` or `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+
+## Run
+
+`npm run start`
 
 ## Running unit tests
 

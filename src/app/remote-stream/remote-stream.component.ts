@@ -51,9 +51,9 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
     };
 
     this.mediaStream = this._remoteStream.getMediaStream();
-    this._remoteStream.onMediaStream((mediaStream: MediaStream) => {
+    this._remoteStream.onMediaStream((mediaStream: MediaStream | undefined) => {
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${CNAME}|onMediaStreamReady`, mediaStream);
+        console.debug(`${CNAME}|onMediaStream`, mediaStream);
       }
       this.mediaStream = mediaStream;
     })
