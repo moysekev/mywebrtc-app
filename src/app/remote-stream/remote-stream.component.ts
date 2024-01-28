@@ -144,18 +144,22 @@ export class RemoteStreamComponent implements OnInit, OnDestroy {
         dataChannel.close()
       })
 
-      // dataChannel.onclose = () => {
-      //   this.snapshotDataChannels.delete(dataChannel)
-      // }
+      dataChannel.onclose = (event) => {
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${CNAME}|dataChannel:onclose`, DATACHANNEL_SNAPSHOT_PATH, event);
+        }
+      }
+      dataChannel.onerror = (event) => {
+        if (globalThis.logLevel.isDebugEnabled) {
+          console.debug(`${CNAME}|dataChannel:onerror`, DATACHANNEL_SNAPSHOT_PATH, event);
+        }
+      }
     })
   }
 
   togglePublishAudio() {
-    // if (this._remoteStream) {
-    //   const stream = this._remoteStream;
     this._remoteStream?.updatePublishOptions({ audio: !this._remoteStream.getPublishOptions().audio })
       .then(() => { })
-    // }
   }
 
   togglePublishVideo() {

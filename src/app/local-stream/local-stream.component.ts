@@ -48,9 +48,9 @@ export class LocalStreamComponent implements OnInit {
         // is also fixed and there is no need for a Set to keep references.
         //this.snapshotDataChannels.add(dataChannel)
 
-        dataChannel.onopen = () => {
+        dataChannel.onopen = (event) => {
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${CNAME}|snapshot datachannel opened, making snapshot`)
+            console.debug(`${CNAME}|dataChannel:onopen`, DATACHANNEL_SNAPSHOT_PATH, event)
           }
           this._localStream.snapshot().then((dataUrl: string) => {
             // https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Using_data_channels
@@ -65,7 +65,7 @@ export class LocalStreamComponent implements OnInit {
             // }
             // dataChannel.send(DATACHANNEL_SNAPSHOT_END)
             if (globalThis.logLevel.isDebugEnabled) {
-              console.debug(`${CNAME}|snapshot datachannel sending`, dataUrl)
+              console.debug(`${CNAME}|datachannel sending snapshot`, dataUrl)
             }
 
             // sendByChunks(dataChannel, dataUrl) // works
@@ -73,17 +73,20 @@ export class LocalStreamComponent implements OnInit {
             // Promise version is the most reliable
             sendByChunksWithDelayPromise(dataChannel, dataUrl).then(() => {
               if (globalThis.logLevel.isDebugEnabled) {
-                console.debug(`${CNAME}|snapshot datachannel sent`)
+                console.debug(`${CNAME}|datachannel snapshot sent`)
               }
             })
-
           })
         }
-        dataChannel.onclose = () => {
+        dataChannel.onclose = (event) => {
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${CNAME}|snapshot datachannel closed`)
+            console.debug(`${CNAME}|datachannel:onclose`, DATACHANNEL_SNAPSHOT_PATH, event)
           }
-          //this.snapshotDataChannels.delete(dataChannel)
+        }
+        dataChannel.onerror = (event) => {
+          if (globalThis.logLevel.isDebugEnabled) {
+            console.debug(`${CNAME}|datachannel:onerror`, DATACHANNEL_SNAPSHOT_PATH, event)
+          }
         }
       })
     }

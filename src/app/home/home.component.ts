@@ -595,35 +595,35 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  applyMediaStreamConstraintsHD(remoteStream: RemoteStream) {
-    //const constraints: MediaStreamConstraints | any = ;
-    //const constraints: MediaStreamConstraints = { video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ zoom: 4 }] } };
-    //, advanced: [{ zoom: 2 }]
-    remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ torch: true }] } })
-      .then(() => {
-        if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${CNAME}|applyMediaStreamConstraints done`);
-        }
-      })
-      .catch((error: any) => {
-        console.error(`${CNAME}|applyMediaStreamConstraints error`, error)
-      });
-  }
+  // applyMediaStreamConstraintsHD(remoteStream: RemoteStream) {
+  //   //const constraints: MediaStreamConstraints | any = ;
+  //   //const constraints: MediaStreamConstraints = { video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ zoom: 4 }] } };
+  //   //, advanced: [{ zoom: 2 }]
+  //   remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ torch: true }] } })
+  //     .then(() => {
+  //       if (globalThis.logLevel.isDebugEnabled) {
+  //         console.debug(`${CNAME}|applyMediaStreamConstraints done`);
+  //       }
+  //     })
+  //     .catch((error: any) => {
+  //       console.error(`${CNAME}|applyMediaStreamConstraints error`, error)
+  //     });
+  // }
 
-  applyMediaStreamConstraintsVGA(remoteStream: RemoteStream) {
-    //const constraints: MediaStreamConstraints | any = ;
-    //{ video: { zoom: 4 } }
-    //{ video: { height: { exact: 480 }, width: { exact: 640 } } }
-    remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 480 }, width: { exact: 640 }, advanced: [{ torch: false }] } })
-      .then(() => {
-        if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${CNAME}|applyMediaStreamConstraints done`);
-        }
-      })
-      .catch((error: any) => {
-        console.error(`${CNAME}|applyMediaStreamConstraints error`, error)
-      });
-  }
+  // applyMediaStreamConstraintsVGA(remoteStream: RemoteStream) {
+  //   //const constraints: MediaStreamConstraints | any = ;
+  //   //{ video: { zoom: 4 } }
+  //   //{ video: { height: { exact: 480 }, width: { exact: 640 } } }
+  //   remoteStream.applyMediaStreamConstraints({ video: { height: { exact: 480 }, width: { exact: 640 }, advanced: [{ torch: false }] } })
+  //     .then(() => {
+  //       if (globalThis.logLevel.isDebugEnabled) {
+  //         console.debug(`${CNAME}|applyMediaStreamConstraints done`);
+  //       }
+  //     })
+  //     .catch((error: any) => {
+  //       console.error(`${CNAME}|applyMediaStreamConstraints error`, error)
+  //     });
+  // }
 
   mediaRecorder: MediaRecorder | undefined;
   recordedBlobs: Array<Blob> = new Array();
