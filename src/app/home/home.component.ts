@@ -95,7 +95,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   remoteStreamsByParticipant: Map<RemoteParticipant, Set<RemoteStream>> = new Map();
 
   get _width() {
-    return `${Math.floor(100 / this.remoteStreamsByParticipant.size)}%`
+    return `${Math.floor(100 / this.remoteStreamsByParticipant.size)}%`;
   }
 
   isWaitingForAcceptance = false;
@@ -111,8 +111,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   @HostListener('window:unload', ['$event'])
   unloadHandler(event: any) {
     // console.log("unloadHandler", event);
-    event.preventDefault();
-    this.doCleanUp();
+    event.preventDefault()
+    this.doCleanUp()
   }
 
   // Use BEFORE unload to hangup (works for Firefox at least)
@@ -151,17 +151,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
 
     if (globalThis.logLevel.isDebugEnabled) {
-      console.debug(`${CNAME}|ngOnInit baseUrl conversationId`, baseUrl, conversationId);
+      console.debug(`${CNAME}|ngOnInit baseUrl conversationId`, baseUrl, conversationId)
     }
 
     const options: ConversationOptions = {
       moderated: this.moderated
-    }
+    };
 
     // ref(getDatabase(), 'Conversations')
     Conversation.getOrCreate(conversationId, ref(getDatabase()), options).then((conversation: Conversation) => {
       if (globalThis.logLevel.isInfoEnabled) {
-        console.log(`${CNAME}|Conversation`, conversation);
+        console.log(`${CNAME}|Conversation`, conversation)
       }
 
       this.conversation = conversation;
@@ -175,64 +175,64 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       }
       conversation.onCandidateAdded = (candidate: User) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${CNAME}|onCandidateAdded`, candidate);
+          console.debug(`${CNAME}|onCandidateAdded`, candidate)
         }
         // Maintain local list of pending Candidates
-        this.remoteCandidates.add(candidate);
+        this.remoteCandidates.add(candidate)
       };
       conversation.onCandidateRemoved = (candidate: User) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${CNAME}|onCandidateRemoved`, candidate);
+          console.debug(`${CNAME}|onCandidateRemoved`, candidate)
         }
         // Maintain local list of pending Candidates
-        this.remoteCandidates.delete(candidate);
+        this.remoteCandidates.delete(candidate)
       };
       conversation.onParticipantAdded = (participant: RemoteParticipant) => {
         if (globalThis.logLevel.isDebugEnabled) {
-          console.debug(`${CNAME}|onParticipantAdded`, participant);
+          console.debug(`${CNAME}|onParticipantAdded`, participant)
         }
 
         this.remoteParticipants.add(participant);
 
         participant.user.onUserDataUpdate((userData: UserData) => {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${CNAME}|onUserDataUpdate`, participant, userData);
+            console.log(`${CNAME}|onUserDataUpdate`, participant, userData)
           }
         })
         participant.onStreamPublished((stream: RemoteStream) => {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${CNAME}|onStreamPublished`, participant, stream);
+            console.log(`${CNAME}|onStreamPublished`, participant, stream)
           }
           // First, set listener(s)
-          this.doStoreRemoteStreamByParticipant(participant, stream);
+          this.doStoreRemoteStreamByParticipant(participant, stream)
           // And then, subscribe
-          this.localParticipant?.subscribe(stream);
+          this.localParticipant?.subscribe(stream)
           // or 
-          //this.localParticipant?.subscribe(stream, { audio: true, video: false });
+          //this.localParticipant?.subscribe(stream, { audio: true, video: false })
         })
         participant.onStreamUnpublished((stream: RemoteStream) => {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${CNAME}|onStreamUnpublished`, participant, stream);
+            console.log(`${CNAME}|onStreamUnpublished`, participant, stream)
           }
-          this.doRemoveMediaStream(participant, stream);
+          this.doRemoveMediaStream(participant, stream)
         })
       };
       conversation.onParticipantRemoved = (participant: RemoteParticipant | LocalParticipant) => {
         if (globalThis.logLevel.isInfoEnabled) {
-          console.log(`${CNAME}|onParticipantRemoved`, participant);
+          console.log(`${CNAME}|onParticipantRemoved`, participant)
         }
         if (participant instanceof RemoteParticipant) {
-          this.doRemoveRemoteParticipant(participant);
+          this.doRemoveRemoteParticipant(participant)
         }
         else if (participant instanceof LocalParticipant) {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${CNAME}|local user removed ?!`, participant);
+            console.log(`${CNAME}|local user removed ?!`, participant)
           }
         }
       };
 
       conversation.onMessage((participant: User, message: Message) => {
-        this.messages.push([participant.userData as UserData, message]);
+        this.messages.push([participant.userData as UserData, message])
       })
 
       // Join the conversation
@@ -245,7 +245,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.isWaitingForAcceptance = true;
       conversation.getOrCreateParticipant(userData, { moderator: this.moderator }).then((participant: LocalParticipant) => {
         if (globalThis.logLevel.isInfoEnabled) {
-          console.log(`${CNAME}|addParticipant succeed`, participant);
+          console.log(`${CNAME}|addParticipant succeed`, participant)
         }
         this.isWaitingForAcceptance = false;
         this.localParticipant = participant;
@@ -254,21 +254,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
         this.localParticipant.user.onUserDataUpdate((userData: UserData) => {
           if (globalThis.logLevel.isInfoEnabled) {
-            console.log(`${CNAME}|onUserDataUpdate`, this.localParticipant, userData);
+            console.log(`${CNAME}|onUserDataUpdate`, this.localParticipant, userData)
           }
           this.localParticipantData = userData;
         })
       }).catch((error: any) => {
         if (globalThis.logLevel.isWarnEnabled) {
-          console.warn(`${CNAME}|addParticipant failed`, error);
+          console.warn(`${CNAME}|addParticipant failed`, error)
         }
         this.isWaitingForAcceptance = false;
       });
 
       this.url = `${baseUrl}/${conversation.id}`;
     }).catch((error: any) => {
-      console.error(`${CNAME}|getOrCreate failed`, error);
-    });
+      console.error(`${CNAME}|getOrCreate failed`, error)
+    })
   }
 
   ngAfterViewInit() {
@@ -279,13 +279,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       }, video: true
     }).then((mediaStream: MediaStream) => {
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${CNAME}|ngAfterViewInit getUserMedia`, mediaStream);
+        console.debug(`${CNAME}|ngAfterViewInit getUserMedia`, mediaStream)
       }
-      this.doStoreAndBindLocalMediaStream(mediaStream);
+      this.doStoreAndBindLocalMediaStream(mediaStream)
       this.publish()
     }).catch((error) => {
-      console.error(`${CNAME}|ngAfterViewInit getUserMedia`, error);
-    });
+      console.error(`${CNAME}|ngAfterViewInit getUserMedia`, error)
+    })
   }
 
   onSnapshot(dataUrl: string) {
@@ -301,7 +301,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   doStoreAndBindLocalMediaStream(mediaStream: MediaStream) {
     this.localMediaStream = mediaStream;
-    this.doGatherCapConstSettings();
+    this.doGatherCapConstSettings()
     //this.doListenToTracksEvents(mediaStream, "LOCAL:");
   }
 
@@ -386,12 +386,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (this.localStream && this.localMediaStream) {
       this.blurredMediaStream = this.localMediaStream;
       this.localMediaStream = MediaStreamHelper.blur(this.localMediaStream);
-      this.localStream.replaceMediaStream(this.localMediaStream);
+      this.localStream.replaceMediaStream(this.localMediaStream)
     }
   }
 
   ngOnDestroy(): void {
-    this.doCleanUp();
+    this.doCleanUp()
   }
 
   public signOut() {
@@ -399,15 +399,15 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.conversation.close().then(() => {
         this.conversation = undefined;
         if (globalThis.logLevel.isInfoEnabled) {
-          console.info(`${CNAME}|Conversation closed`);
+          console.info(`${CNAME}|Conversation closed`)
         }
       }).catch((error: any) => {
         console.error(`${CNAME}|Conversation closing error`, error)
       }).finally(() => {
-        this.doSignOut();
-      });
+        this.doSignOut()
+      })
     } else {
-      this.doSignOut();
+      this.doSignOut()
     }
   }
 
@@ -458,7 +458,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (this.localParticipant) {
       this.localParticipant.sendMessage(this.messageFc.value);
     } else {
-      console.error(`${CNAME}|Cannot sendMessage`, this.localParticipant);
+      console.error(`${CNAME}|Cannot sendMessage`, this.localParticipant)
     }
   }
 
@@ -476,13 +476,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       // Or
       //this.localParticipant.publish(this.localMediaStream, { type: 'webcam', foo: 'bar' });
     } else {
-      console.error(`${CNAME}|Cannot publish`, this.localMediaStream, this.localParticipant);
+      console.error(`${CNAME}|Cannot publish`, this.localMediaStream, this.localParticipant)
     }
   }
 
   unpublish() {
     if (this.localMediaStream) {
-      this.localParticipant?.unpublish(this.localMediaStream);
+      this.localParticipant?.unpublish(this.localMediaStream)
       this.localStream = undefined;
     }
   }
@@ -517,33 +517,30 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         console.debug(`${CNAME}|shareScreen getDisplayMedia`, mediaStream)
       }
       if (this.localParticipant) {
-        this.localParticipant.publish(mediaStream, { topic: 'screen' });
+        this.localParticipant.publish(mediaStream, { topic: 'screen' })
       }
     }).catch((error: any) => {
-      console.error(`${CNAME}|shareScreen`, error);
+      console.error(`${CNAME}|shareScreen`, error)
     });
   }
 
   goHd() {
     if (this.localMediaStream) {
       this.localMediaStream.getTracks().forEach(track => {
-        track.stop();
-      });
+        track.stop()
+      })
     }
 
     navigator.mediaDevices.getUserMedia({
       video: { width: { exact: 1280 }, height: { exact: 720 } }
-    })
-      .then(mediaStream => {
-        //const oldStream = this.localMediaStream;
-        this.doStoreAndBindLocalMediaStream(mediaStream);
-        if (this.localStream) {
-          this.localStream.replaceMediaStream(mediaStream);
-        }
-      })
-      .catch(error => {
-        console.error(`${CNAME}|goHd`, error);
-      });
+    }).then(mediaStream => {
+      this.doStoreAndBindLocalMediaStream(mediaStream)
+      if (this.localStream) {
+        this.localStream.replaceMediaStream(mediaStream)
+      }
+    }).catch(error => {
+      console.error(`${CNAME}|goHd`, error)
+    });
   }
 
   doApplyAudioConstraint(constraintName: string, value: ConstrainULong | ConstrainDouble | ConstrainBoolean | ConstrainDOMString) {
@@ -553,9 +550,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         const constraints: any = settings;
         constraints[constraintName] = value;
         track.applyConstraints(constraints).then(() => {
-          this.doGatherCapConstSettings();
-        });
-      });
+          this.doGatherCapConstSettings()
+        })
+      })
     }
   }
 
@@ -564,16 +561,16 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     //Promise<undefined> applyConstraints(optional MediaTrackConstraints constraints = {});
     if (this.localMediaStream) {
       this.localMediaStream.getVideoTracks().forEach(track => {
-        const constraints: MediaTrackConstraints = { width: { exact: 1280 }, height: { exact: 720 } }
+        const constraints: MediaTrackConstraints = { width: { exact: 1280 }, height: { exact: 720 } };
         track.applyConstraints(constraints).then(() => {
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${CNAME}|applyConstraints done`, this.localMediaStream, constraints);
+            console.debug(`${CNAME}|applyConstraints done`, this.localMediaStream, constraints)
           }
-          this.doGatherCapConstSettings();
+          this.doGatherCapConstSettings()
         }).catch(error => {
-          console.error(`${CNAME}|track.applyConstraints error`, error);
-        });
-      });
+          console.error(`${CNAME}|track.applyConstraints error`, error)
+        })
+      })
     }
   }
 
@@ -582,16 +579,16 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     //Promise<undefined> applyConstraints(optional MediaTrackConstraints constraints = {});
     if (this.localMediaStream) {
       this.localMediaStream.getVideoTracks().forEach(track => {
-        const constraints: MediaTrackConstraints = { frameRate: 24 }
+        const constraints: MediaTrackConstraints = { frameRate: 24 };
         track.applyConstraints(constraints).then(() => {
           if (globalThis.logLevel.isDebugEnabled) {
-            console.debug(`${CNAME}|applyConstraints done`, this.localMediaStream, constraints);
+            console.debug(`${CNAME}|applyConstraints done`, this.localMediaStream, constraints)
           }
-          this.doGatherCapConstSettings();
+          this.doGatherCapConstSettings()
         }).catch(error => {
-          console.error("applyConstraints error", error);
-        });
-      });
+          console.error("applyConstraints error", error)
+        })
+      })
     }
   }
 
@@ -632,21 +629,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.mediaRecorder = new MediaRecorder(mediaStream);
     this.mediaRecorder.onstop = (event: any) => {
       if (globalThis.logLevel.isInfoEnabled) {
-        console.info(`${CNAME}|Recorder stopped`, event);
+        console.info(`${CNAME}|Recorder stopped`, event)
       }
     };
     this.mediaRecorder.ondataavailable = (event: any) => {
       if (globalThis.logLevel.isDebugEnabled) {
-        console.debug(`${CNAME}|ondataavailable`, event);
+        console.debug(`${CNAME}|ondataavailable`, event)
       }
       if (event.data && event.data.size > 0) {
-        this.recordedBlobs.push(event.data);
+        this.recordedBlobs.push(event.data)
       }
     };
-    this.mediaRecorder.start();
+    this.mediaRecorder.start()
   }
   stopRecording() {
-    this.mediaRecorder?.stop();
+    this.mediaRecorder?.stop()
     setTimeout(() => {
       const blob = new Blob(this.recordedBlobs, { type: 'video/webm' });
       const url = window.URL.createObjectURL(blob);
@@ -655,11 +652,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         native.href = url;
         native.download = "video.webm";
       }
-      this.aRef?.nativeElement.click();
-      window.URL.revokeObjectURL(url);
+      this.aRef?.nativeElement.click()
+      window.URL.revokeObjectURL(url)
 
       this.mediaRecorder = undefined;
-    }, 1000);
+    }, 1000)
   }
 
 }
