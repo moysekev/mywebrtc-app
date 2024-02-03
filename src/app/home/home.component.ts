@@ -119,8 +119,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   // This is useful if user closes the tab, or refreshes the page
   @HostListener('window:beforeunload', ['$event'])
   beforeUnloadHandler(event: BeforeUnloadEvent) {
-    event.preventDefault();
-    this.doCleanUp();
+    event.preventDefault()
+    this.doCleanUp()
     event.returnValue = true;
   }
 
@@ -172,7 +172,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       //
       conversation.onModeratedChanged = (moderated: boolean) => {
         this.moderated = moderated;
-      }
+      };
       conversation.onCandidateAdded = (candidate: User) => {
         if (globalThis.logLevel.isDebugEnabled) {
           console.debug(`${CNAME}|onCandidateAdded`, candidate)
@@ -264,7 +264,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           console.warn(`${CNAME}|addParticipant failed`, error)
         }
         this.isWaitingForAcceptance = false;
-      });
+      })
 
       this.url = `${baseUrl}/${conversation.id}`;
     }).catch((error: any) => {

@@ -77,17 +77,17 @@ export class LocalStreamComponent implements OnInit {
               }
             })
           })
-        }
+        };
         dataChannel.onclose = (event) => {
           if (globalThis.logLevel.isDebugEnabled) {
             console.debug(`${CNAME}|datachannel:onclose`, DATACHANNEL_SNAPSHOT_PATH, event)
           }
-        }
+        };
         dataChannel.onerror = (event) => {
           if (globalThis.logLevel.isDebugEnabled) {
             console.debug(`${CNAME}|datachannel:onerror`, DATACHANNEL_SNAPSHOT_PATH, event)
           }
-        }
+        };
       })
     }
   }
@@ -113,9 +113,9 @@ export class LocalStreamComponent implements OnInit {
   togglePublishAudio() {
     if (this._localStream) {
       if (this._localStream.getPublishOptions().audio) {
-        MediaStreamHelper.disableAudio(this._localStream.getMediaStream());
+        MediaStreamHelper.disableAudio(this._localStream.getMediaStream())
       } else {
-        MediaStreamHelper.enableAudio(this._localStream.getMediaStream());
+        MediaStreamHelper.enableAudio(this._localStream.getMediaStream())
       }
       this._localStream.updatePublishOptions({ audio: !this._localStream.getPublishOptions().audio })
         .then(() => { })
@@ -125,9 +125,9 @@ export class LocalStreamComponent implements OnInit {
   togglePublishVideo() {
     if (this._localStream) {
       if (this._localStream.getPublishOptions().video) {
-        MediaStreamHelper.disableVideo(this._localStream.getMediaStream());
+        MediaStreamHelper.disableVideo(this._localStream.getMediaStream())
       } else {
-        MediaStreamHelper.enableVideo(this._localStream.getMediaStream());
+        MediaStreamHelper.enableVideo(this._localStream.getMediaStream())
       }
       this._localStream.updatePublishOptions({ video: !this._localStream.getPublishOptions().video })
         .then(() => { })
