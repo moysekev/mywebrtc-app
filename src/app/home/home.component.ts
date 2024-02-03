@@ -206,9 +206,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           // First, set listener(s)
           this.doStoreRemoteStreamByParticipant(participant, stream)
           // And then, subscribe
-          this.localParticipant?.subscribe(stream)
+          // this.localParticipant?.subscribe(stream)
+          stream.subscribe()
           // or 
-          //this.localParticipant?.subscribe(stream, { audio: true, video: false })
+          //stream.subscribe({ audio: true, video: false })
         })
         participant.onStreamUnpublished((stream: RemoteStream) => {
           if (globalThis.logLevel.isInfoEnabled) {
